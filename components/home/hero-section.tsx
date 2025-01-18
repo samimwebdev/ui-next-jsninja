@@ -2,10 +2,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, CirclePlay } from 'lucide-react'
 import React from 'react'
+import { HeroMarquee } from './hero-marquee'
 
 export const HeroSection = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex items-center justify-center">
       <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
         <div>
           <Badge className="bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
@@ -30,8 +31,21 @@ export const HeroSection = () => {
               <CirclePlay className="!h-5 !w-5" /> Watch Demo
             </Button>
           </div>
+          <div className="pt-4 flex items-center gap-4 animate-in slide-in-from-left duration-700 delay-400">
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-10 h-10 rounded-full border-2 border-background bg-primary/10"
+                />
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Join 10,000+ developers who have elevated their skills
+            </p>
+          </div>
         </div>
-        <div className="w-full aspect-video bg-accent rounded-xl" />
+        <HeroMarquee />
       </div>
     </div>
   )
