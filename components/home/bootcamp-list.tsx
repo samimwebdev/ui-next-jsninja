@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/card'
 import { useOutsideClick } from '@/hooks/user-outside-click'
 
-interface BlogPost {
+interface bootcamp {
   title: string
   description: string
   image: string
@@ -25,7 +25,7 @@ interface BlogPost {
   content: () => ReactNode
 }
 
-const blogPosts: BlogPost[] = [
+const bootcampList: bootcamp[] = [
   {
     title: 'Lorem, ipsum dolor',
     description: 'An introduction to soilless farming techniques.',
@@ -75,7 +75,7 @@ const blogPosts: BlogPost[] = [
 ]
 
 export const BootcampList = () => {
-  const [activePost, setActivePost] = useState<BlogPost | null>(null)
+  const [activePost, setActivePost] = useState<bootcamp | null>(null)
   const ref = useRef<HTMLDivElement>(null as unknown as HTMLDivElement)
   const id = useId()
 
@@ -159,8 +159,8 @@ export const BootcampList = () => {
         )}
       </AnimatePresence>
 
-      <div className="max-w-6xl  mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {blogPosts.map((post) => (
+      <div className="max-w-screen-xl  mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {bootcampList.map((post) => (
           <motion.div
             layoutId={`card-${post.title}-${id}`}
             key={post.title}

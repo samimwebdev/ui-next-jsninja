@@ -216,7 +216,7 @@ export const CourseList = () => {
               </motion.div>
             </AnimatePresence>
           </div>
-          <div style={{ height: '520px' }} />{' '}
+          <div style={{ height: '400px' }} />{' '}
           {/* Placeholder to maintain height */}
         </div>
       </div>

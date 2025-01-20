@@ -14,7 +14,7 @@ export default async function CourseDetailsPage({
 }: {
   params: { slug: string }
 }) {
-  const { slug } = params
+  const { slug } = await params
   return (
     <div className="bg-background text-foreground">
       {/* <CourseHead slug="test" /> */}
