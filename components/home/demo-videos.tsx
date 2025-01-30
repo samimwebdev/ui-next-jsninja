@@ -59,7 +59,7 @@ export const DemoVideos = () => {
           <Badge variant="secondary" className="px-4 py-1">
             Demo Videos
           </Badge>
-          <h2 className="text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl font-bold tracking-tight">
             Actions Speak Louder Than Words
           </h2>
         </div>

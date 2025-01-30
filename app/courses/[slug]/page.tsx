@@ -6,7 +6,7 @@ import { ReviewSlider } from '@/components/course/review-slider'
 import { CourseAuthor } from '@/components/course/course-author'
 import { FAQ } from '@/components/course/faq'
 import { CourseBundle } from '@/components/course/course-bundle'
-import { CourseHeader } from '@/components/course/course-header'
+import { CourseHero } from '@/components/course/course-hero'
 import { CircleCheckBig } from 'lucide-react'
 
 export default async function CourseDetailsPage({
@@ -19,7 +19,7 @@ export default async function CourseDetailsPage({
     <div className="bg-background text-foreground">
       {/* <CourseHead slug="test" /> */}
       <main className="container mx-auto px-4 max-w-screen-xl">
-        <CourseHeader />
+        <CourseHero />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
             <CourseTabs />

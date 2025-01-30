@@ -217,9 +217,9 @@ export const TestimonialSection = () => {
 
   return (
     <div className="px-4 py-12 w-full" aria-label="Customer testimonials">
-      <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
+      <h2 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
         Read trusted reviews from our customers
-      </h1>
+      </h2>
 
       <div className="relative max-w-screen-xl mx-auto">
         <div

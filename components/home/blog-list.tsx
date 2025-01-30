@@ -5,9 +5,9 @@ export const BlogList = () => (
   <div className="w-full py-12 lg:py-12 max-w-screen-xl">
     <div className="container mx-auto flex flex-col gap-14">
       <div className="flex w-full flex-col sm:flex-row sm:justify-between sm:items-center gap-8">
-        <h4 className="text-3xl md:text-5xl tracking-tighter max-w-xl font-regular">
+        <h2 className="text-3xl md:text-5xl tracking-tighter max-w-xl font-regular">
           Latest articles
-        </h4>
+        </h2>
         <Button className="gap-4">
           View all articles <MoveRight className="w-4 h-4" />
         </Button>

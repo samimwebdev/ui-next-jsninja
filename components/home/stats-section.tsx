@@ -7,7 +7,7 @@ export const StatsSection = () => {
       <Card className="mx-auto max-w-screen-xl p-8 rounded-3xl">
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold tracking-tight">
+            <h2 className="text-4xl font-bold tracking-tight">
               Let&apos;s build something great.
             </h2>
             <p className="text-muted-foreground">
