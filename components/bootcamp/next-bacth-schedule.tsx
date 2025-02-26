@@ -40,13 +40,13 @@ const scheduleItems: ScheduleItem[] = [
 
 export function BatchSchedule() {
   return (
-    <section className="w-full bg-slate-950 text-slate-50 py-16 px-4">
+    <section className="w-full px-4 py-12">
       <div className="container mx-auto max-w-6xl">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">
+        <h2 className="text-4xl mb-12 text-center font-black leading-tight tracking-tight ">
           Next Batch Schedule
         </h2>
 
-        <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm p-8 mb-12">
+        <Card className="backdrop-blur-sm p-8 mb-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {scheduleItems.map((item, index) => {
               const Icon = item.icon
@@ -58,10 +58,8 @@ export function BatchSchedule() {
                     <Icon className={`w-6 h-6 text-${item.color}-500`} />
                   </div>
                   <div>
-                    <h3 className="text-slate-400 text-sm font-medium mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-50 font-semibold">{item.date}</p>
+                    <h3 className="text-sm font-medium mb-1">{item.title}</h3>
+                    <p className="font-semibold">{item.date}</p>
                   </div>
                 </div>
               )
@@ -78,11 +76,8 @@ export function BatchSchedule() {
             , Register On The Website
           </p>
 
-          <Button
-            size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-6 text-lg rounded-full shadow-lg shadow-purple-500/25 hover:shadow-purple-500/50 transition-all duration-300"
-          >
-            Enroll Now
+          <Button size="lg" className="rounded-full text-base ">
+            Register Now
           </Button>
         </div>
       </div>

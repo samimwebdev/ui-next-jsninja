@@ -1,11 +1,13 @@
 'use client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowUpRight, CirclePlay, PlayCircle } from 'lucide-react'
+import { PlayCircle, Wallet2Icon } from 'lucide-react'
 
 import React, { useState } from 'react'
 import VideoModal from './video-modal'
 import Image from 'next/image'
+import BootcampAssessment from './bootcamp-assessment'
+import BootcampShortFeature from '../bootcamp-short-features'
 
 export const BootcampHero = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
@@ -37,16 +39,10 @@ export const BootcampHero = () => {
             style={{ animationDelay: '500ms' }}
           >
             <Button size="lg" className="rounded-full text-base ">
-              Get Started{' '}
-              <ArrowUpRight className="!h-5 !w-5 transition-transform group-hover:translate-x-1" />
+              <Wallet2Icon className="!h-5 !w-5 transition-transform group-hover:translate-x-1" />
+              3000Tk | Enroll Now
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full text-base shadow-none"
-            >
-              <CirclePlay className="!h-5 !w-5" /> Watch Demo
-            </Button>
+            <BootcampAssessment />
           </div>
 
           <div
@@ -73,26 +69,28 @@ export const BootcampHero = () => {
             </div>
           </div>
         </div>
-
         {/* Video */}
-        <div
-          className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden cursor-pointer group animate-fade-in-scale"
-          style={{ animationDelay: '400ms' }}
-          onClick={() => setIsVideoModalOpen(true)}
-        >
-          <video
-            className="w-full h-full object-cover"
-            muted
-            loop
-            playsInline
-            autoPlay
+        <div>
+          <div
+            className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden cursor-pointer group animate-fade-in-scale"
+            style={{ animationDelay: '400ms' }}
+            onClick={() => setIsVideoModalOpen(true)}
           >
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-            <PlayCircle className="w-16 h-16 text-white opacity-90 group-hover:scale-105 transition-transform duration-300" />
+            <video
+              className="w-full h-full object-cover"
+              muted
+              loop
+              playsInline
+              autoPlay
+            >
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+              <PlayCircle className="w-16 h-16 text-white opacity-90 group-hover:scale-105 transition-transform duration-300" />
+            </div>
           </div>
+          <BootcampShortFeature />
         </div>
         <VideoModal
           isOpen={isVideoModalOpen}

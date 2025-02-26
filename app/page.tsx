@@ -2,11 +2,12 @@ import { CourseList } from '@/components/home/course-list'
 import { DemoVideos } from '@/components/home/demo-videos'
 import { FeatureSection } from '@/components/home/feature-section'
 import { HeroSection } from '@/components/home/hero-section'
-import { LogoSlider } from '@/components/home/logo-slider'
+import { LogoSlider } from '@/components/bootcamp/bootcamp-logo-slider'
 import { TestimonialSection } from '@/components/home/testimonial-section'
 import { StatsSection } from '@/components/home/stats-section'
 import { BootcampList } from '@/components/home/bootcamp-list'
 import { BlogList } from '@/components/home/blog-list'
+import HomeTechLogos from '@/components/home-tech-logos'
 
 export default function Home() {
   return (
@@ -16,7 +17,7 @@ export default function Home() {
     >
       <HeroSection />
       <FeatureSection />
-      <LogoSlider />
+      <HomeTechLogos />
       <CourseList />
       <TestimonialSection />
       <StatsSection />
