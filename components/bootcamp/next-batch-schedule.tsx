@@ -41,7 +41,7 @@ const scheduleItems: ScheduleItem[] = [
 export function BatchSchedule() {
   return (
     <section className="w-full px-4 py-12">
-      <div className="container mx-auto max-w-6xl">
+      <div className="container mx-auto max-w-screen-xl">
         <h2 className="text-4xl mb-12 text-center font-black leading-tight tracking-tight ">
           Next Batch Schedule
         </h2>
