@@ -7,6 +7,7 @@ import { StatsSection } from '@/components/home/stats-section'
 import { BootcampList } from '@/components/home/bootcamp-list'
 import { BlogList } from '@/components/home/blog-list'
 import HomeTechLogos from '@/components/home-tech-logos'
+import HomeBlogList from '@/components/home/home-blog-list'
 
 export default function Home() {
   return (
@@ -21,7 +22,7 @@ export default function Home() {
       <TestimonialSection />
       <StatsSection />
       <BootcampList />
-      <BlogList />
+      <HomeBlogList />
       <DemoVideos />
     </div>
   )
