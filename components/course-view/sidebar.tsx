@@ -200,7 +200,7 @@ export function Sidebar({
                         <FileText className="!h-5 !w-5 shrink-0 text-muted-foreground" />
                       )}
                     </div>
-                    <div className="flex flex-col items-start gap-1 text-left">
+                    <div className="flex flex-col items-start gap-1 text-left overflow-hidden">
                       <p className="text-sm leading-normal break-words">
                         {lesson.title}
                       </p>

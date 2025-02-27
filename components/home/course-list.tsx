@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -92,37 +93,39 @@ const CourseCard = ({ course }: { course: Course }) => {
       whileHover={{ scale: 1.05 }}
       transition={{ type: 'spring', stiffness: 400, damping: 10 }}
     >
-      <Card className="overflow-hidden h-full flex flex-col">
-        <CardHeader className="p-0">
-          <div className="relative h-48 w-full overflow-hidden">
-            <Image
-              src={course.image || '/placeholder.svg'}
-              alt={course.title}
-              layout="fill"
-              objectFit="cover"
-            />
-            <div className="absolute top-2 right-2">
-              <Badge className="bg-primary text-primary-foreground">
-                {course.price.toLocaleString()} BDT
-              </Badge>
+      <Link href={`/courses/${course.id}`}>
+        <Card className="overflow-hidden h-full flex flex-col">
+          <CardHeader className="p-0">
+            <div className="relative h-48 w-full overflow-hidden">
+              <Image
+                src={course.image || '/placeholder.svg'}
+                alt={course.title}
+                layout="fill"
+                objectFit="cover"
+              />
+              <div className="absolute top-2 right-2">
+                <Badge className="bg-primary text-primary-foreground">
+                  {course.price.toLocaleString()} BDT
+                </Badge>
+              </div>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 flex-grow">
-          <CardTitle className="text-xl mb-2">{course.title}</CardTitle>
-          <CardDescription className="mb-4">
-            {course.description}
-          </CardDescription>
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Badge variant="secondary">{course.category}</Badge>
-            <Badge variant="outline">{course.duration}</Badge>
-            <Badge>{course.level}</Badge>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full">Enroll Now</Button>
-        </CardFooter>
-      </Card>
+          </CardHeader>
+          <CardContent className="p-4 flex-grow">
+            <CardTitle className="text-xl mb-2">{course.title}</CardTitle>
+            <CardDescription className="mb-4">
+              {course.description}
+            </CardDescription>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Badge variant="secondary">{course.category}</Badge>
+              <Badge variant="outline">{course.duration}</Badge>
+              <Badge>{course.level}</Badge>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full">Enroll Now</Button>
+          </CardFooter>
+        </Card>
+      </Link>
     </motion.div>
   )
 }

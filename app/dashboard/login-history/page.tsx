@@ -70,6 +70,7 @@ const DeviceIcon = ({ type }: { type: string }) => {
 export default function LoginHistoryPage() {
   const [selectedLogin, setSelectedLogin] = useState<number | null>(null)
   const [reportReason, setReportReason] = useState('')
+  console.log(selectedLogin)
 
   const handleReport = () => {
     toast.success('Login reported successfully', {

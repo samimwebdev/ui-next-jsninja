@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 
 interface ProjectCardProps {
   title: string
@@ -74,7 +75,7 @@ export function ProjectCard({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4">
-          <img
+          <Image
             src={image || '/placeholder.svg'}
             alt={title}
             className="aspect-video object-cover rounded-lg"

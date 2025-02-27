@@ -14,30 +14,30 @@ import { NavigationMenuProps } from '@radix-ui/react-navigation-menu'
 import { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
-import { foods, travelMenuItems } from './config'
+import { courses, bootCamps } from './config'
 
 export const NavMenu = (props: NavigationMenuProps) => (
   <NavigationMenu {...props}>
     <NavigationMenuList className="gap-0 space-x-0 text-sm">
       <NavigationMenuItem>
         <Button variant="ghost" className="text-[15px] font-normal" asChild>
-          <Link href="#">Home</Link>
+          <Link href="/">Home</Link>
         </Button>
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuTrigger className="text-[15px] font-normal">
-          Food
+          Course
         </NavigationMenuTrigger>
         <NavigationMenuContent>
           <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-            {foods.map((food) => (
+            {courses.map((course) => (
               <ListItem
-                key={food.title}
-                title={food.title}
-                icon={food.icon}
-                href="#"
+                key={course.title}
+                title={course.title}
+                icon={course.icon}
+                href="/courses/random"
               >
-                {food.description}
+                {course.description}
               </ListItem>
             ))}
           </ul>
@@ -45,18 +45,18 @@ export const NavMenu = (props: NavigationMenuProps) => (
       </NavigationMenuItem>
       <NavigationMenuItem>
         <NavigationMenuTrigger className="text-[15px] font-normal">
-          Travel
+          Bootcamp
         </NavigationMenuTrigger>
         <NavigationMenuContent>
           <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-            {travelMenuItems.map((menuItem) => (
+            {bootCamps.map((bootcamp) => (
               <ListItem
-                key={menuItem.title}
-                title={menuItem.title}
-                icon={menuItem.icon}
-                href="#"
+                key={bootcamp.title}
+                title={bootcamp.title}
+                icon={bootcamp.icon}
+                href="/bootcamps/random"
               >
-                {menuItem.description}
+                {bootcamp.description}
               </ListItem>
             ))}
           </ul>

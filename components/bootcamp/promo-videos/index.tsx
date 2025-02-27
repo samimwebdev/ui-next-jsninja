@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { CardHoverEffect } from './card-hover-effect'
 import { Play } from 'lucide-react'
 import Image from 'next/image'
+import { DialogTitle } from '@radix-ui/react-dialog'
 
 interface Video {
   id: string
@@ -104,6 +105,11 @@ export function PromoVideos() {
         onOpenChange={() => setSelectedVideo(null)}
       >
         <DialogContent className="sm:max-w-[80vw] h-[80vh] p-0">
+          <DialogHeader>
+            <DialogTitle className="sr-only">
+              {selectedVideo?.title}
+            </DialogTitle>
+          </DialogHeader>
           {selectedVideo && (
             <iframe
               src={selectedVideo.videoUrl}

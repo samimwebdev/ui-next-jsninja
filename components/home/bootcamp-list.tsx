@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useOutsideClick } from '@/hooks/user-outside-click'
+import Link from 'next/link'
 
 interface bootcamp {
   title: string
@@ -150,7 +151,12 @@ export const BootcampList = () => {
                 </div>
                 <div className="flex justify-center mt-2">
                   <Button size={'sm'} variant={'outline'}>
-                    Read More...
+                    <Link
+                      href="/bootcamps/[slug]"
+                      as={`/bootcamps/${activePost.title}`}
+                    >
+                      Learn More...
+                    </Link>
                   </Button>
                 </div>
               </div>

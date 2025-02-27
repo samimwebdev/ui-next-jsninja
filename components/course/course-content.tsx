@@ -6,8 +6,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Lock, PlayCircle, FileText } from 'lucide-react'
+import { DialogTitle } from '@radix-ui/react-dialog'
 
 const courseModules = [
   {
@@ -214,6 +215,9 @@ export function CourseContent() {
         onOpenChange={() => setSelectedVideo(null)}
       >
         <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>{selectedVideo?.title}</DialogTitle>
+          </DialogHeader>
           <div className="aspect-video">
             <video
               controls
