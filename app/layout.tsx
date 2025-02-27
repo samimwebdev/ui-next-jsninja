@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
+import { Toaster } from '@/components/ui/sonner'
 
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
@@ -43,6 +44,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navigation />
+          <Toaster position="top-right" />
           {children}
           <Footer />
         </ThemeProvider>
