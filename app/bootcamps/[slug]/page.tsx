@@ -9,8 +9,7 @@ import TestimonialBootcamp from '@/components/testimonial-bootcamp'
 import { BootcampLogoSlider } from '@/components/bootcamp/bootcamp-logo-slider'
 import CallToAction from '@/components/shapexui/cta'
 import BootcampSteps from '@/components/shapexui/steps'
-
-// import { BootcampTestimonials } from '@/components/bootcamp/bootcamp-testimonials'
+import { BootcampPricing } from '@/components/bootcamp/bootcamp-pricing'
 
 export default function BootcampDetails() {
   return (
@@ -22,6 +21,7 @@ export default function BootcampDetails() {
       <BootcampSpeciality />
       <BootcampLogoSlider />
       <BootcampProjectShowcase />
+      <BootcampPricing />
       <PromoVideos />
       <TestimonialBootcamp />
       <FAQBootcamp />

@@ -101,7 +101,7 @@ const Login = () => {
 
           <div className="mt-5 space-y-5">
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-sm block underline text-muted-foreground text-center"
             >
               Forgot your password?
