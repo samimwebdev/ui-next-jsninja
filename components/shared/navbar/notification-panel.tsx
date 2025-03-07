@@ -289,7 +289,7 @@ export function NotificationPanel() {
               className="h-[350px] hover:overflow-y-auto"
               onScroll={handleScroll}
               type="hover"
-              onWheel={(e) => e.stopPropagation()}
+              preventScroll={true}
             >
               {notifications.length > 0 ? (
                 <div className="divide-y">
@@ -356,7 +356,7 @@ export function NotificationPanel() {
               className="h-[350px] hover:overflow-y-auto"
               onScroll={handleScroll}
               type="hover"
-              onWheel={(e) => e.stopPropagation()}
+              preventScroll={true}
             >
               {filteredNotifications.length > 0 ? (
                 <div className="divide-y">
