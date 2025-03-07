@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import {
   Carousel,
   CarouselApi,
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel'
+import { techLogos } from '@/data/tech-logos'
 
 export const BootcampLogoSlider = () => {
   const [api, setApi] = useState<CarouselApi>()
@@ -36,13 +38,23 @@ export const BootcampLogoSlider = () => {
             You Will Learn the following Technologies
           </h3>
           <div className="relative w-full col-span-4">
-            <div className="bg-gradient-to-r from-background via-white/0 to-background z-10 absolute left-0 top-0 right-0 bottom-0 w-full h-full"></div>
+            <div className="bg-gradient-to-r from-background via-transparent to-background z-10 absolute left-0 top-0 right-0 bottom-0 w-full h-full"></div>
             <Carousel setApi={setApi} className="w-full">
               <CarouselContent>
-                {Array.from({ length: 25 }).map((_, index) => (
+                {techLogos.map((logo, index) => (
                   <CarouselItem className="basis-1/4 lg:basis-1/6" key={index}>
-                    <div className="flex rounded-md aspect-square bg-muted items-center justify-center p-2">
-                      <span className="text-sm">Logo {index + 1}</span>
+                    <div className="flex flex-col rounded-md aspect-square bg-card items-center justify-center p-3 hover:shadow-md transition-all duration-300">
+                      <div className="relative w-12 h-12 mb-2">
+                        <Image
+                          src={logo.url}
+                          alt={logo.alt}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <span className="text-xs text-center font-medium text-foreground">
+                        {logo.shortName || logo.name}
+                      </span>
                     </div>
                   </CarouselItem>
                 ))}

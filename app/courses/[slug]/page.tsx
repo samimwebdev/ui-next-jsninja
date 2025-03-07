@@ -67,9 +67,11 @@ export default async function CourseDetailsPage({
               </ul>
               <div className="mt-6">
                 <div className="text-3xl font-bold mb-4">৳ ৭৯৯৯</div>
-                <button className="w-full bg-[#E91E63] text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors">
-                  কোর্সে ভর্তি হন
-                </button>
+                <a href={`/checkout?courseId=${params.slug}`} className="block w-full">
+                  <button className="w-full bg-[#E91E63] text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors">
+                    কোর্সে ভর্তি হন
+                  </button>
+                </a>
               </div>
             </div>
           </div>

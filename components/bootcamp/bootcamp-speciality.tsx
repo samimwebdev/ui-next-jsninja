@@ -1,83 +1,88 @@
 // thanks to oliver: https://www.youtube.com/@olivierlarose1
 'use client'
+
 import { ReactLenis } from 'lenis/react'
 import { useTransform, motion, useScroll, MotionValue } from 'framer-motion'
 import { useRef } from 'react'
-import Image from 'next/image'
+import { useTheme } from 'next-themes'
+import { cn } from '@/lib/utils'
+import {
+  BookOpen,
+  ClipboardCheck,
+  HeadphonesIcon,
+  GraduationCap,
+  Briefcase,
+} from 'lucide-react'
+
 const projects = [
   {
     title: 'Daily Lecture Update',
     description:
-      'Originally hailing from Austria, Berlin-based photographer Matthias Leindinger is a young creative brimming with talent and ideas.',
-    src: 'rock.jpg',
-    link: 'https://images.unsplash.com/photo-1605106702842-01a887a31122?q=80&w=500&auto=format&fit=crop',
+      'Get daily lecture updates with comprehensive materials and resources. Our expert instructors provide clear explanations and practical examples.',
+    icon: BookOpen,
     color: '#16357F',
   },
   {
     title: 'Must Complete On Time',
     description:
-      'This is a story on the border between reality and imaginary, about the contradictory feelings that the insularity of a rocky, arid, and wild territory provokes”—so French photographer Clément.',
-    src: 'tree.jpg',
-    link: 'https://images.unsplash.com/photo-1605106250963-ffda6d2a4b32?w=500&auto=format&fit=crop&q=60',
+      'Time-bound assignments with clear deadlines help you stay on track. Our structured approach ensures you develop consistent coding habits.',
+    icon: ClipboardCheck,
     color: '#53CD99',
   },
   {
     title: 'Daily Support',
     description:
-      'Though he views photography as a medium for storytelling, Zissou’s images don’t insist on a narrative. Both crisp and ethereal.',
-    src: 'water.jpg',
-    link: 'https://images.unsplash.com/photo-1605106901227-991bd663255c?w=500&auto=format&fit=crop',
+      'Get 24/7 support from our team of experienced developers. Ask questions, get code reviews, and receive guidance whenever you need it.',
+    icon: HeadphonesIcon,
     color: '#6A177D',
   },
   {
     title: 'Exam After Ending',
     description:
-      'The coastlines of Denmark are documented in tonal colors in a pensive new series by Danish photographers Ulrik Hasemann and Mathias Svold; an ongoing project investigating how humans interact with and disrupt the Danish coast.',
-    src: 'house.jpg',
-    link: 'https://images.unsplash.com/photo-1605106715994-18d3fecffb98?w=500&auto=format&fit=crop&q=60',
+      "Comprehensive assessments at the end of each module ensure you've mastered the material before moving on to more advanced concepts.",
+    icon: GraduationCap,
     color: '#02a95c',
   },
   {
     title: 'Internship',
     description:
-      'Dutch photographer Mark Rammers has shared with IGNANT the first chapter of his latest photographic project, ‘all over again’—captured while in residency at Hektor, an old farm in Los Valles, Lanzarote.',
-    src: 'cactus.jpg',
-    link: 'https://images.unsplash.com/photo-1506792006437-256b665541e2?w=500&auto=format&fit=crop',
+      "Real-world experience through our partner companies. Apply what you've learned in actual projects and build your professional portfolio.",
+    icon: Briefcase,
     color: '#5428B8',
   },
 ]
+
 export function BootcampSpeciality() {
   const container = useRef(null)
   const { scrollYProgress } = useScroll({
     target: container,
     offset: ['start start', 'end end'],
   })
+
   return (
     <ReactLenis root>
       <main ref={container} className="text-foreground bg-background">
-        <>
-          <section className="w-full py-12 grid place-content-center text-center ">
-            <h2 className="2xl:text-4xl text-4xl px-8 mb-6 font-semibold  text-center tracking-tight leading-[120%]">
-              Speciality of The Bootcamp
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Detail information about course
-            </p>
-          </section>
-        </>
+        <section className="w-full py-12 md:py-16 lg:py-20 grid place-content-center text-center">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl px-8 mb-6 font-semibold text-center tracking-tight leading-[120%]">
+            Speciality of The Bootcamp
+          </h2>
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-4">
+            Our bootcamp offers unique features designed to maximize your
+            learning experience and prepare you for a successful career in tech.
+          </p>
+        </section>
 
-        <section className="w-full ">
+        <section className="w-full">
           {projects.map((project, i) => {
             const targetScale = 1 - (projects.length - i) * 0.05
             return (
               <Card
                 key={`p_${i}`}
                 i={i}
-                url={project?.link}
-                src={project?.src}
-                title={project?.title}
-                color={project?.color}
-                description={project?.description}
+                icon={project.icon}
+                title={project.title}
+                color={project.color}
+                description={project.description}
                 progress={scrollYProgress}
                 range={[i * 0.25, 1]}
                 targetScale={targetScale}
@@ -94,18 +99,18 @@ interface CardProps {
   i: number
   title: string
   description: string
-  src: string
-  url: string
+  icon: React.ElementType
   color: string
   progress: MotionValue<number>
   range: [number, number]
   targetScale: number
 }
+
 export const Card: React.FC<CardProps> = ({
   i,
   title,
   description,
-  url,
+  icon: Icon,
   color,
   progress,
   range,
@@ -117,13 +122,16 @@ export const Card: React.FC<CardProps> = ({
     offset: ['start end', 'start start'],
   })
 
-  const imageScale = useTransform(scrollYProgress, [0, 1], [2, 1])
+  // Enhanced animations
+  const iconScale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1.2, 1])
+  const iconRotate = useTransform(scrollYProgress, [0, 1], [0, 360])
   const scale = useTransform(progress, range, [1, targetScale])
+  const opacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
 
   return (
     <div
       ref={container}
-      className="min-h-[600] flex items-center justify-center sticky top-0"
+      className="min-h-[600px] flex items-center justify-center sticky top-0"
     >
       <motion.div
         style={{
@@ -131,24 +139,137 @@ export const Card: React.FC<CardProps> = ({
           scale,
           top: `calc(-5vh + ${i * 25}px)`,
         }}
-        className={`flex flex-col relative -top-[25%] h-[450px] w-[70%] rounded-md p-10 origin-top`}
+        className="flex flex-col relative -top-[25%] h-[450px] w-[90%] md:w-[80%] lg:w-[70%] rounded-xl p-6 md:p-8 lg:p-10 origin-top shadow-lg"
       >
-        <h3 className="text-3xl text-left font-semibold text-white">{title}</h3>
-        <div className={`flex h-full mt-5 gap-10`}>
-          <div className={`w-[40%] relative top-[10%]`}>
-            <p className="text-white">{description}</p>
+        <motion.h3
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-2xl md:text-3xl text-left font-semibold text-white"
+        >
+          {title}
+        </motion.h3>
+
+        <div className="flex flex-col md:flex-row h-full mt-5 gap-6 md:gap-10">
+          <div className="w-full md:w-[40%] relative">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-white/90 text-sm md:text-base"
+            >
+              {description}
+            </motion.p>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+              }}
+              whileTap={{ scale: 0.95 }}
+              className="mt-6 px-4 py-2 rounded-md text-sm font-medium bg-white/20 text-white transition-all duration-300"
+            >
+              Learn More
+            </motion.button>
           </div>
 
-          <div
-            className={`relative w-[60%] h-full rounded-lg overflow-hidden `}
+          <motion.div
+            className="relative w-full md:w-[60%] h-[250px] md:h-full flex items-start justify-center"
+            style={{ opacity }}
           >
             <motion.div
-              className={`w-full h-full`}
-              style={{ scale: imageScale }}
+              className="w-full h-[80%] flex items-center justify-center"
+              style={{ scale: iconScale }}
             >
-              <Image fill src={url} alt="image" className="object-cover" />
+              <motion.div
+                className="relative w-[300px] h-[300px] flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                {/* Animated background elements */}
+                <motion.div
+                  className="absolute w-full h-full rounded-full"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    rotate: iconRotate,
+                  }}
+                />
+                <motion.div
+                  className="absolute w-[80%] h-[80%] rounded-full"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    rotate: useTransform(iconRotate, (r) => r * -1),
+                  }}
+                />
+                <motion.div
+                  className="absolute w-[60%] h-[60%] rounded-full"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+                    rotate: iconRotate,
+                  }}
+                />
+
+                {/* Floating icon animation */}
+                <motion.div
+                  className="relative z-10 flex items-center justify-center"
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, 5, -5, 0],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  <Icon
+                    size={150}
+                    className="text-white/90 drop-shadow-2xl filter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                  />
+                </motion.div>
+
+                {/* Particle effects */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.3, 0.1, 0.3],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  {[...Array(3)].map((_, index) => (
+                    <motion.div
+                      key={index}
+                      className="absolute w-2 h-2 rounded-full bg-white/30"
+                      animate={{
+                        y: [0, -100, 0],
+                        x: [0, index * 20 - 20, 0],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: index * 0.5,
+                        ease: 'easeInOut',
+                      }}
+                      style={{
+                        left: `${50 + index * 10}%`,
+                        top: '60%',
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              </motion.div>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </div>

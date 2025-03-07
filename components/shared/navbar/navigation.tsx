@@ -3,6 +3,7 @@ import { Logo } from '@/components/shared/navbar/logo'
 import { NavMenu } from '@/components/shared/navbar/nav-menu'
 import { NavigationSheet } from '@/components/shared/navbar/navigation-sheet'
 import { ThemeSwitcher } from '@/components/shared/navbar/theme-switcher'
+import { NotificationPanel } from '@/components/shared/navbar/notification-panel'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -31,7 +32,13 @@ export const Navigation = () => {
           </div>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
-              <UserNav user={demoUser} onLogout={() => setIsLoggedIn(false)} />
+              <>
+                <NotificationPanel />
+                <UserNav
+                  user={demoUser}
+                  onLogout={() => setIsLoggedIn(false)}
+                />
+              </>
             ) : (
               <>
                 <Button variant="outline" className="hidden sm:inline-flex">

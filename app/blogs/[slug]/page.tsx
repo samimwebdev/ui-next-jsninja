@@ -120,7 +120,7 @@ const Page = () => {
         title="Woman holding a mug"
       ></div>
       <div className="max-w-7xl mx-auto">
-        <div className="mt-3 bg-white shadow-sm rounded-b lg:rounded-b-none lg:rounded-r flex flex-col justify-between leading-normal">
+        <div className="mt-3 bg-card shadow-sm rounded-b lg:rounded-b-none lg:rounded-r flex flex-col justify-between leading-normal">
           <div className="bg-card-client relative  top-0 -mt-32 p-5 sm:p-10">
             <h1 className="text-white font-bold text-3xl mb-2">
               {data[0].Title}
@@ -136,7 +136,7 @@ const Page = () => {
               </a>
             </p>
             <p className="text-base leading-8 my-5">{data[0].Intro}</p>
-            <div className="dark:text-black">
+            <div className="dark:text-white">
               <h3 className="text-2xl font-bold my-5">
                 #1. What is Lorem Ipsum?
               </h3>

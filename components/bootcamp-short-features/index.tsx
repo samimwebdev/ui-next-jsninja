@@ -24,17 +24,17 @@ const features = [
 
 const BootcampShortFeature = () => {
   return (
-    <div className="flex items-center justify-center py-4 gap-3">
+    <div className="flex flex-col md:flex-row items-center justify-center py-6 gap-4 w-full">
       {features.map((feature) => (
         <div
           key={feature.title}
-          className="flex flex-col border rounded-xl py-6 px-5"
+          className="flex flex-col border rounded-xl py-6 px-5 w-full md:w-auto flex-1 hover:shadow-lg transition-all duration-300 hover:border-primary/20 hover:-translate-y-1 bg-card/50"
         >
-          <div className="mb-3 h-10 w-10 flex items-center justify-center bg-muted rounded-full">
-            <feature.icon className="h-6 w-6" />
+          <div className="mb-4 h-12 w-12 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/30 rounded-full shadow-sm">
+            <feature.icon className="h-6 w-6 text-primary" />
           </div>
-          <span className="text-lg font-semibold">{feature.title}</span>
-          <p className="mt-1 text-foreground/80 text-[15px]">
+          <span className="text-lg font-semibold tracking-tight">{feature.title}</span>
+          <p className="mt-2 text-foreground/70 text-[15px] leading-relaxed">
             {feature.description}
           </p>
         </div>
