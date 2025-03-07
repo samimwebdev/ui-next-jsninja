@@ -63,7 +63,8 @@ export const DemoVideos = () => {
             Actions Speak Louder Than Words
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Watch our expert instructors demonstrate key concepts and techniques through high-quality tutorial videos
+            Watch our expert instructors demonstrate key concepts and techniques
+            through high-quality tutorial videos
           </p>
         </div>
 
@@ -71,6 +72,7 @@ export const DemoVideos = () => {
           {/* Main Video Player */}
           <div className="relative aspect-video bg-muted rounded-xl overflow-hidden shadow-xl mt-4">
             <iframe
+              key={activeVideo} // Add key prop to force re-render when video changes
               width="100%"
               height="100%"
               src={`https://www.youtube.com/embed/${activeVideo}?autoplay=0`}
