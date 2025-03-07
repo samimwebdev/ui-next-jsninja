@@ -5,7 +5,7 @@ import { HeroSection } from '@/components/home/hero-section'
 import { TestimonialSection } from '@/components/home/testimonial-section'
 import { StatsSection } from '@/components/home/stats-section'
 import { BootcampList } from '@/components/home/bootcamp-list'
-import { BlogList } from '@/components/home/blog-list'
+
 import HomeTechLogos from '@/components/home-tech-logos'
 import HomeBlogList from '@/components/home/home-blog-list'
 

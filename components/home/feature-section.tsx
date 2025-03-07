@@ -58,7 +58,7 @@ export const FeatureSection = () => {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="flex flex-col border rounded-xl py-6 px-5"
+              className="flex flex-col border rounded-xl py-6 px-5 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-accent/50"
             >
               <div className="mb-3 h-10 w-10 flex items-center justify-center bg-muted rounded-full">
                 <feature.icon className="h-6 w-6" />

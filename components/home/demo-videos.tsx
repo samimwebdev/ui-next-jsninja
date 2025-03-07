@@ -62,6 +62,9 @@ export const DemoVideos = () => {
           <h2 className="text-3xl font-bold tracking-tight">
             Actions Speak Louder Than Words
           </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Watch our expert instructors demonstrate key concepts and techniques through high-quality tutorial videos
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-10 items-start">

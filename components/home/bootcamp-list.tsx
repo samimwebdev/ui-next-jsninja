@@ -101,9 +101,12 @@ export const BootcampList = () => {
 
   return (
     <div className="px-4 py-12 w-full" aria-label="Customer testimonials">
-      <h2 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
+      <h2 className="text-4xl font-bold text-center mb-4 max-w-3xl mx-auto">
         Live BootCamp
       </h2>
+      <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+        Intensive, hands-on training programs designed to transform beginners into job-ready developers
+      </p>
       <AnimatePresence>
         {activePost && (
           <motion.div

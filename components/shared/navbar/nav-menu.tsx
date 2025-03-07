@@ -25,6 +25,11 @@ export const NavMenu = (props: NavigationMenuProps) => (
         </Button>
       </NavigationMenuItem>
       <NavigationMenuItem>
+        <Button variant="ghost" className="text-[15px] font-normal" asChild>
+          <Link href="/generic">Generic</Link>
+        </Button>
+      </NavigationMenuItem>
+      <NavigationMenuItem>
         <NavigationMenuTrigger className="text-[15px] font-normal">
           Course
         </NavigationMenuTrigger>

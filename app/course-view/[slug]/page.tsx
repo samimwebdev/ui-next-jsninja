@@ -12,6 +12,7 @@ import type {
   Lesson,
   Module,
 } from '@/components/course-view/types/course'
+
 import {
   actionButtons,
   assignment,
