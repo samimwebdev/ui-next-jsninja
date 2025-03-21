@@ -10,23 +10,23 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary-300/70 text-primary-foreground hover:bg-primary-300/90 dark:bg-primary-700 dark:hover:bg-primary-700/90',
+          'bg-primary-300/70 text-primary-foreground hover:bg-primary-300/90 dark:bg-primary-700 dark:text-primary-foreground dark:hover:bg-primary-700/90',
         destructive:
           'bg-destructive text-destructive-foreground hover:bg-destructive/90',
         outline:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
         outlinePrimary:
-          'border border-primary-300 dark:border-primary-900 hover:bg-primary-100/50 dark:hover:bg-primary-900',
+          'border border-primary-300 dark:border-primary-900 hover:bg-primary-100/50 dark:hover:bg-primary-900 dark:text-foreground',
         outlineSecondary:
-          'border border-secondary-300 dark:border-secondary-900  hover:bg-secondary-100/50 dark:hover:bg-secondary-900',
+          'border border-secondary-300 dark:border-secondary-900 hover:bg-secondary-100/50 dark:hover:bg-secondary-900 dark:text-foreground',
         outlineDestructive:
-          'border border-red-500 bg-background hover:bg-red-500',
+          'border border-red-500 bg-background hover:bg-red-500 dark:text-foreground',
         primary:
-          'bg-primary-300/70 text-primary-foreground hover:bg-primary-300/90 dark:bg-primary-700 dark:hover:bg-primary-700/90',
+          'bg-primary-300/70 text-primary-foreground hover:bg-primary-300/90 dark:bg-primary-700 dark:text-primary-foreground dark:hover:bg-primary-700/90',
         secondary:
-          'bg-secondary-300/70 text-secondary-foreground hover:bg-secondary-300/90 dark:bg-secondary-700 dark:hover:bg-secondary-700/90',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'bg-secondary-300/70 text-secondary-foreground hover:bg-secondary-300/90 dark:bg-secondary-700 dark:text-secondary-foreground dark:hover:bg-secondary-700/90',
+        ghost: 'hover:bg-accent hover:text-accent-foreground dark:text-foreground',
+        link: 'text-primary underline-offset-4 hover:underline dark:text-primary',
         unstyled: '',
       },
       size: {

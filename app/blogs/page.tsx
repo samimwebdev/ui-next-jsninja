@@ -1,3 +1,5 @@
+'use client'
+
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -7,6 +9,7 @@ import {
   BookHeart,
   BriefcaseBusiness,
   Calendar,
+  ChevronRight,
   ClockIcon,
   Cpu,
   FlaskRound,
@@ -14,6 +17,9 @@ import {
   Scale,
 } from 'lucide-react'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 
 const categories = [
   {
@@ -158,73 +164,201 @@ const blogPosts = [
 ]
 
 const Blog = () => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [isInView, setIsInView] = useState(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  // Filter posts by category if one is selected
+  const filteredPosts = selectedCategory
+    ? blogPosts.filter((post) => post.category === selectedCategory)
+    : blogPosts
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  }
+
+  const categoryVariants = {
+    hidden: { opacity: 0, x: 20 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+  }
+
+  // Intersection observer to trigger animations when content is in view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="max-w-screen-xl mx-auto py-10 lg:py-16 px-6 xl:px-0 flex flex-col lg:flex-row items-start gap-12">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Posts</h2>
-
-        <div className="mt-4 space-y-12">
-          {blogPosts.map((blog, i) => (
-            <Card
-              key={i}
-              className="flex flex-col sm:flex-row sm:items-center shadow-none overflow-hidden rounded-md border-none"
+    <div
+      ref={sectionRef}
+      className="max-w-screen-xl mx-auto py-10 lg:py-16 px-6 xl:px-0 flex flex-col lg:flex-row items-start gap-12"
+    >
+      <div className="w-full lg:w-2/3">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-between items-center mb-8"
+        >
+          <h2 className="text-3xl font-bold tracking-tight">Posts</h2>
+          {selectedCategory && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="text-sm text-primary flex items-center gap-1"
+              onClick={() => setSelectedCategory(null)}
             >
-              <CardHeader className="px-0 sm:p-0">
-                <Image
-                  src={blog.image || '/placeholder.svg'}
-                  width={600}
-                  height={600}
-                  alt={blog.title}
-                  className="aspect-video sm:w-56 sm:aspect-square object-cover rounded-lg"
-                />
-              </CardHeader>
-              <CardContent className="px-0 sm:px-6 py-0 flex flex-col">
-                <div className="flex items-center gap-6">
-                  <Badge className="bg-primary/5 text-primary hover:bg-primary/5 shadow-none">
-                    {blog.category}
-                  </Badge>
-                </div>
+              View all posts
+            </motion.button>
+          )}
+        </motion.div>
 
-                <h3 className="mt-4 text-2xl font-semibold tracking-tight">
-                  {blog.title}
-                </h3>
-                <p className="mt-2 text-muted-foreground line-clamp-3 text-ellipsis">
-                  {blog.description}
-                </p>
-                <div className="mt-4 flex items-center gap-6 text-muted-foreground text-sm font-medium">
-                  <div className="flex items-center gap-2">
-                    <ClockIcon className="h-4 w-4" /> {blog.readTime}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" /> {blog.date}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <motion.div
+          className="mt-4 space-y-12"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {filteredPosts.map((blog, i) => (
+            <motion.div key={i} variants={itemVariants}>
+              <Link href={`/blogs/${i + 1}`} className="block">
+                <motion.div
+                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Card className="flex flex-col sm:flex-row sm:items-center shadow-none overflow-hidden rounded-md border-none hover:shadow-md transition-shadow duration-300">
+                    <CardHeader className="px-0 sm:p-0">
+                      <motion.div
+                        className="overflow-hidden rounded-lg"
+                        whileHover={{
+                          scale: 1.05,
+                          transition: { duration: 0.3 },
+                        }}
+                      >
+                        <Image
+                          src={blog.image || '/placeholder.svg'}
+                          width={600}
+                          height={600}
+                          alt={blog.title}
+                          className="aspect-video sm:w-56 sm:aspect-square object-cover rounded-lg transition-transform duration-300"
+                        />
+                      </motion.div>
+                    </CardHeader>
+                    <CardContent className="px-0 sm:px-6 py-0 flex flex-col">
+                      <motion.div
+                        className="flex items-center gap-6"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Badge className="bg-primary/5 text-primary hover:bg-primary/5 shadow-none">
+                          {blog.category}
+                        </Badge>
+                      </motion.div>
+
+                      <h3 className="mt-4 text-2xl font-semibold tracking-tight group-hover:text-primary transition-colors duration-300">
+                        {blog.title}
+                      </h3>
+                      <p className="mt-2 text-muted-foreground line-clamp-3 text-ellipsis">
+                        {blog.description}
+                      </p>
+                      <div className="mt-4 flex items-center gap-6 text-muted-foreground text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <ClockIcon className="h-4 w-4" /> {blog.readTime}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4" /> {blog.date}
+                        </div>
+                      </div>
+                      <motion.div
+                        className="mt-4 text-primary flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Read more <ChevronRight className="h-4 w-4" />
+                      </motion.div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
-      <aside className="sticky top-8 shrink-0 lg:max-w-sm w-full">
-        <h3 className="text-3xl font-bold tracking-tight">Categories</h3>
-        <div className="mt-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2">
-          {categories.map((category) => (
-            <div
+      <aside className="sticky top-8 shrink-0 lg:max-w-sm w-full lg:w-1/3">
+        <motion.h3
+          className="text-3xl font-bold tracking-tight"
+          initial={{ opacity: 0, y: -10 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          Categories
+        </motion.h3>
+        <motion.div
+          className="mt-4 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-2"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? 'visible' : 'hidden'}
+        >
+          {categories.map((category, index) => (
+            <motion.div
               key={category.name}
+              variants={categoryVariants}
+              custom={index}
+              whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setSelectedCategory(category.name)}
               className={cn(
-                'flex items-center justify-between gap-2 bg-muted p-3 rounded-md bg-opacity-15 dark:bg-opacity-25',
-                category.background
+                'flex items-center justify-between gap-2 bg-muted p-3 rounded-md bg-opacity-15 dark:bg-opacity-25 cursor-pointer transition-all duration-300',
+                category.background,
+                selectedCategory === category.name ? 'ring-2 ring-primary' : ''
               )}
             >
               <div className="flex items-center gap-3">
-                <category.icon className={cn('h-5 w-5', category.color)} />
+                <motion.div
+                  whileHover={{ rotate: 10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <category.icon className={cn('h-5 w-5', category.color)} />
+                </motion.div>
                 <span className="font-medium">{category.name}</span>
               </div>
-              <Badge className="px-1.5 rounded-full">
-                {category.totalPosts}
-              </Badge>
-            </div>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Badge className="px-1.5 rounded-full">
+                  {category.totalPosts}
+                </Badge>
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </aside>
     </div>
   )

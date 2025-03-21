@@ -79,6 +79,25 @@ export const BootcampList = () => {
   const [activePost, setActivePost] = useState<bootcamp | null>(null)
   const ref = useRef<HTMLDivElement>(null as unknown as HTMLDivElement)
   const id = useId()
+  const [isInView, setIsInView] = useState(false)
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true)
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -100,13 +119,23 @@ export const BootcampList = () => {
   useOutsideClick(ref, () => setActivePost(null))
 
   return (
-    <div className="px-4 py-12 w-full" aria-label="Customer testimonials">
-      <h2 className="text-4xl font-bold text-center mb-4 max-w-3xl mx-auto">
+    <div className="px-4 py-12 w-full" aria-label="Customer testimonials" ref={sectionRef}>
+      <motion.h2 
+        className="text-4xl font-bold text-center mb-4 max-w-3xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 0.5 }}
+      >
         Live BootCamp
-      </h2>
-      <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+      </motion.h2>
+      <motion.p 
+        className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
         Intensive, hands-on training programs designed to transform beginners into job-ready developers
-      </p>
+      </motion.p>
       <AnimatePresence>
         {activePost && (
           <motion.div
@@ -125,6 +154,9 @@ export const BootcampList = () => {
               layoutId={`card-${activePost.title}-${id}`}
               ref={ref}
               className="w-full max-w-xl bg-background rounded-lg shadow-lg overflow-hidden"
+              initial={{ scale: 0.9, opacity: 0.5 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
             >
               <div className="relative">
                 <Image
@@ -134,12 +166,15 @@ export const BootcampList = () => {
                   height={300}
                   className="w-full h-60 object-cover"
                 />
-                <button
+                <motion.button
                   onClick={() => setActivePost(null)}
                   className="absolute top-4 right-4 p-1 rounded-full"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <CircleX size={24} />
-                </button>
+                </motion.button>
               </div>
 
               <div className="p-4">
@@ -153,14 +188,16 @@ export const BootcampList = () => {
                   {activePost.content()}
                 </div>
                 <div className="flex justify-center mt-2">
-                  <Button size={'sm'} variant={'outline'}>
-                    <Link
-                      href="/bootcamps/[slug]"
-                      as={`/bootcamps/${activePost.title}`}
-                    >
-                      Learn More...
-                    </Link>
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button size={'sm'} variant={'outline'}>
+                      <Link
+                        href="/bootcamps/[slug]"
+                        as={`/bootcamps/${activePost.title}`}
+                      >
+                        Learn More...
+                      </Link>
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -168,13 +205,22 @@ export const BootcampList = () => {
         )}
       </AnimatePresence>
 
-      <div className="max-w-screen-xl  mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {bootcampList.map((post) => (
+      <motion.div 
+        className="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        initial={{ opacity: 0, y: 30 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        {bootcampList.map((post, index) => (
           <motion.div
             layoutId={`card-${post.title}-${id}`}
             key={post.title}
             onClick={() => setActivePost(post)}
             className="p-2 group flex flex-col rounded-xl cursor-pointer"
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+            whileHover={{ y: -5 }}
           >
             <Card key={post.title} className="overflow-hidden">
               <CardHeader className="p-0">
@@ -196,22 +242,18 @@ export const BootcampList = () => {
               </CardContent>
               <CardFooter className="flex justify-between items-center p-4">
                 <div className="flex flex-wrap gap-2">
-                  {post.category?.map((_, indx) => (
+                  {post.category?.map((category, indx) => (
                     <Badge key={indx} variant="secondary">
-                      13 weeks
+                      {category}
                     </Badge>
                   ))}
                 </div>
-                {/* <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="secondary">13 weeks</Badge>
-                </div> */}
-
-                <p className="text-sm">Start Date: {post.date}</p>
+                <span className="text-xs text-muted-foreground">{post.date}</span>
               </CardFooter>
             </Card>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   )
 }

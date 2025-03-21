@@ -263,7 +263,10 @@ export default function CheckoutPage() {
                     open={paymentMethod === 'card'}
                     className="border border-border rounded-lg overflow-hidden transition-all duration-200"
                   >
-                    <div className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent">
+                    <div
+                      className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent"
+                      onClick={() => setPaymentMethod('card')}
+                    >
                       <RadioGroupItem value="card" id="card" />
                       <Label
                         htmlFor="card"
@@ -331,7 +334,10 @@ export default function CheckoutPage() {
                     open={paymentMethod === 'bkash'}
                     className="border border-border rounded-lg overflow-hidden transition-all duration-200"
                   >
-                    <div className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent">
+                    <div
+                      className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent"
+                      onClick={() => setPaymentMethod('bkash')}
+                    >
                       <RadioGroupItem value="bkash" id="bkash" />
                       <Label
                         htmlFor="bkash"
@@ -460,7 +466,10 @@ export default function CheckoutPage() {
                     open={paymentMethod === 'nagad'}
                     className="border border-border rounded-lg overflow-hidden transition-all duration-200"
                   >
-                    <div className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent">
+                    <div
+                      className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent"
+                      onClick={() => setPaymentMethod('nagad')}
+                    >
                       <RadioGroupItem value="nagad" id="nagad" />
                       <Label
                         htmlFor="nagad"
@@ -557,7 +566,10 @@ export default function CheckoutPage() {
                     open={paymentMethod === 'rocket'}
                     className="border border-border rounded-lg overflow-hidden transition-all duration-200"
                   >
-                    <div className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent">
+                    <div
+                      className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-accent"
+                      onClick={() => setPaymentMethod('rocket')}
+                    >
                       <RadioGroupItem value="rocket" id="rocket" />
                       <Label
                         htmlFor="rocket"

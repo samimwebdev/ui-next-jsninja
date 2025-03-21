@@ -14,9 +14,8 @@ const HomeTechLogos = () => {
   return (
     <div className="flex items-center justify-center px-6 py-12">
       <div className="overflow-hidden">
-        <h2 className="text-4xl font-bold text-center mb-4">Technology Stack</h2>
-        <p className="text-center text-muted-foreground max-w-2xl mx-auto">
-          Master the most in-demand technologies used by leading companies worldwide
+        <p className="text-center text-xl font-medium">
+          Learn Trending Technology
         </p>
 
         <div className="mt-12 max-w-screen-xl space-y-8">

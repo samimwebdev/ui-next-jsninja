@@ -21,7 +21,7 @@ export function BootcampPricing() {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Live Package */}
           <Card className="relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 p-8">
-            <Badge className="absolute top-6 right-6 bg-primary/10 text-primary">
+            <Badge className="absolute top-6 right-6 bg-primary/10 hover:bg-primary/10 text-foreground">
               Most Popular
             </Badge>
 
@@ -31,14 +31,18 @@ export function BootcampPricing() {
               </div>
               <div>
                 <h3 className="text-2xl font-bold">Live Package</h3>
-                <p className="text-muted-foreground">Interactive live sessions</p>
+                <p className="text-muted-foreground">
+                  Interactive live sessions
+                </p>
               </div>
             </div>
 
             <div className="mb-6">
               <p className="text-3xl font-bold">
                 ৳15,000
-                <span className="text-lg text-muted-foreground font-normal">/course</span>
+                <span className="text-lg text-muted-foreground font-normal">
+                  /course
+                </span>
               </p>
             </div>
 
@@ -89,7 +93,9 @@ export function BootcampPricing() {
             <div className="mb-6">
               <p className="text-3xl font-bold">
                 ৳8,000
-                <span className="text-lg text-muted-foreground font-normal">/course</span>
+                <span className="text-lg text-muted-foreground font-normal">
+                  /course
+                </span>
               </p>
             </div>
 

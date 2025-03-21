@@ -9,6 +9,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export const CourseBundle = () => {
   return (
@@ -92,10 +93,12 @@ export const CourseBundle = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="overflow-hidden rounded-lg">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=2940"
                   alt="React Course"
                   className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                  width={500}
+                  height={300}
                 />
               </div>
               <div className="space-y-2">
@@ -151,13 +154,15 @@ export const CourseBundle = () => {
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold">8000 tk</span>
-                  <Button
-                    variant="outline"
-                    className="gap-2 transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <BookOpen className="w-4 h-4" />
-                    View Details
-                  </Button>
+                  <Link href="/courses/javascript-bootcamp">
+                    <Button
+                      variant="outline"
+                      className="gap-2 transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      View Details
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </CardContent>
@@ -210,13 +215,15 @@ export const CourseBundle = () => {
                     </span>
                   </div>
                 </div>
-                <Button
-                  size="lg"
-                  className="w-full gap-2 bg-primary hover:bg-primary/90 transition-colors"
-                >
-                  <DollarSign className="w-4 h-4" />
-                  Enroll Now
-                </Button>
+                <Link href="/checkout?bundle=javascript-react">
+                  <Button
+                    size="lg"
+                    className="w-full gap-2 bg-primary hover:bg-primary/90 transition-colors"
+                  >
+                    <DollarSign className="w-4 h-4" />
+                    Enroll Now
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

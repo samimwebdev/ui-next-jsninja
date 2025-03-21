@@ -131,7 +131,6 @@ const CourseCard = ({ course }: { course: Course }) => {
 }
 export const CourseList = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-
   const [direction, setDirection] = useState(0)
 
   const nextSlide = () => {
@@ -163,12 +162,9 @@ export const CourseList = () => {
   return (
     <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold  tracking-tight text-center mb-4">
+        <h2 className="text-4xl font-bold  tracking-tight text-center mb-16">
           Featured Courses
         </h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Explore our comprehensive collection of courses designed to help you master new skills and advance your career
-        </p>
         <div className="relative overflow-hidden">
           <Button
             variant="outline"

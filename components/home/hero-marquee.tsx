@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
-import { Marquee } from './marquee'
+// Import the Marquee component directly from the home directory to avoid compatibility issues
+import { Marquee } from '@/components/home/marquee'
 import { useEffect, useState } from 'react'
 
 const teamMembers = [
