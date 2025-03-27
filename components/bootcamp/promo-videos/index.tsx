@@ -104,24 +104,26 @@ export function PromoVideos() {
         open={!!selectedVideo}
         onOpenChange={() => setSelectedVideo(null)}
       >
-        <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] max-h-[90vh] p-6 bg-background">
-          <DialogHeader className="mb-4">
-            <DialogTitle className="text-2xl font-semibold">
-              {selectedVideo?.title}
-            </DialogTitle>
-            <p className="text-muted-foreground mt-2">
-              {selectedVideo?.description}
-            </p>
-          </DialogHeader>
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-            {selectedVideo && (
-              <iframe
-                src={selectedVideo.videoUrl}
-                className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            )}
+        <DialogContent className="sm:max-w-[95vw] md:max-w-[85vw] lg:max-w-[70vw] h-[90vh] p-0 overflow-hidden bg-background">
+          <div className="flex flex-col h-full">
+            <DialogHeader className="p-6 border-b">
+              <DialogTitle className="text-2xl font-semibold mb-2">
+                {selectedVideo?.title}
+              </DialogTitle>
+              <p className="text-muted-foreground">
+                {selectedVideo?.description}
+              </p>
+            </DialogHeader>
+            <div className="flex-1 relative w-full p-6">
+              {selectedVideo && (
+                <iframe
+                  src={selectedVideo.videoUrl}
+                  className="absolute inset-0 w-full h-full rounded-lg shadow-lg"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
