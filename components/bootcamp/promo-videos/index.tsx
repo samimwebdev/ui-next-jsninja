@@ -104,20 +104,25 @@ export function PromoVideos() {
         open={!!selectedVideo}
         onOpenChange={() => setSelectedVideo(null)}
       >
-        <DialogContent className="sm:max-w-[80vw] h-[80vh] p-0">
-          <DialogHeader>
-            <DialogTitle className="sr-only">
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] max-h-[90vh] p-6 bg-background">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-2xl font-semibold">
               {selectedVideo?.title}
             </DialogTitle>
+            <p className="text-muted-foreground mt-2">
+              {selectedVideo?.description}
+            </p>
           </DialogHeader>
-          {selectedVideo && (
-            <iframe
-              src={selectedVideo.videoUrl}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          )}
+          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+            {selectedVideo && (
+              <iframe
+                src={selectedVideo.videoUrl}
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </section>
