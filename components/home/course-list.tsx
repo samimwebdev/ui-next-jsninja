@@ -100,8 +100,8 @@ const CourseCard = ({ course }: { course: Course }) => {
               <Image
                 src={course.image || '/placeholder.svg'}
                 alt={course.title}
-                layout="fill"
-                objectFit="cover"
+                fill
+                className="object-cover"
               />
               <div className="absolute top-2 right-2">
                 <Badge className="bg-primary text-primary-foreground">
@@ -131,6 +131,7 @@ const CourseCard = ({ course }: { course: Course }) => {
 }
 export const CourseList = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
+  // const [isAnimating, setIsAnimating] = useState(false)
   const [direction, setDirection] = useState(0)
 
   const nextSlide = () => {

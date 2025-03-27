@@ -42,9 +42,10 @@ export function ProjectCard({
         >
           <CardContent className="p-6">
             <div className="aspect-video relative rounded-lg overflow-hidden mb-4">
-              <img
+              <Image
                 src={image || '/placeholder.svg'}
                 alt={title}
+                fill
                 className="object-cover w-full h-full"
               />
             </div>
@@ -78,6 +79,8 @@ export function ProjectCard({
           <Image
             src={image || '/placeholder.svg'}
             alt={title}
+            width={600}
+            height={338}
             className="aspect-video object-cover rounded-lg"
           />
           <p className="text-muted-foreground dark:text-gray-400">
