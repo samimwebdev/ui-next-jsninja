@@ -4,8 +4,6 @@
 import { ReactLenis } from 'lenis/react'
 import { useTransform, motion, useScroll, MotionValue } from 'framer-motion'
 import { useRef } from 'react'
-import { useTheme } from 'next-themes'
-import { cn } from '@/lib/utils'
 import {
   BookOpen,
   ClipboardCheck,

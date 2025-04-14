@@ -5,27 +5,28 @@ import { BootcampProjectShowcase } from '@/components/bootcamp/project-showcase/
 import { BootcampSpeciality } from '@/components/bootcamp/bootcamp-speciality'
 import { PromoVideos } from '@/components/bootcamp/promo-videos'
 import { BatchSchedule } from '@/components/bootcamp/next-batch-schedule'
-import { BootcampOverview } from '@/components/bootcamp/bootcamp-overview/bootcamp-overview'
-import FAQBootcamp from '@/components/faq/faq-bootcamp'
-import TestimonialBootcamp from '@/components/testimonial-bootcamp'
+import { BootcampOverview } from '@/components/bootcamp/bootcamp-overview'
+import FAQBootcamp from '@/components/bootcamp/faq/faq-bootcamp'
+import TestimonialBootcamp from '@/components/bootcamp/testimonial-bootcamp'
 import { BootcampLogoSlider } from '@/components/bootcamp/bootcamp-logo-slider'
 import CallToAction from '@/components/shapexui/cta'
 import BootcampSteps from '@/components/shapexui/steps'
 import { BootcampPricing } from '@/components/bootcamp/bootcamp-pricing'
+import { BootcampCurriculum } from '@/components/bootcamp/bootcamp-curriculum'
 
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { fadeInUp, revealSection, scrollFadeIn } from '@/lib/micro-animations'
 
 // Define the animation type options based on the available variants
-type AnimationType = 'fadeInUp' | 'revealSection' | 'scrollFadeIn';
+type AnimationType = 'fadeInUp' | 'revealSection' | 'scrollFadeIn'
 
 // Interface for AnimatedSection props
 interface AnimatedSectionProps {
-  children: React.ReactNode;
-  animation?: AnimationType;
-  delay?: number;
-  className?: string;
+  children: React.ReactNode
+  animation?: AnimationType
+  delay?: number
+  className?: string
 }
 
 // Animation wrapper component to handle scroll-triggered animations
@@ -97,6 +98,10 @@ export default function BootcampDetails() {
 
       <AnimatedSection animation="fadeInUp" delay={0.1}>
         <BootcampPricing />
+      </AnimatedSection>
+
+      <AnimatedSection animation="revealSection" delay={0.2}>
+        <BootcampCurriculum />
       </AnimatedSection>
 
       <AnimatedSection animation="scrollFadeIn" delay={0.2}>

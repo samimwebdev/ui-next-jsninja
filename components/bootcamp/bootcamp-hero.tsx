@@ -7,7 +7,7 @@ import React, { useState } from 'react'
 import VideoModal from './video-modal'
 import Image from 'next/image'
 import BootcampAssessment from './bootcamp-assessment'
-import BootcampShortFeature from '../bootcamp-short-features'
+import BootcampShortFeature from './bootcamp-short-features'
 
 import { motion } from 'framer-motion'
 import { fadeInUp } from '@/lib/micro-animations'

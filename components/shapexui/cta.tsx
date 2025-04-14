@@ -8,9 +8,9 @@ import { Video, Code, RefreshCw, FileCheck } from 'lucide-react'
 
 const CallToAction = () => {
   return (
-    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-primary/90 via-primary/80 to-primary/95 dark:from-primary/20 dark:via-primary/15 dark:to-primary/25">
+    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-accent/10 via-accent/5 to-accent/15 dark:from-primary/20 dark:via-primary/15 dark:to-primary/25">
       {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-20 dark:opacity-10">
         <div
           className="absolute inset-0"
           style={{
@@ -26,14 +26,14 @@ const CallToAction = () => {
           transition={{ duration: 0.6 }}
           className="max-w-3xl mx-auto text-center"
         >
-          <h2 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl text-primary-foreground dark:text-foreground">
+          <h2 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl text-foreground dark:text-foreground">
             Unlock the Power of{' '}
             <span className="text-accent-foreground dark:text-accent-foreground relative inline-block">
               Javascript Bootcamp
               <span className="absolute -bottom-2 left-0 w-full h-1 bg-accent-foreground dark:bg-accent-foreground rounded-full"></span>
             </span>
           </h2>
-          <p className="max-w-xl mx-auto mt-6 text-lg leading-relaxed text-primary-foreground/80 dark:text-foreground/80">
+          <p className="max-w-xl mx-auto mt-6 text-lg leading-relaxed text-foreground/80 dark:text-foreground/80">
             Learn Programming Problem Solving, Logic Development and Prepare for
             Future
           </p>
@@ -68,16 +68,16 @@ const CallToAction = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -5, scale: 1.02 }}
-              className="flex items-start rounded-xl p-6 backdrop-blur-sm bg-card/10 border border-border/20 hover:border-accent-foreground/50 hover:bg-card/15 transition-all duration-300 shadow-lg"
+              className="flex items-start rounded-xl p-6 backdrop-blur-sm bg-background/80 border border-border hover:border-accent-foreground/50 hover:bg-background/90 transition-all duration-300 shadow-lg dark:bg-card/10 dark:border-border/20 dark:hover:bg-card/15"
             >
-              <div className="p-3 rounded-lg bg-accent-foreground/20 text-accent-foreground dark:text-accent-foreground">
+              <div className="p-3 rounded-lg bg-accent/10 text-accent-foreground dark:bg-accent-foreground/20 dark:text-accent-foreground">
                 {feature.icon}
               </div>
               <div className="ml-4">
-                <h3 className="text-xl font-bold text-primary-foreground dark:text-foreground">
+                <h3 className="text-xl font-bold text-foreground dark:text-foreground">
                   {feature.title}
                 </h3>
-                <p className="mt-1.5 text-sm text-primary-foreground/70 dark:text-foreground/80">
+                <p className="mt-1.5 text-sm text-foreground/70 dark:text-foreground/80">
                   {feature.text}
                 </p>
               </div>
@@ -100,7 +100,7 @@ const CallToAction = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full sm:w-auto px-12 py-7 bg-gradient-to-r from-accent-foreground to-accent-foreground/80 text-accent dark:text-accent hover:from-accent-foreground/90 hover:to-accent-foreground/70 focus:outline-none focus:ring-2 focus:ring-accent-foreground focus:ring-offset-2 focus:ring-offset-background transition duration-300 shadow-lg shadow-accent-foreground/30 relative overflow-hidden group rounded-full font-bold"
+                className="w-full sm:w-auto px-12 py-7 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground dark:from-accent-foreground dark:to-accent-foreground/80 dark:text-accent hover:from-primary/90 hover:to-primary/80 dark:hover:from-accent-foreground/90 dark:hover:to-accent-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-accent-foreground focus:ring-offset-2 focus:ring-offset-background transition duration-300 shadow-lg shadow-primary/20 dark:shadow-accent-foreground/30 relative overflow-hidden group rounded-full font-bold"
               >
                 <span className="absolute inset-0 w-full h-full bg-white/30 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
                 <span className="relative flex items-center justify-center gap-2">

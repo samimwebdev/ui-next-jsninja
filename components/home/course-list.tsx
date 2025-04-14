@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -89,9 +89,9 @@ const courses: Course[] = [
 const CourseCard = ({ course }: { course: Course }) => {
   return (
     <motion.div
-      className="w-full px-2 md:w-1/3 lg:w-1/3 flex-shrink-0"
-      whileHover={{ scale: 1.05 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+      className="w-full md:w-1/3 lg:w-1/3 flex-shrink-0 px-4"
+      whileHover={{ scale: 1.03 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
       <Link href={`/courses/${course.id}`}>
         <Card className="overflow-hidden h-full flex flex-col">
@@ -129,21 +129,18 @@ const CourseCard = ({ course }: { course: Course }) => {
     </motion.div>
   )
 }
+
 export const CourseList = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
-  // const [isAnimating, setIsAnimating] = useState(false)
-  const [direction, setDirection] = useState(0)
+  const coursesPerPage = 3
+  const totalPages = Math.ceil(courses.length / coursesPerPage)
 
   const nextSlide = () => {
-    setDirection(1)
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % courses.length)
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % totalPages)
   }
 
   const prevSlide = () => {
-    setDirection(-1)
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + courses.length) % courses.length
-    )
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + totalPages) % totalPages)
   }
 
   useEffect(() => {
@@ -152,76 +149,76 @@ export const CourseList = () => {
     }, 5000)
 
     return () => clearInterval(timer)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const visibleCourses = [
-    courses[(currentIndex - 1 + courses.length) % courses.length],
-    courses[currentIndex],
-    courses[(currentIndex + 1) % courses.length],
-  ]
+  // Get current courses to display
+  const startIndex = currentIndex * coursesPerPage
+  const visibleCourses = courses.slice(startIndex, startIndex + coursesPerPage)
+
+  // If we don't have enough courses to fill the page, add from the beginning
+  if (visibleCourses.length < coursesPerPage) {
+    const remaining = coursesPerPage - visibleCourses.length
+    visibleCourses.push(...courses.slice(0, remaining))
+  }
 
   return (
     <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold  tracking-tight text-center mb-16">
+        <h2 className="text-4xl font-bold tracking-tight text-center mb-4">
           Featured Courses
         </h2>
-        <div className="relative overflow-hidden">
+        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+          Explore our curated selection of high-quality courses designed to help
+          you master new skills and advance your career
+        </p>
+
+        <div className="relative">
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-4 top-1/3 transform -translate-y-1/2 z-10"
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10"
             onClick={prevSlide}
           >
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Previous slide</span>
           </Button>
+
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-4 top-1/3 transform -translate-y-1/2 z-10"
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10"
             onClick={nextSlide}
           >
             <ChevronRight className="h-4 w-4" />
             <span className="sr-only">Next slide</span>
           </Button>
-          <div className="overflow-hidden">
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.div
-                key={currentIndex}
-                custom={direction}
-                variants={{
-                  enter: (direction: number) => ({
-                    x: direction > 0 ? '100%' : '-100%',
-                    opacity: 0,
-                  }),
-                  center: {
-                    x: 0,
-                    opacity: 1,
-                  },
-                  exit: (direction: number) => ({
-                    x: direction < 0 ? '100%' : '-100%',
-                    opacity: 0,
-                  }),
-                }}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: 'spring', stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 },
-                }}
-                className="flex justify-center"
-                style={{ width: '100%', position: 'absolute' }}
-              >
-                {visibleCourses.map((course, index) => (
-                  <CourseCard key={`${course.id}-${index}`} course={course} />
-                ))}
-              </motion.div>
-            </AnimatePresence>
+
+          <div className="overflow-hidden mx-10">
+            <motion.div
+              className="flex justify-center"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              {visibleCourses.map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </motion.div>
           </div>
-          <div style={{ height: '400px' }} />{' '}
-          {/* Placeholder to maintain height */}
+        </div>
+
+        <div className="flex justify-center mt-8">
+          {Array.from({ length: totalPages }).map((_, index) => (
+            <Button
+              key={index}
+              variant={index === currentIndex ? 'default' : 'outline'}
+              size="sm"
+              className="mx-1 h-2 w-2 rounded-full p-0"
+              onClick={() => setCurrentIndex(index)}
+            >
+              <span className="sr-only">Page {index + 1}</span>
+            </Button>
+          ))}
         </div>
       </div>
     </div>
