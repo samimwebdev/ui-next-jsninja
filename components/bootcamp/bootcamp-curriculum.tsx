@@ -168,11 +168,13 @@ export function BootcampCurriculum() {
         transition={{ duration: 0.5 }}
       >
         <h2 className="text-3xl font-bold tracking-tight mb-2 text-center">
-          Bootcamp Curriculum
+          - Bootcamp Curriculum + JavaScript Bootcamp Curriculum
         </h2>
         <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-          Our comprehensive curriculum is designed to take you from beginner to
-          professional frontend developer
+          - Our comprehensive curriculum is designed to take you from beginner
+          to - professional frontend developer + Master JavaScript and frontend
+          development with our step-by-step curriculum, designed to take you
+          from beginner to job-ready developer.
         </p>
       </motion.div>
 

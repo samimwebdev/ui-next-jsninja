@@ -12,54 +12,54 @@ import { useState } from 'react'
 
 const faq = [
   {
-    question: 'What is your return policy?',
+    question: 'What prerequisites do I need for this frontend course?',
     answer:
-      'You can return unused items in their original packaging within 30 days for a refund or exchange. Contact support for assistance.',
+      'Basic knowledge of HTML, CSS, and JavaScript is recommended. However, we have introductory modules for complete beginners to help you get started with the fundamentals.',
   },
   {
-    question: 'How do I track my order?',
+    question: 'How long do I have access to the course materials?',
     answer:
-      'Track your order using the link provided in your confirmation email, or log into your account to view tracking details.',
+      'You get lifetime access to all course materials, including future updates. Once enrolled, you can learn at your own pace and revisit lessons whenever needed.',
   },
   {
-    question: 'Do you ship internationally?',
+    question: 'Is there a certificate upon completion?',
     answer:
-      'Yes, we ship worldwide. Shipping fees and delivery times vary by location, and customs duties may apply for some countries.',
+      'Yes, youll receive a certificate of completion after finishing all course modules and projects. This certificate can be added to your portfolio and LinkedIn profile.',
   },
   {
-    question: 'What payment methods do you accept?',
+    question: 'What kind of support will I receive during the course?',
     answer:
-      'We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay, ensuring secure payment options for all customers.',
+      'Youll have access to our community forum where instructors and fellow students can help with questions. Premium enrollments include 3 months of direct 1:1 support with our instructors.',
   },
   {
-    question: 'What if I receive a damaged item?',
+    question: 'Are the projects in this course suitable for my portfolio?',
     answer:
-      'Please contact our support team within 48 hours of delivery with photos of the damaged item. We’ll arrange a replacement or refund.',
+      'Absolutely! The course includes 5 real-world projects designed to showcase different frontend skills. These projects are perfect for demonstrating your abilities to potential employers.',
   },
   {
-    question: 'Can I cancel or change my order?',
+    question: 'How often is the course content updated?',
     answer:
-      'Yes, you can cancel or change your order within 24 hours of placing it. Contact customer support to make updates.',
+      'We update the course quarterly to ensure all content reflects current frontend development best practices and the latest framework versions.',
   },
   {
-    question: 'Do you offer discounts for bulk purchases?',
+    question: 'Can I get a refund if the course isnt right for me?',
     answer:
-      'Yes, we provide special discounts for bulk orders. Contact our sales team with your requirements for a customized quote.',
+      'Yes, we offer a 30-day money-back guarantee. If youre not satisfied with the course, contact our support team within 30 days of purchase for a full refund.',
   },
   {
-    question: 'How long does shipping take?',
+    question: 'Will this course help me get a job as a frontend developer?',
     answer:
-      'Shipping usually takes 3-7 business days domestically and 7-14 business days internationally, depending on your location and selected shipping method.',
+      'Many of our graduates have successfully landed frontend developer roles. The course focuses on practical skills, modern frameworks, and portfolio-building projects that employers value.',
   },
   {
-    question: 'Are your products eco-friendly?',
+    question: 'Do you offer any discounts for students or groups?',
     answer:
-      'Many of our products are made with sustainable materials and eco-friendly practices to reduce environmental impact while maintaining quality.',
+      'Yes, we offer special discounts for students with valid ID and for groups of 5 or more. Contact our sales team for details on group enrollment discounts.',
   },
   {
-    question: 'How can I contact customer support?',
+    question: 'What makes this frontend course different from others?',
     answer:
-      'Reach out via email at support@example.com or call us at 1-800-123-4567 for assistance with any inquiries.',
+      'Our course combines theory with extensive hands-on practice, focuses on the latest frontend technologies (React, Vue, and more), and includes mentorship from industry professionals currently working at top tech companies.',
   },
 ]
 export const FAQ = () => {

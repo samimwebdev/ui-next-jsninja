@@ -82,82 +82,82 @@ const categories = [
 
 const blogPosts = [
   {
-    title: 'The Future of Artificial Intelligence in Software Development',
+    title: 'Mastering React Hooks',
     category: 'Technology',
     description:
-      'Explore how AI is revolutionizing the way we write code and build applications, from automated testing to intelligent code completion.',
+      'A comprehensive guide to using React Hooks effectively in your projects, from useState and useEffect to custom hooks.',
     image:
-      'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&auto=format&fit=crop&q=60',
     readTime: '6 min read',
     date: 'Feb 15, 2024',
   },
   {
-    title: 'Sustainable Business Practices for the Modern Enterprise',
-    category: 'Business',
+    title: 'Tailwind CSS Best Practices',
+    category: 'Technology',
     description:
-      'Learn how companies are incorporating environmental responsibility into their business models while maintaining profitability.',
+      'Learn how to structure and optimize your Tailwind CSS projects for better maintainability and performance.',
     image:
-      'https://images.unsplash.com/photo-1664575602554-2087b04935a5?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=60',
     readTime: '4 min read',
     date: 'Feb 18, 2024',
   },
   {
-    title: 'Cryptocurrency Investment Strategies for 2024',
-    category: 'Finance',
+    title: 'Next.js App Router Guide',
+    category: 'Technology',
     description:
-      'A comprehensive guide to navigating the cryptocurrency market, including risk management and portfolio diversification strategies.',
+      'Everything you need to know about the Next.js App Router and server components for building modern web applications.',
     image:
-      'https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&auto=format&fit=crop&q=60',
     readTime: '8 min read',
     date: 'Feb 20, 2024',
   },
   {
-    title: 'Mindfulness and Mental Health in the Digital Age',
-    category: 'Health',
+    title: 'TypeScript Tips for React Developers',
+    category: 'Technology',
     description:
-      'Discover practical techniques for maintaining mental wellness while navigating the challenges of our increasingly connected world.',
+      'Discover practical TypeScript techniques to improve type safety and developer experience in your React applications.',
     image:
-      'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1607799279861-4dd421887fb3?w=800&auto=format&fit=crop&q=60',
     readTime: '5 min read',
     date: 'Feb 22, 2024',
   },
   {
-    title: 'Modern Home Organization: A Minimalist Approach',
-    category: 'Lifestyle',
+    title: 'Building Accessible Web Applications',
+    category: 'Technology',
     description:
-      'Transform your living space with these minimalist organization techniques that promote clarity and reduce stress.',
+      'Learn how to create web applications that are accessible to all users, including those with disabilities.',
     image:
-      'https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=60',
     readTime: '7 min read',
     date: 'Feb 24, 2024',
   },
   {
-    title: "Global Climate Policy: What's Next?",
-    category: 'Politics',
+    title: 'Frontend Performance Optimization Techniques',
+    category: 'Technology',
     description:
-      'An analysis of current climate policies and their potential impact on international relations and economic development.',
+      'Strategies and best practices for optimizing the performance of your frontend applications for better user experience.',
     image:
-      'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&auto=format&fit=crop&q=60',
     readTime: '9 min read',
     date: 'Feb 25, 2024',
   },
   {
-    title: 'Breakthrough Discoveries in Quantum Computing',
-    category: 'Science',
+    title: 'Introduction to Web Components',
+    category: 'Technology',
     description:
-      'Recent advances in quantum computing that could revolutionize data processing and cryptography in the coming decades.',
+      'Learn how to use Web Components to create reusable, encapsulated HTML elements for your web applications.',
     image:
-      'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=800&auto=format&fit=crop&q=60',
     readTime: '6 min read',
     date: 'Feb 26, 2024',
   },
   {
-    title: 'The Evolution of E-Sports and Competitive Gaming',
-    category: 'Sports',
+    title: 'State Management in Modern React',
+    category: 'Technology',
     description:
-      'How competitive gaming has transformed from a niche hobby into a billion-dollar industry with professional leagues and global tournaments.',
+      'Comparing different state management approaches in React, from Context API and Redux to Zustand and Jotai.',
     image:
-      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60',
+      'https://images.unsplash.com/photo-1555099962-4199c345e5dd?w=800&auto=format&fit=crop&q=60',
     readTime: '5 min read',
     date: 'Feb 27, 2024',
   },

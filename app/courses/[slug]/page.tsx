@@ -166,10 +166,10 @@ export default function CourseDetailsPage() {
               <h2 className="text-2xl font-bold mb-4">Course Features</h2>
               <ul className="space-y-3">
                 {[
-                  '150+ ঘন্টার কোর্স',
-                  'প্রজেক্ট ভিত্তিক',
-                  'লাইফটাইম এক্সেস',
-                  '৩ মাসের জন্য ১:১ সাপোর্ট',
+                  '150+ Hours of Content',
+                  'Project-Based Learning',
+                  'Lifetime Access',
+                  '3 Months of 1:1 Support',
                 ].map((feature, index) => (
                   <motion.li
                     key={index}
@@ -193,7 +193,7 @@ export default function CourseDetailsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8, duration: 0.3 }}
                 >
-                  ৳ ৭৯৯৯
+                  $99.99
                 </motion.div>
 
                 <motion.div
@@ -206,7 +206,7 @@ export default function CourseDetailsPage() {
                     className="w-full bg-[#E91E63] text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors"
                     onClick={handleEnrollClick}
                   >
-                    কোর্সে ভর্তি হন
+                    Enroll Now
                   </button>
                 </motion.div>
               </div>

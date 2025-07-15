@@ -2,24 +2,38 @@ import { Check } from 'lucide-react'
 
 const overviewSections = [
   {
-    title: 'কী কী শিখবেন এ কোর্স থেকে?',
+    title: 'What Will You Learn From This Course?',
     items: [
-      'ফেসবুকের সর্বাধিক ব্যবহার',
-      'ইউটিউবের জনপ্রিয় মার্কেট-প্লেস',
-      'সার্চিং টিপস, সেওপটিমাইজ ও টার্গেটিং',
+      'Modern React with Hooks and Context API',
+      'Next.js 14 with App Router and Server Components',
+      'Responsive UI with Tailwind CSS and Shadcn UI',
+      'State Management with Redux Toolkit and Zustand',
     ],
   },
   {
-    title: 'কোর্সটি যাদের জন্য',
-    items: ['জব অ্যাপ্লিক্যান্ট', 'ভার্সিটি-লেভেলের শিক্ষার্থী'],
+    title: 'Who This Course Is For',
+    items: [
+      'Beginner to Intermediate Web Developers',
+      'UI/UX Designers Looking to Code Their Designs',
+      'Backend Developers Wanting to Learn Frontend',
+    ],
   },
   {
-    title: 'কোর্সটি করার জন্য আপনি কী কী জানা থাকা দরকার?',
-    items: ['কম্পিউটার / স্মার্টফোন / ল্যাপ', 'ইন্টারনেট এক্সেস'],
+    title: 'Prerequisites For This Course',
+    items: [
+      'Basic HTML, CSS, and JavaScript Knowledge',
+      'Familiarity with ES6+ Syntax',
+      'Development Environment (VS Code recommended)',
+    ],
   },
   {
-    title: 'যে সকল সুবিধা পাবেন',
-    items: ['ইনবিল্ট এক্সপার্ট সাপোর্ট সিস্টেম', 'অনলিমিটেড এক্সেস এক্সেস'],
+    title: 'Benefits You Will Receive',
+    items: [
+      'Personal Code Reviews from Expert Instructors',
+      'Access to Private Discord Community',
+      'Real-world Project Portfolio',
+      'Job Placement Assistance',
+    ],
   },
 ]
 

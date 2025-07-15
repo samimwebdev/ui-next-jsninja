@@ -7,57 +7,57 @@ import React, { ComponentProps } from 'react'
 const testimonials = [
   {
     id: 1,
-    name: 'John Doe',
-    designation: 'Software Engineer',
-    company: 'TechCorp',
+    name: 'Ayesha Rahman',
+    designation: 'Frontend Developer',
+    company: 'WebWorks',
     testimonial:
-      'This product has completely transformed the way we work. The efficiency and ease of use are unmatched!',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+      'The JavaScript Bootcamp gave me the confidence and skills to land my first developer job. The hands-on projects and supportive mentors made all the difference!',
+    avatar: 'https://randomuser.me/api/portraits/women/10.jpg',
   },
   {
     id: 2,
-    name: 'Sophia Lee',
-    designation: 'Data Analyst',
-    company: 'InsightTech',
+    name: 'Tanvir Hasan',
+    designation: 'Junior Engineer',
+    company: 'CodeCraft',
     testimonial:
-      'This tool has saved me hours of work! The analytics and reporting features are incredibly powerful.',
-    avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+      'I loved the real-world projects and the interactive classes. The curriculum is up-to-date and the instructors are always ready to help.',
+    avatar: 'https://randomuser.me/api/portraits/men/12.jpg',
   },
   {
     id: 3,
-    name: 'Michael Johnson',
-    designation: 'UX Designer',
-    company: 'DesignPro',
+    name: 'Mehedi Islam',
+    designation: 'Student',
+    company: 'University of Dhaka',
     testimonial:
-      'An amazing tool that simplifies complex tasks. Highly recommended for professionals in the industry.',
-    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+      'As a complete beginner, I was nervous, but the bootcamp structure made learning JavaScript and React fun and approachable. Highly recommended!',
+    avatar: 'https://randomuser.me/api/portraits/men/13.jpg',
   },
   {
     id: 4,
-    name: 'Emily Davis',
-    designation: 'Marketing Specialist',
-    company: 'BrandBoost',
+    name: 'Farzana Akter',
+    designation: 'Freelancer',
+    company: 'Upwork',
     testimonial:
-      "I've seen a significant improvement in our team's productivity since we started using this service.",
-    avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+      "The bootcamp's focus on practical skills and portfolio building helped me secure freelance projects right after graduation.",
+    avatar: 'https://randomuser.me/api/portraits/women/14.jpg',
   },
   {
     id: 5,
-    name: 'Daniel Martinez',
-    designation: 'Full-Stack Developer',
-    company: 'CodeCrafters',
+    name: 'Rafiq Chowdhury',
+    designation: 'React Developer',
+    company: 'TechNova',
     testimonial:
-      "The best investment we've made! The support team is also super responsive and helpful.",
-    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+      'The mentorship and peer support were outstanding. I learned more in 12 weeks than in a year of self-study.',
+    avatar: 'https://randomuser.me/api/portraits/men/15.jpg',
   },
   {
     id: 6,
-    name: 'Jane Smith',
-    designation: 'Product Manager',
-    company: 'InnovateX',
+    name: 'Sumaiya Sultana',
+    designation: 'Intern',
+    company: 'StartupHub',
     testimonial:
-      'The user experience is top-notch! The interface is clean, intuitive, and easy to navigate.',
-    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+      'The job placement support and career guidance were invaluable. I landed an internship within a month of finishing the bootcamp!',
+    avatar: 'https://randomuser.me/api/portraits/women/16.jpg',
   },
 ]
 
@@ -66,11 +66,12 @@ const TestimonialBootcamp = () => (
     <div className="h-full w-full text-center">
       <div className="mb-12">
         <h2 className="text-4xl md:text-4xl font-bold tracking-tight px-6">
-          Testimonials
+          - Testimonials + JavaScript Bootcamp Success Stories
         </h2>
         <p className="text-muted-foreground text-lg">
-          What about the people who have already taken the course? Heres what
-          they have to say
+          - What about the people who have already taken the course? Heres what
+          - they have to say + Hear from graduates who transformed their careers
+          through our JavaScript Bootcamp.
         </p>
       </div>
       <div className="relative">

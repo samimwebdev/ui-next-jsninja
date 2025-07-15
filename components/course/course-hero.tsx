@@ -14,15 +14,15 @@ export const CourseHero = () => {
       <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
         <div>
           <Badge className="bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
-            Updated On 31/12/2024
+            Updated On 15/06/2024
           </Badge>
           <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
-            Customized Shadcn UI Blocks & Components
+            Frontend Ninja: Master React & Next.js Development
           </h1>
           <p className="mt-6 max-w-[60ch] text-lg">
-            Explore a collection of Shadcn UI blocks and components, ready to
-            preview and copy. Streamline your development workflow with
-            easy-to-implement examples.
+            Become a frontend development expert with our comprehensive course.
+            Learn modern React, Next.js, and UI frameworks to build stunning,
+            responsive web applications from scratch.
           </p>
           <div className="mt-12 flex items-center gap-4">
             <Button size="lg" className="rounded-full text-base">
@@ -33,7 +33,7 @@ export const CourseHero = () => {
               size="lg"
               className="rounded-full text-base shadow-none"
             >
-              <CirclePlay className="!h-5 !w-5" /> Read Reviews
+              <CirclePlay className="!h-5 !w-5" /> Watch Preview
             </Button>
           </div>
         </div>

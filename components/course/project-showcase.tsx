@@ -15,74 +15,71 @@ import Image from 'next/image'
 const projectLists = [
   {
     id: 1,
-    title: 'Facebook Marketing Mastery',
+    title: 'Responsive Portfolio Website',
     description:
-      'Learn how to create and manage successful Facebook marketing campaigns',
-
+      'Build a modern, responsive portfolio website using React and Tailwind CSS',
     image:
-      'https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&q=80&w=800',
     features: [
-      '20+ hours of video content',
-      'Practical assignments',
-      'Certificate of completion',
-      'Lifetime access',
+      'Responsive design for all devices',
+      'Dark/light mode toggle',
+      'Animated page transitions',
+      'Contact form with validation',
     ],
   },
   {
     id: 2,
-    title: 'Google Ads Professional',
-    description: 'Master Google Ads and drive traffic to your business',
-
+    title: 'E-commerce Dashboard',
+    description: 'Create a feature-rich admin dashboard for online stores',
     image:
-      'https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
     features: [
-      '25+ hours of video content',
-      'Real campaign setup',
-      'Certificate of completion',
-      'Lifetime access',
+      'Data visualization with charts',
+      'User authentication',
+      'Order management system',
+      'Inventory tracking',
     ],
   },
   {
     id: 3,
-    title: 'Complete Digital Marketing',
+    title: 'Social Media App',
     description:
-      'Comprehensive course covering all aspects of digital marketing',
-
+      'Develop a full-featured social media application with React and Firebase',
     image:
-      'https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&q=80&w=800',
     features: [
-      '50+ hours of video content',
-      'Multiple projects',
-      'Certificate of completion',
-      'Lifetime access',
+      'Real-time messaging',
+      'User profiles and authentication',
+      'Post creation and interaction',
+      'Notification system',
     ],
   },
   {
     id: 4,
-    title: 'Complete Digital Marketing',
+    title: 'Weather Application',
     description:
-      'Comprehensive course covering all aspects of digital marketing',
+      'Build a weather app that fetches and displays data from a weather API',
     image:
-      'https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1592210454359-9043f067919b?auto=format&fit=crop&q=80&w=800',
     features: [
-      '50+ hours of video content',
-      'Multiple projects',
-      'Certificate of completion',
-      'Lifetime access',
+      'Location-based weather data',
+      'Five-day forecast',
+      'Weather animations',
+      'Responsive UI design',
     ],
   },
   {
     id: 5,
-    title: 'Complete Digital Marketing',
+    title: 'Task Management System',
     description:
-      'Comprehensive course covering all aspects of digital marketing',
+      'Create a Kanban-style task management application with drag-and-drop functionality',
     image:
-      'https://images.unsplash.com/photo-1627398242454-45a1465c2479?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&q=80&w=800',
     features: [
-      '50+ hours of video content',
-      'Multiple projects',
-      'Certificate of completion',
-      'Lifetime access',
+      'Drag-and-drop task organization',
+      'Task categories and labels',
+      'Progress tracking',
+      'Data persistence with localStorage',
     ],
   },
 ]
@@ -106,7 +103,7 @@ export const ProjectShowcase = () => {
   return (
     <section className="my-12">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold">Project ShowCase</h2>
+        <h2 className="text-3xl font-bold">Project Showcase</h2>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={() => scroll('left')}>
             <ChevronLeft className="h-4 w-4" />
@@ -121,32 +118,31 @@ export const ProjectShowcase = () => {
         ref={sliderRef}
         className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide"
       >
-        {projectLists.map((course) => (
+        {projectLists.map((project) => (
           <motion.div
-            key={course.id}
+            key={project.id}
             className="flex-shrink-0 w-[300px] snap-start"
             whileHover={{ scale: 1.02 }}
             transition={{ duration: 0.2 }}
-            onClick={() => setProjectItem(course)}
+            onClick={() => setProjectItem(project)}
           >
             <div className="bg-card rounded-lg overflow-hidden cursor-pointer">
               <Image
-                src={course.image || '/placeholder.svg'}
-                alt={course.title}
+                src={project.image || '/placeholder.svg'}
+                alt={project.title}
                 className="w-full h-[200px] object-cover"
                 width="300"
                 height="300"
               />
               <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{course.title}</h3>
+                <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
                 <p className="text-muted-foreground text-sm mb-4">
-                  {course.description}
+                  {project.description}
                 </p>
-                {/* <p className="text-2xl font-bold">৳{course.price}</p> */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="secondary">Javascript</Badge>
                   <Badge variant="secondary">React</Badge>
-                  <Badge variant="secondary">Asynchronous</Badge>
+                  <Badge variant="secondary">JavaScript</Badge>
+                  <Badge variant="secondary">Tailwind CSS</Badge>
                 </div>
               </div>
             </div>
@@ -162,7 +158,7 @@ export const ProjectShowcase = () => {
           <div className="space-y-4">
             <Image
               src={projectItem?.image || '/placeholder.svg'}
-              alt={projectItem?.title || 'demo title'}
+              alt={projectItem?.title || 'Project'}
               className="w-full h-[200px] object-cover rounded-lg"
               width="600"
               height="200"
@@ -178,9 +174,9 @@ export const ProjectShowcase = () => {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="secondary">Javascript</Badge>
-                <Badge variant="outline">React</Badge>
-                <Badge variant="outline">Asynchronous</Badge>
+                <Badge variant="secondary">React</Badge>
+                <Badge variant="outline">JavaScript</Badge>
+                <Badge variant="outline">Tailwind CSS</Badge>
               </div>
             </div>
           </div>

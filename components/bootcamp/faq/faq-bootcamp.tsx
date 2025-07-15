@@ -12,54 +12,54 @@ import { useState } from 'react'
 
 const faq = [
   {
-    question: 'What is your return policy?',
+    question: 'What is the duration of the JavaScript Bootcamp?',
     answer:
-      'You can return unused items in their original packaging within 30 days for a refund or exchange. Contact support for assistance.',
+      'The bootcamp runs for 12 weeks, featuring daily lectures, coding assignments, and hands-on projects to help you master JavaScript and modern frontend development.',
   },
   {
-    question: 'How do I track my order?',
+    question: 'Do I need prior programming experience to join?',
     answer:
-      'Track your order using the link provided in your confirmation email, or log into your account to view tracking details.',
+      'No prior experience is required. The bootcamp starts from the basics and gradually progresses to advanced topics, making it suitable for both beginners and those looking to upskill.',
   },
   {
-    question: 'Do you ship internationally?',
+    question: 'Which technologies will I learn in this bootcamp?',
     answer:
-      'Yes, we ship worldwide. Shipping fees and delivery times vary by location, and customs duties may apply for some countries.',
+      'You will learn HTML, CSS, JavaScript, React, Next.js, TypeScript, and other essential frontend tools and frameworks used in the industry.',
   },
   {
-    question: 'What payment methods do you accept?',
+    question: 'Will I receive a certificate after completing the bootcamp?',
     answer:
-      'We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay, ensuring secure payment options for all customers.',
+      'Yes, you will receive a certificate of completion and a portfolio of real-world projects to showcase your skills to potential employers.',
   },
   {
-    question: 'What if I receive a damaged item?',
+    question: 'What kind of support is available during the bootcamp?',
     answer:
-      'Please contact our support team within 48 hours of delivery with photos of the damaged item. We’ll arrange a replacement or refund.',
+      'You will have access to 24/7 support from instructors and mentors, as well as a community of fellow learners for collaboration and networking.',
   },
   {
-    question: 'Can I cancel or change my order?',
+    question: 'Are there job placement opportunities after graduation?',
     answer:
-      'Yes, you can cancel or change your order within 24 hours of placing it. Contact customer support to make updates.',
+      'Yes, we offer career guidance, interview preparation, and connect you with hiring partners for job placement opportunities after graduation.',
   },
   {
-    question: 'Do you offer discounts for bulk purchases?',
+    question: 'Can I access course materials after the bootcamp ends?',
     answer:
-      'Yes, we provide special discounts for bulk orders. Contact our sales team with your requirements for a customized quote.',
+      'Absolutely! All course materials, recorded lectures, and resources remain accessible to you even after the bootcamp concludes.',
   },
   {
-    question: 'How long does shipping take?',
+    question: 'How are the classes conducted?',
     answer:
-      'Shipping usually takes 3-7 business days domestically and 7-14 business days internationally, depending on your location and selected shipping method.',
+      'Classes are conducted online via live sessions, with interactive Q&A, group projects, and recorded videos for flexible learning.',
   },
   {
-    question: 'Are your products eco-friendly?',
+    question: 'Is there a refund policy?',
     answer:
-      'Many of our products are made with sustainable materials and eco-friendly practices to reduce environmental impact while maintaining quality.',
+      'Yes, you can request a full refund within the first week if you are not satisfied with the bootcamp experience.',
   },
   {
-    question: 'How can I contact customer support?',
+    question: 'How do I enroll in the bootcamp?',
     answer:
-      'Reach out via email at support@example.com or call us at 1-800-123-4567 for assistance with any inquiries.',
+      "Click the 'Enroll Now' button on the bootcamp page and follow the instructions to complete your registration and payment.",
   },
 ]
 const FAQBootcamp = () => {
@@ -70,11 +70,14 @@ const FAQBootcamp = () => {
       <div className="w-full max-w-screen-xl">
         <div className="mb-12 text-center">
           <h2 className="text-4xl md:text-4xl text-center !leading-[1.15] font-bold tracking-tight">
-            Frequently Asked Questions
+            - Frequently Asked Questions + JavaScript Bootcamp FAQs
           </h2>
           <p className="text-muted-foreground text-lg">
-            What about the people who have already taken the course? Heres what
-            they have to say
+            - Find answers to common questions about our JavaScript Programming
+            - Bootcamp, including curriculum, support, certification, and -
+            enrollment details. + Get answers to the most common questions about
+            our JavaScript Bootcamp, including curriculum, support,
+            certification, and how to enroll.
           </p>
         </div>
         <div className="w-full grid md:grid-cols-2 gap-x-10">

@@ -15,14 +15,24 @@ export function CourseAuthor() {
           <AvatarFallback>PM</AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="text-xl font-semibold">Priyom Mozumder</h3>
-          <p className="text-muted-foreground">Founder & CEO, BOHUBRIHI</p>
+          <h3 className="text-xl font-semibold">Alex Johnson</h3>
+          <p className="text-muted-foreground">
+            Senior Frontend Engineer & Instructor
+          </p>
         </div>
       </div>
       <div className="mt-4 space-y-4">
         <p>
-          ডিজিটাল মার্কেটিং এর সকল দিক নিয়ে ১০ বছরের বেশি সময় ধরে কাজ করছেন।
-          তিনি বর্তমানে BOHUBRIHI এর ফাউন্ডার ও সিইও হিসেবে কর্মরত আছেন।
+          Alex is a seasoned frontend developer with over 8 years of experience
+          working with React and modern JavaScript frameworks. He has led
+          frontend teams at several tech startups and now focuses on teaching
+          the next generation of developers.
+        </p>
+        <p>
+          Having contributed to popular open-source projects and spoken at React
+          conferences, Alex brings real-world expertise and best practices to
+          his teaching. His students appreciate his clear explanations and
+          practical, project-based approach to learning.
         </p>
       </div>
     </section>

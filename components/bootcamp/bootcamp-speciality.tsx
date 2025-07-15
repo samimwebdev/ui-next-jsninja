@@ -62,11 +62,13 @@ export function BootcampSpeciality() {
       <main ref={container} className="text-foreground bg-background">
         <section className="w-full py-12 md:py-16 lg:py-20 grid place-content-center text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl px-8 mb-6 font-semibold text-center tracking-tight leading-[120%]">
-            Speciality of The Bootcamp
+            Why Choose Our JavaScript Bootcamp?
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-4">
-            Our bootcamp offers unique features designed to maximize your
-            learning experience and prepare you for a successful career in tech.
+            Our JavaScript Bootcamp is designed to accelerate your journey from
+            beginner to job-ready developer. Experience hands-on learning,
+            real-world projects, and dedicated mentorship to launch your career
+            in web development.
           </p>
         </section>
 

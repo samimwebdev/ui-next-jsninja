@@ -87,10 +87,12 @@ export function BootcampProjectShowcase() {
     <section className="container mx-auto max-w-screen-xl px-4 py-12">
       <div className="text-center mb-12">
         <h2 className="text-4xl md:text-4xl font-black tracking-tight text-center mb-6">
-          Projects for the Bootcamp
+          JavaScript Bootcamp Project Showcase
         </h2>
         <p className="text-muted-foreground text-lg">
-          Detail information about the Projects
+          Explore hands-on projects you ll build during the bootcamp, designed
+          to reinforce your JavaScript and frontend skills with real-world
+          challenges.
         </p>
       </div>
       <Masonry

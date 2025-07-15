@@ -61,11 +61,11 @@ export function PromoVideos() {
       <div className="relative z-10">
         <div className="mb-12 text-center">
           <h2 className="text-4xl mb-4 font-black leading-tight tracking-tight">
-            Watch Class Quality
+            Bootcamp Video Previews
           </h2>
           <p className="text-muted-foreground max-w-3xl text-center mx-auto">
-            Discover our journey through carefully crafted videos that showcase
-            our vision, products, and the people behind them.
+            Preview sample lessons and highlights from our JavaScript Bootcamp
+            to experience our teaching style and class quality firsthand.
           </p>
         </div>
 

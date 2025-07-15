@@ -12,92 +12,91 @@ import { DialogTitle } from '@radix-ui/react-dialog'
 
 const courseModules = [
   {
-    title: 'Introduction to the course',
+    title: 'Getting Started with React',
     lectures: [
       {
-        title: 'Welcome to the Course',
+        title: 'Welcome to Frontend Ninja',
         type: 'video',
         duration: '5:30',
         isFree: true,
         videoUrl: '/lecture1.mp4',
       },
       {
-        title: 'Before we start!',
+        title: 'Setting Up Your Development Environment',
         type: 'text',
         duration: '10:00',
-        isFree: false,
+        isFree: true,
       },
       {
-        title: 'Welcome to our community',
-        type: 'text',
-        duration: '8:00',
-        isFree: false,
-      },
-    ],
-  },
-  {
-    title: 'Facebook Marketing',
-    lectures: [
-      {
-        title: 'Facebook Page Creation and Setup',
+        title: 'React Fundamentals & JSX',
         type: 'video',
         duration: '15:00',
-        isFree: true,
-        videoUrl: '/facebook1.mp4',
-      },
-      {
-        title: 'Content Strategy for Facebook',
-        type: 'video',
-        duration: '20:00',
         isFree: false,
-      },
-      {
-        title: 'Facebook Ads Basics',
-        type: 'video',
-        duration: '25:00',
-        isFree: true,
-        videoUrl: '/facebook2.mp4',
       },
     ],
   },
   {
-    title: 'Google Marketing',
+    title: 'React Hooks & State Management',
     lectures: [
       {
-        title: 'Introduction to Google Ads',
+        title: 'Understanding useState and useEffect',
+        type: 'video',
+        duration: '20:00',
+        isFree: true,
+        videoUrl: '/react-hooks.mp4',
+      },
+      {
+        title: 'Custom Hooks for Reusable Logic',
+        type: 'video',
+        duration: '18:00',
+        isFree: false,
+      },
+      {
+        title: 'Global State with Context API',
+        type: 'video',
+        duration: '25:00',
+        isFree: false,
+      },
+    ],
+  },
+  {
+    title: 'Next.js Fundamentals',
+    lectures: [
+      {
+        title: 'Introduction to Next.js',
         type: 'video',
         duration: '18:00',
         isFree: true,
-        videoUrl: '/google1.mp4',
+        videoUrl: '/nextjs-intro.mp4',
       },
       {
-        title: 'SEO Fundamentals',
+        title: 'Routing in Next.js',
         type: 'video',
         duration: '22:00',
         isFree: false,
       },
       {
-        title: 'Google Analytics Setup',
+        title: 'Server Components vs Client Components',
         type: 'video',
-        duration: '15:00',
+        duration: '25:00',
         isFree: false,
       },
     ],
   },
   {
-    title: 'Email Marketing',
+    title: 'Building UI with Tailwind & Shadcn',
     lectures: [
       {
-        title: 'Email Marketing Basics',
+        title: 'Tailwind CSS Fundamentals',
         type: 'video',
         duration: '20:00',
         isFree: true,
-        videoUrl: '/email1.mp4',
+        videoUrl: '/tailwind-basics.mp4',
       },
       {
-        title: 'Building Email Lists',
+        title: 'Component-Driven Development with Shadcn UI',
         type: 'video',
-        duration: '15:00',
+        duration: '25:00',
         isFree: false,
       },
       {

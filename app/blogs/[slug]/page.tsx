@@ -25,37 +25,39 @@ type Blog = {
 // Static data for the blogs
 const data: Blog[] = [
   {
-    slug: 'best-places-to-eat-in-hongkong',
-    Title: 'Best places to eat in Hong Kong',
+    slug: 'mastering-react-hooks',
+    Title: 'Mastering React Hooks',
     Intro:
-      'Discover the top spots for dining in the vibrant city of Hong Kong.',
+      'A comprehensive guide to using React Hooks effectively in your projects.',
     Image:
       'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
     created_at: '2023-09-20',
-    Tags: 'Travel, Food, Asia',
+    Tags: 'React, JavaScript, Frontend',
     Description:
-      '<p>Detailed description about food places in Hong Kong...</p>',
+      '<p>React Hooks have revolutionized how we build components. This guide explores useState, useEffect, useContext, and custom hooks with practical examples.</p>',
   },
   {
-    slug: 'exploring-new-york',
-    Title: 'Exploring New York City',
-    Intro: 'A guide to the must-see attractions in the Big Apple.',
+    slug: 'tailwind-css-best-practices',
+    Title: 'Tailwind CSS Best Practices',
+    Intro: 'Learn how to structure and optimize your Tailwind CSS projects.',
     Image:
       'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
     created_at: '2023-08-15',
-    Tags: 'Travel, City, USA',
-    Description: '<p>Detailed description about exploring New York City...</p>',
+    Tags: 'CSS, Tailwind, Frontend',
+    Description:
+      '<p>Discover the most effective ways to organize your Tailwind CSS projects, create reusable components, and optimize for production.</p>',
   },
   {
-    slug: 'hiking-in-the-alps',
-    Title: 'Hiking in the Alps',
+    slug: 'nextjs-app-router-guide',
+    Title: 'Next.js App Router Guide',
     Intro:
-      'Everything you need to know about trekking through the stunning Alps.',
+      'Everything you need to know about the Next.js App Router and server components.',
     Image:
       'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
     created_at: '2023-07-05',
-    Tags: 'Adventure, Hiking, Nature',
-    Description: '<p>Detailed description about hiking in the Alps...</p>',
+    Tags: 'Next.js, React, Web Development',
+    Description:
+      '<p>A deep dive into Next.js App Router, server components, and how they improve performance and developer experience.</p>',
   },
 ]
 
@@ -250,29 +252,41 @@ const Page = () => {
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
                 <h3 className="text-2xl font-bold my-5">
-                  #1. What is Lorem Ipsum?
+                  #1. Understanding React Hooks
                 </h3>
 
                 <p className="text-base leading-8 my-5">
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry&apos;s
-                  standard dummy text ever since the 1500s, when an unknown
-                  printer took a galley of type and scrambled it to make a type
-                  specimen book.
+                  React Hooks were introduced in React 16.8 as a way to use
+                  state and other React features without writing a class
+                  component. They allow you to hook into React state and
+                  lifecycle features from function components, making your code
+                  more readable and easier to maintain.
                 </p>
 
                 <blockquote className="border-l-4 border-yellow-500 text-base italic leading-8 my-6 p-6 bg-primary/5 rounded-r-md shadow-sm">
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry&apos;s
-                  standard dummy text ever since the 1500s
+                  Hooks are a new addition in React 16.8. They let you use state
+                  and other React features without writing a class. - React
+                  Documentation
                 </blockquote>
 
                 <p className="text-base leading-8 my-5">
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry&apos;s
-                  standard dummy text ever since the 1500s, when an unknown
-                  printer took a galley of type and scrambled it to make a type
-                  specimen book.
+                  The most commonly used hooks are useState for managing
+                  component state, useEffect for handling side effects,
+                  useContext for consuming context, and useRef for creating
+                  mutable references. You can also create your own custom hooks
+                  to reuse stateful logic between components.
+                </p>
+
+                <h3 className="text-2xl font-bold my-5">
+                  #2. Practical Applications
+                </h3>
+
+                <p className="text-base leading-8 my-5">
+                  Hooks have transformed how we build React applications by
+                  enabling more functional programming patterns and reducing the
+                  need for complex class components. They make it easier to
+                  reuse stateful logic between components and organize code by
+                  related functionality rather than lifecycle methods.
                 </p>
               </motion.div>
 
