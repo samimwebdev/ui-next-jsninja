@@ -1,39 +1,95 @@
 'use client'
 
+import React, { useActionState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { Label } from '@/components/ui/label'
+import { Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { useRouter } from 'next/navigation'
+import { loginAction } from '../actions'
+import { loginSchema } from '@/lib/validation'
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
-})
+type FormData = {
+  identifier: string
+  password: string
+}
+
+type ActionState = {
+  message: string
+  errors: Record<string, string[]>
+  success: boolean
+}
 
 const Login = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const [state, formAction] = useActionState(loginAction, {
+    message: '',
+    errors: {},
+    success: false,
+  } as ActionState)
+
+  const router = useRouter()
+  const [isVisible, setIsVisible] = React.useState<boolean>(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    clearErrors,
+    setError,
+  } = useForm<FormData>({
+    resolver: yupResolver(loginSchema),
+    mode: 'onBlur',
     defaultValues: {
-      email: '',
-      password: '',
+      identifier: 'pamkor@gmail.com',
+      password: 'sfazlu123',
     },
-    resolver: zodResolver(formSchema),
   })
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data)
+  const onSubmit = async (data: FormData) => {
+    try {
+      clearErrors()
+
+      const formData = new FormData()
+      Object.entries(data).forEach(([key, value]) => {
+        formData.append(key, value)
+      })
+
+      // Call server action manually
+      formAction(formData)
+    } catch (err) {
+      console.error('Submission error:', err)
+    }
   }
+
+  // Set errors from action state
+  useEffect(() => {
+    if (state?.errors && Object.keys(state.errors).length > 0) {
+      Object.entries(state.errors).forEach(([field, messages]) => {
+        if (Array.isArray(messages) && messages.length > 0) {
+          setError(field as keyof FormData, {
+            type: 'server',
+            message: messages.join(', '),
+          })
+        }
+      })
+    }
+  }, [state, setError])
+
+  // Redirect after successful login
+  useEffect(() => {
+    if (state.success) {
+      const timer = setTimeout(() => {
+        router.push('/dashboard')
+      }, 1500)
+
+      return () => clearTimeout(timer)
+    }
+  }, [state.success, router])
 
   return (
     <div className="h-screen flex items-center justify-center">
@@ -41,7 +97,7 @@ const Login = () => {
         <div className="max-w-xs m-auto w-full flex flex-col items-center">
           <p className="mt-4 text-3xl font-bold tracking-tight">Log in</p>
 
-          <Button className="mt-8 w-full gap-3">
+          <Button className="mt-8 w-full gap-3" type="button">
             <GoogleLogo />
             Continue with Google
           </Button>
@@ -51,53 +107,92 @@ const Login = () => {
             <span className="text-sm px-2">OR</span>
             <Separator />
           </div>
-
-          <Form {...form}>
-            <form
-              className="w-full space-y-4"
-              onSubmit={form.handleSubmit(onSubmit)}
+          {/* Success/Error Message */}
+          {state.message && (
+            <div
+              className={`mt-4 mb-4 text-sm text-center ${
+                state.success ? 'text-green-600' : 'text-red-600'
+              }`}
             >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="Email"
-                        className="w-full"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              {state.errors.server ? (
+                <span className="text-red-500">
+                  {state.errors.server.join(', ')}
+                </span>
+              ) : (
+                state.message
+              )}
+            </div>
+          )}
+
+          <form
+            className="w-full space-y-4"
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                {...register('identifier', {
+                  required: 'Email or username is required',
+                })}
+                className={`transition-colors ${
+                  errors.identifier
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                    : ''
+                }`}
               />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Password"
-                        className="w-full"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="min-h-[1.25rem]">
+                {errors.identifier && (
+                  <span className="text-sm text-red-500 block">
+                    {errors.identifier.message}
+                  </span>
                 )}
-              />
-              <Button type="submit" className="mt-4 w-full">
-                Continue with Email
-              </Button>
-            </form>
-          </Form>
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={isVisible ? 'text' : 'password'}
+                  placeholder="Password"
+                  {...register('password')}
+                  className={`pr-10 transition-colors ${
+                    errors.password
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : ''
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsVisible((prev) => !prev)}
+                  aria-label={isVisible ? 'Hide password' : 'Show password'}
+                  className="absolute inset-y-0 right-0 flex items-center justify-center w-10 text-muted-foreground/80 hover:text-foreground"
+                >
+                  {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              <div className="min-h-[1.25rem]">
+                {errors.password && (
+                  <span className="text-sm text-red-500 block">
+                    {errors.password.message}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="mt-4 w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Signing in...' : 'Continue with Email'}
+            </Button>
+          </form>
 
           <div className="mt-5 space-y-5">
             <Link
@@ -131,7 +226,7 @@ const Login = () => {
   )
 }
 
-const GoogleLogo = () => (
+const GoogleLogo: React.FC = () => (
   <svg
     width="1.2em"
     height="1.2em"
@@ -145,23 +240,23 @@ const GoogleLogo = () => (
       <path
         d="M15.6823 8.18368C15.6823 7.63986 15.6382 7.0931 15.5442 6.55811H7.99829V9.63876H12.3194C12.1401 10.6323 11.564 11.5113 10.7203 12.0698V14.0687H13.2983C14.8122 12.6753 15.6823 10.6176 15.6823 8.18368Z"
         fill="#4285F4"
-      ></path>
+      />
       <path
         d="M7.99812 16C10.1558 16 11.9753 15.2915 13.3011 14.0687L10.7231 12.0698C10.0058 12.5578 9.07988 12.8341 8.00106 12.8341C5.91398 12.8341 4.14436 11.426 3.50942 9.53296H0.849121V11.5936C2.2072 14.295 4.97332 16 7.99812 16Z"
         fill="#34A853"
-      ></path>
+      />
       <path
         d="M3.50665 9.53295C3.17154 8.53938 3.17154 7.4635 3.50665 6.46993V4.4093H0.849292C-0.285376 6.66982 -0.285376 9.33306 0.849292 11.5936L3.50665 9.53295Z"
         fill="#FBBC04"
-      ></path>
+      />
       <path
         d="M7.99812 3.16589C9.13867 3.14825 10.241 3.57743 11.067 4.36523L13.3511 2.0812C11.9048 0.723121 9.98526 -0.0235266 7.99812 -1.02057e-05C4.97332 -1.02057e-05 2.2072 1.70493 0.849121 4.40932L3.50648 6.46995C4.13848 4.57394 5.91104 3.16589 7.99812 3.16589Z"
         fill="#EA4335"
-      ></path>
+      />
     </g>
     <defs>
       <clipPath id="clip0">
-        <rect width="15.6825" height="16" fill="white"></rect>
+        <rect width="15.6825" height="16" fill="white" />
       </clipPath>
     </defs>
   </svg>

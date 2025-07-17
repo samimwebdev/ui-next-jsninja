@@ -4,13 +4,10 @@ import { Menu } from 'lucide-react'
 import Link from 'next/link'
 import { Logo } from './logo'
 import { NavMenu } from './nav-menu'
+import { User } from '@/components/context/AuthProvider'
 interface NavigationSheetProps {
   isLoggedIn?: boolean
-  user?: {
-    name: string
-    email: string
-    image: string
-  } | null
+  user?: User | null
   onLogout?: () => void
 }
 

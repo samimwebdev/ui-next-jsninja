@@ -8,17 +8,26 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useState } from 'react'
 import { UserNav } from './user-nav'
+import { useUser } from '@/components/context/AuthProvider'
+import { logoutAction } from '@/app/(auth)/actions'
 
 // Demo user for testing
-const demoUser = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  image: 'https://github.com/shadcn.png',
-}
+// const demoUser = {
+//   id: 1,
+//   documentId: '12345',
+//   email: 'demo@example.com',
+//   username: 'demoUser',
+// }
 
 export const Navigation = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true) // Set to true to show logged in state by default
+  const user = useUser()
+  console.log({ user })
+  const [isLoggedIn, setIsLoggedIn] = useState(user ? true : false) // Set to true to show logged in state by default
 
+  const logout = async () => {
+    await logoutAction()
+    setIsLoggedIn(false)
+  }
   return (
     <div className="bg-muted">
       <nav className="h-16 bg-background border-b">
@@ -34,10 +43,7 @@ export const Navigation = () => {
             {isLoggedIn ? (
               <>
                 <NotificationPanel />
-                <UserNav
-                  user={demoUser}
-                  onLogout={() => setIsLoggedIn(false)}
-                />
+                <UserNav user={user} onLogout={() => setIsLoggedIn(false)} />
               </>
             ) : (
               <>
@@ -54,8 +60,8 @@ export const Navigation = () => {
             <div className="md:hidden">
               <NavigationSheet
                 isLoggedIn={isLoggedIn}
-                user={isLoggedIn ? demoUser : null}
-                onLogout={() => setIsLoggedIn(false)}
+                user={isLoggedIn ? user : null}
+                onLogout={() => logout()}
               />
             </div>
           </div>
