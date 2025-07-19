@@ -9,6 +9,24 @@ export type User = {
   documentId: string // Assuming this is the user ID in your Strapi setup
   email: string
   username?: string
+  confirmed?: boolean
+  profile?: {
+    firstName: string
+    lastName: string
+    address?: string // Optional address field
+    phone?: string // Optional phone field
+    bio?: string // Optional bio field
+    phoneNumber?: string // Optional phone image URL
+    imageUrl?: string // Optional profile image URL
+    image?: {
+      formats?: {
+        medium?: {
+          url: string
+        }
+      }
+      url?: string // Original image URL
+    }
+  }
 } | null
 
 // Create context with proper typing

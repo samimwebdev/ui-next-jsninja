@@ -6,7 +6,7 @@ import { ThemeSwitcher } from '@/components/shared/navbar/theme-switcher'
 import { NotificationPanel } from '@/components/shared/navbar/notification-panel'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { UserNav } from './user-nav'
 import { useUser } from '@/components/context/AuthProvider'
 import { logoutAction } from '@/app/(auth)/actions'
@@ -21,12 +21,23 @@ import { logoutAction } from '@/app/(auth)/actions'
 
 export const Navigation = () => {
   const user = useUser()
-  console.log({ user })
-  const [isLoggedIn, setIsLoggedIn] = useState(user ? true : false) // Set to true to show logged in state by default
+  const [isLoggedIn, setIsLoggedIn] = useState(false) // Set to true to show logged in state by default
+
+  useEffect(() => {
+    if (user) {
+      setIsLoggedIn(true)
+    } else {
+      setIsLoggedIn(false)
+    }
+  }, [user])
 
   const logout = async () => {
-    await logoutAction()
-    setIsLoggedIn(false)
+    try {
+      await logoutAction()
+      setIsLoggedIn(false)
+    } catch (err) {
+      console.log(err, 'Logout failed')
+    }
   }
   return (
     <div className="bg-muted">
@@ -43,7 +54,7 @@ export const Navigation = () => {
             {isLoggedIn ? (
               <>
                 <NotificationPanel />
-                <UserNav user={user} onLogout={() => setIsLoggedIn(false)} />
+                <UserNav user={user} onLogout={() => logout()} />
               </>
             ) : (
               <>

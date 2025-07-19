@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { profile } from 'console'
 import { LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,14 +20,49 @@ interface UserNavProps {
   onLogout?: () => void
 }
 
+export function getProfileImageUrl(user: User | null): string | undefined {
+  // First, check if imageUrl exists (direct URL like GitHub avatar)
+  if (user?.profile?.imageUrl) {
+    return user.profile.imageUrl
+  }
+
+  // Then, check if there's a Strapi uploaded image
+  if (user?.profile?.image?.formats?.medium?.url) {
+    // If it's a relative URL, prepend Strapi base URL
+    const imageUrl = user.profile.image.formats.medium.url
+    if (imageUrl.startsWith('/')) {
+      return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
+    }
+    return imageUrl
+  }
+
+  // Fallback to original image if medium doesn't exist
+  if (user?.profile?.image?.url) {
+    const imageUrl = user.profile.image.url
+    if (imageUrl.startsWith('/')) {
+      return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
+    }
+    return imageUrl
+  }
+
+  return undefined
+}
+
 export function UserNav({ user, onLogout }: UserNavProps) {
+  const profileImageUrl = getProfileImageUrl(user)
+  console.log(user, 'UserNav user data')
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            {/* <AvatarImage src={user?.image} alt={user?.username} />
-            <AvatarFallback>{user?.firstName.charAt(0)}</AvatarFallback> */}
+            <AvatarImage
+              src={profileImageUrl ? getProfileImageUrl(user) : undefined}
+              alt={user?.profile?.firstName}
+            />
+            <AvatarFallback>
+              {user?.profile?.firstName.charAt(0)}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

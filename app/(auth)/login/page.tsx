@@ -10,7 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { loginAction } from '../actions'
 import { loginSchema } from '@/lib/validation'
 
@@ -32,8 +32,10 @@ const Login = () => {
     success: false,
   } as ActionState)
 
-  const router = useRouter()
   const [isVisible, setIsVisible] = React.useState<boolean>(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectPath = searchParams.get('redirect') || '/dashboard' //
 
   const {
     register,
@@ -84,12 +86,12 @@ const Login = () => {
   useEffect(() => {
     if (state.success) {
       const timer = setTimeout(() => {
-        router.push('/dashboard')
+        router.push(redirectPath)
       }, 1500)
 
       return () => clearTimeout(timer)
     }
-  }, [state.success, router])
+  }, [state.success, router, redirectPath])
 
   return (
     <div className="h-screen flex items-center justify-center">

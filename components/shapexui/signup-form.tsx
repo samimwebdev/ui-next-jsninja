@@ -17,6 +17,7 @@ import {
 import { PASSWORD_REQUIREMENTS, registerSchema } from '@/lib/validation'
 import { registerAction } from '@/app/(auth)/actions'
 import { useRouter } from 'next/navigation'
+import GitHubAuthButton from '../shared/oauth/GithubAuthButton'
 
 type StrengthScore = 0 | 1 | 2 | 3 | 4 | 5
 
@@ -385,11 +386,14 @@ const SignUp = () => {
                 >
                   {isSubmitting ? 'Creating Account...' : 'Create an account'}
                 </Button>
-                <Button variant="outline" className="w-full" type="button">
-                  Sign up with Google
-                </Button>
+                {/* <Button variant="outline" className="w-full" type="button">
+                  Sign up with Github
+                </Button> */}
               </div>
             </form>
+            <div className="w-full mt-4">
+              <GitHubAuthButton />
+            </div>
           </CardContent>
         </Card>
       </div>

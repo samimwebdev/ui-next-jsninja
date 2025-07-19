@@ -49,9 +49,9 @@ export async function getUser(): Promise<User | null> {
   if (!token) return null
 
   try {
-    return await strapiFetch('/api/users/me', { token })
+    return await strapiFetch('/api/users/me?populate=profile', { token })
   } catch {
-    await clearAuthCookie()
+    // await clearAuthCookie()
     return null
   }
 }
@@ -73,7 +73,7 @@ export async function getUserWithProfile(): Promise<UserWithProfile | null> {
     )
 
     if (!profile) {
-      await clearAuthCookie()
+      // await clearAuthCookie()
       return null
     }
 
@@ -90,6 +90,20 @@ export async function getUserWithProfile(): Promise<UserWithProfile | null> {
     console.error('Failed to get user with profile:', error)
     await clearAuthCookie()
     return null
+  }
+}
+
+// Add a separate action for clearing invalid tokens
+export async function clearInvalidAuthCookie() {
+  'use server'
+  try {
+    const user = await getUser()
+    if (!user) {
+      await clearAuthCookie()
+    }
+  } catch (error) {
+    console.error('Error checking auth:', error)
+    await clearAuthCookie()
   }
 }
 

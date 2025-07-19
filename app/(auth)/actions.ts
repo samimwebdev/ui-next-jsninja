@@ -6,6 +6,8 @@ import { setAuthCookie, clearAuthCookie } from '@/lib/auth'
 import { registerSchema, loginSchema } from '@/lib/validation'
 import { ValidationError } from 'yup'
 import { nanoid } from 'nanoid'
+import { revalidatePath } from 'next/cache'
+import * as yup from 'yup'
 
 function generateReadableUsernameWithSeparator(
   firstName: string,
@@ -115,7 +117,56 @@ export async function registerAction(
     }
   }
 }
+export async function githubAuthAction() {
+  const githubAuthUrl = `${process.env.STRAPI_URL}/api/connect/github`
+  redirect(githubAuthUrl)
+}
 
+export async function githubCallbackAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const data = Object.fromEntries(formData)
+
+  try {
+    const accessToken = data.access_token as string
+
+    if (!accessToken) {
+      return {
+        message: 'GitHub authentication failed',
+        errors: { auth: ['No access token received'] },
+        success: false,
+      }
+    }
+
+    // Exchange access token with Strapi
+    const res = await strapiFetch<{
+      jwt: string
+      user: {
+        id: number
+        username: string
+        email: string
+        documentId: string
+      }
+    }>(`/github/callback?access_token=${accessToken}`)
+
+    await setAuthCookie(res.jwt)
+
+    return {
+      message: 'GitHub authentication successful. Redirecting to dashboard...',
+      errors: {},
+      success: true,
+    }
+  } catch (error) {
+    console.error('GitHub auth callback error:', error)
+
+    return {
+      message: 'GitHub authentication failed',
+      errors: error instanceof Error ? { auth: [error.message] } : {},
+      success: false,
+    }
+  }
+}
 export async function loginAction(
   _prevState: FormState,
   formData: FormData
@@ -169,6 +220,123 @@ export async function loginAction(
 }
 
 export async function logoutAction() {
-  clearAuthCookie()
+  await clearAuthCookie()
+  revalidatePath('/')
   redirect('/login')
+}
+
+// Add validation schemas for password reset
+const forgotPasswordSchema = yup.object({
+  email: yup
+    .string()
+    .email('Invalid email format')
+    .required('Email is required'),
+})
+
+const resetPasswordSchema = yup.object({
+  code: yup.string().required('Reset code is required'),
+  password: yup
+    .string()
+    .min(6, 'Password must be at least 6 characters')
+    .required('Password is required'),
+  passwordConfirmation: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords must match')
+    .required('Password confirmation is required'),
+})
+
+export async function forgotPasswordAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const data = Object.fromEntries(formData)
+
+  try {
+    const validated = await forgotPasswordSchema.validate(data, {
+      abortEarly: false,
+    })
+
+    const res = await strapiFetch('/api/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify(validated),
+    })
+
+    console.log('Forgot password response:', res)
+    return {
+      message: 'Password reset link has been sent to your email address.',
+      errors: {},
+      success: true,
+    }
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      const fieldErrors: Record<string, string[]> = {}
+      error.inner.forEach((err) => {
+        if (!err.path) return
+        if (!fieldErrors[err.path]) fieldErrors[err.path] = []
+        fieldErrors[err.path].push(err.message)
+      })
+
+      return {
+        message: 'Invalid input',
+        errors: fieldErrors,
+        success: false,
+      }
+    }
+
+    console.error('Forgot password error:', error)
+
+    return {
+      message: 'Failed to send reset email. Please check your email address.',
+      errors: {},
+      success: false,
+    }
+  }
+}
+
+export async function resetPasswordAction(
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const data = Object.fromEntries(formData)
+
+  try {
+    const validated = await resetPasswordSchema.validate(data, {
+      abortEarly: false,
+    })
+
+    await strapiFetch('/api/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(validated),
+    })
+
+    return {
+      message: 'Password has been reset successfully!',
+      errors: {},
+      success: true,
+    }
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      const fieldErrors: Record<string, string[]> = {}
+      error.inner.forEach((err) => {
+        if (!err.path) return
+        if (!fieldErrors[err.path]) fieldErrors[err.path] = []
+        fieldErrors[err.path].push(err.message)
+      })
+
+      return {
+        message: 'Invalid input',
+        errors: fieldErrors,
+        success: false,
+      }
+    }
+
+    console.error('Reset password error:', error)
+
+    return {
+      message:
+        'Failed to reset password. The reset link may be invalid or expired.',
+      errors: {},
+      success: false,
+    }
+  }
 }
