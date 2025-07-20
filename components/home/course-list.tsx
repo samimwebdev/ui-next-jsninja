@@ -130,7 +130,7 @@ const CourseCard = ({ course }: { course: Course }) => {
   )
 }
 
-export const CourseList = () => {
+export const CourseList: React.FC<{ data: Course[] }> = ({ data }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const coursesPerPage = 3
   const totalPages = Math.ceil(courses.length / coursesPerPage)
