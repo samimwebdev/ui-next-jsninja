@@ -8,13 +8,12 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import React from 'react'
-import { BlogSectionData } from '@/types/strapi'
+import { BlogSectionData } from '@/types/homePage'
+import { calculateReadingTime, formatDuration, getExcerpt } from '@/lib/utils'
 
-interface HomeBlogListProps {
-  data?: BlogSectionData
-}
-
-const HomeBlogList: React.FC<HomeBlogListProps> = ({ data }) => {
+const HomeBlogList: React.FC<{ data: BlogSectionData }> = ({
+  data: blogSectionData,
+}) => {
   const [isInView, setIsInView] = useState(false)
   const sectionRef = useRef<HTMLDivElement>(null)
 
@@ -46,10 +45,11 @@ const HomeBlogList: React.FC<HomeBlogListProps> = ({ data }) => {
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-3xl font-bold tracking-tight">Posts</h2>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {blogSectionData.title}
+        </h2>
         <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-          Explore our collection of articles covering the latest trends,
-          tutorials, and insights in technology, design, and development.
+          {blogSectionData.description}
         </p>
       </motion.div>
 
@@ -68,9 +68,9 @@ const HomeBlogList: React.FC<HomeBlogListProps> = ({ data }) => {
       </motion.div>
 
       <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        {[0, 1, 2].map((i) => (
+        {blogSectionData.blogs.map((blog, i) => (
           <motion.div
-            key={i}
+            key={blog.id}
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
@@ -79,8 +79,8 @@ const HomeBlogList: React.FC<HomeBlogListProps> = ({ data }) => {
             <Card className="shadow-none overflow-hidden rounded-md group h-full">
               <CardHeader className="p-0">
                 <Image
-                  src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"
-                  alt={`Blog post ${i + 1}`}
+                  src={blog.thumbnail.url || '/images/placeholder.png'}
+                  alt={`Blog thumbnail for ${blog.title}`}
                   width={500}
                   height={250}
                   className="group-hover:scale-105 group-focus:scale-105 transition-transform duration-300 ease-in-out rounded-xl w-full object-cover"
@@ -94,23 +94,24 @@ const HomeBlogList: React.FC<HomeBlogListProps> = ({ data }) => {
                   transition={{ delay: 0.3 + i * 0.1 }}
                 >
                   <Badge className="bg-primary/5 text-primary hover:bg-primary/5 shadow-none">
-                    Technology
+                    {`${blog.categories[0]?.name || 'General'}`}
                   </Badge>
                   <span className="font-medium text-xs text-muted-foreground">
-                    5 min read
+                    {calculateReadingTime(blog.details) ||
+                      formatDuration(blog.timeToRead)}{' '}
+                    min read
                   </span>
                 </motion.div>
 
                 <h3 className="mt-4 text-[1.35rem] font-semibold tracking-tight">
-                  A beginner&apos;s guide to blockchain for engineers
+                  {blog.title}
                 </h3>
-                <p className="mt-2 text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                  Suspendisse varius enim in eros.
+                <p className="mt-2 text-muted-foreground line-clamp-3">
+                  {getExcerpt(blog.details, 18)}
                 </p>
 
                 <Button className="mt-6 shadow-none group" asChild>
-                  <Link href="/blogs/1">
+                  <Link href={`/blogs/${blog.slug}`}>
                     Read more{' '}
                     <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>

@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image' // Added missing import
 import {
   Carousel,
   CarouselContent,
@@ -11,55 +12,24 @@ import { Button } from '@/components/ui/button'
 import { PlayCircle } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
+import { VideoSectionData } from '@/types/homePage'
+import { extractYouTubeId, getYouTubeThumbnail } from '@/lib/utils'
 
-interface Video {
-  id: number
-  title: string
-  shortDescription: string
-  videoURL: string
-}
-
-interface BrowseVideosBtn {
-  id: number
-  btnLabel: string
-  btnIcon: {
-    iconName: string
-    iconData: string
-    width: number
-    height: number
-  }
-  btnLink: string
-}
-
-interface DemoVideosProps {
-  data: {
-    title: string
-    description: string
-    video: Video[]
-    browseVideosBtn: BrowseVideosBtn
-  }
-}
-
-const extractYouTubeId = (url: string): string => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
-  const match = url.match(regExp)
-  return match && match[2].length === 11 ? match[2] : ''
-}
-
-const generateThumbnail = (videoId: string): string => {
-  return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-}
-
-export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
-  const [activeVideo, setActiveVideo] = useState(
-    data.video.length > 0 ? extractYouTubeId(data.video[0].videoURL) : ''
-  )
-
-  const videosWithThumbnails = data.video.map((video) => ({
+export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
+  data: videoSectionData,
+}) => {
+  const videosWithData = videoSectionData.videos.map((video) => ({
     ...video,
     embedId: extractYouTubeId(video.videoURL),
-    thumbnail: generateThumbnail(extractYouTubeId(video.videoURL)),
+    thumbnail: getYouTubeThumbnail(extractYouTubeId(video.videoURL)),
   }))
+
+  console.log('Videos with data:', videosWithData)
+
+  // Set first video as active initially
+  const [activeVideo, setActiveVideo] = useState(
+    videosWithData.length > 0 ? videosWithData[0].embedId : ''
+  )
 
   return (
     <div className="max-w-screen-xl bg-background text-foreground">
@@ -68,9 +38,11 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
           <Badge variant="secondary" className="px-4 py-1">
             Demo Videos
           </Badge>
-          <h2 className="text-3xl font-bold tracking-tight">{data.title}</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {videoSectionData.title}
+          </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            {data.description}
+            {videoSectionData.description}
           </p>
         </div>
 
@@ -79,23 +51,25 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
           <div className="relative aspect-video bg-muted rounded-xl overflow-hidden shadow-xl mt-4">
             {activeVideo ? (
               <iframe
-                key={activeVideo}
+                key={activeVideo} // Add key prop to force re-render when video changes
                 width="100%"
                 height="100%"
                 src={`https://www.youtube.com/embed/${activeVideo}?autoplay=0`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="absolute inset-0"
+                title="YouTube video player"
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <p className="text-muted-foreground">No video selected</p>
+                <p className="text-muted-foreground">No video available</p>
               </div>
             )}
           </div>
 
           {/* Video Carousel */}
           <div className="relative">
+            {/* First Carousel */}
             <Carousel
               opts={{
                 align: 'start',
@@ -104,7 +78,7 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
               className="w-full"
             >
               <CarouselContent>
-                {videosWithThumbnails.map((video) => (
+                {videosWithData.map((video) => (
                   <CarouselItem
                     key={video.id}
                     className="md:basis-1/2 lg:basis-1/2"
@@ -117,10 +91,16 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
                       }`}
                       onClick={() => setActiveVideo(video.embedId)}
                     >
-                      <img
+                      <Image
                         src={video.thumbnail}
                         alt={video.title}
+                        width={480}
+                        height={360}
                         className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          // Fallback to different thumbnail quality
+                          e.currentTarget.src = `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`
+                        }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
@@ -144,19 +124,19 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
               <CarouselNext className="hidden md:flex" />
             </Carousel>
 
-            {/* Second row of videos */}
-            {videosWithThumbnails.length > 2 && (
+            {/* Second Carousel - Only show if more than 2 videos */}
+            {videosWithData.length > 2 && (
               <Carousel
                 opts={{
                   align: 'start',
                   loop: true,
                 }}
-                className="w-full mt-6"
+                className="w-full"
               >
-                <CarouselContent>
-                  {videosWithThumbnails.slice(2).map((video) => (
+                <CarouselContent className="mt-6">
+                  {videosWithData.map((video) => (
                     <CarouselItem
-                      key={video.id}
+                      key={`second-${video.id}`}
                       className="md:basis-1/2 lg:basis-1/2"
                     >
                       <div
@@ -167,10 +147,16 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
                         }`}
                         onClick={() => setActiveVideo(video.embedId)}
                       >
-                        <img
+                        <Image
                           src={video.thumbnail}
                           alt={video.title}
+                          width={480}
+                          height={360}
                           className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            // Fallback to different thumbnail quality
+                            e.currentTarget.src = `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
@@ -196,17 +182,11 @@ export const DemoVideos: React.FC<DemoVideosProps> = ({ data }) => {
             )}
 
             {/* Browse Videos Button */}
-            {data.browseVideosBtn && (
+            {videoSectionData.browseVideosBtn && (
               <div className="flex justify-center mt-8">
                 <Button asChild className="group">
-                  <Link href={data.browseVideosBtn.btnLink}>
-                    <div
-                      className="w-4 h-4 mr-2"
-                      dangerouslySetInnerHTML={{
-                        __html: data.browseVideosBtn.btnIcon.iconData,
-                      }}
-                    />
-                    {data.browseVideosBtn.btnLabel}
+                  <Link href={videoSectionData.browseVideosBtn.btnLink}>
+                    {videoSectionData.browseVideosBtn.btnLabel}
                   </Link>
                 </Button>
               </div>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { Review } from '@/types/strapi'
+import { Review, ReviewSectionData } from '@/types/homePage'
 
 const AUTO_SCROLL_INTERVAL = 5000
 
@@ -112,13 +112,16 @@ const NavigationControls = ({
   </div>
 )
 
-export const TestimonialSection: React.FC<{ data: Review[] }> = ({ data }) => {
+export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
+  data: reviewSectionData,
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(0)
   const isMobile = useMediaQuery()
 
   // Use the provided data or fallback to empty array
-  const reviews = data && data.length > 0 ? data : []
+  const reviews =
+    reviewSectionData?.reviews?.length > 0 ? reviewSectionData.reviews : []
 
   const next = useCallback(() => {
     if (reviews.length === 0) return
@@ -157,7 +160,7 @@ export const TestimonialSection: React.FC<{ data: Review[] }> = ({ data }) => {
     return (
       <section className="px-4 py-6" aria-label="Customer reviews">
         <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
-          Read trusted reviews from our customers
+          {reviewSectionData.title || 'Customer Reviews'}
         </h1>
         <p className="text-center text-gray-500">
           No reviews available at the moment.
@@ -169,7 +172,7 @@ export const TestimonialSection: React.FC<{ data: Review[] }> = ({ data }) => {
   return (
     <section className="px-4 py-6" aria-label="Customer reviews">
       <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
-        Read trusted reviews from our customers
+        {reviewSectionData.title || 'Customer Reviews'}
       </h1>
 
       <div className="relative max-w-6xl mx-auto">
