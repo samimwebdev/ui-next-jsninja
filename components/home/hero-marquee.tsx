@@ -3,7 +3,7 @@ import Image from 'next/image'
 // Import the Marquee component directly from the home directory to avoid compatibility issues
 import { Marquee } from '@/components/home/marquee'
 import { useEffect, useState } from 'react'
-import { Course } from '@/types/homePage'
+import { Course } from '@/types/home-page-types'
 
 const CourseCard: React.FC<Course> = ({ title, level, featureImage }) => {
   return (

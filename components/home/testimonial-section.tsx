@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
-import { Review, ReviewSectionData } from '@/types/homePage'
+import { Review, ReviewSectionData } from '@/types/home-page-types'
 
 const AUTO_SCROLL_INTERVAL = 5000
 

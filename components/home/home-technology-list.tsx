@@ -1,6 +1,6 @@
 import Marquee from '@/components/ui/marquee'
 import DynamicLogo from '@/components/shared/home-tech-logo/DynamicLogo'
-import { TechSectionData } from '@/types/homePage'
+import { TechSectionData } from '@/types/home-page-types'
 
 const HomeTechLogos: React.FC<{ data: TechSectionData }> = ({ data }) => {
   return (

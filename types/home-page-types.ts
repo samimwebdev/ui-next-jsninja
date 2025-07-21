@@ -235,6 +235,99 @@ export interface VideoSectionData {
   browseVideosBtn: ButtonType
 }
 
+export interface ImageFormat {
+  name: string
+  hash: string
+  ext: string
+  mime: string
+  path: string | null
+  width: number
+  height: number
+  size: number
+  sizeInBytes: number
+  url: string
+  provider_metadata?: {
+    public_id: string
+    resource_type: string
+  }
+}
+
+export interface MetaImage {
+  id: number
+  documentId?: string
+  name: string
+  alternativeText?: string | null
+  caption?: string | null
+  width?: number
+  height?: number
+  formats?: {
+    large?: ImageFormat
+    medium?: ImageFormat
+    small?: ImageFormat
+    thumbnail?: ImageFormat
+  }
+  hash: string
+  ext: string
+  mime: string
+  size: number
+  url: string
+  previewUrl?: string | null
+  provider: string
+  provider_metadata?: {
+    public_id: string
+    resource_type: string
+  }
+  folderPath: string
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+  locale?: string | null
+}
+
+export interface MetaSocial {
+  id: number
+  socialNetwork: string
+  title: string
+  description: string
+  image?: MetaImage
+}
+
+export interface StructuredData {
+  '@context': string
+  '@type': string
+  name: string
+  url: string
+  description: string
+  provider: {
+    '@type': string
+    name: string
+    logo: {
+      '@type': string
+      url: string
+    }
+    sameAs: string[]
+  }
+}
+
+export interface SEOData {
+  id: number
+  metaTitle?: string
+  metaDescription?: string
+  keywords?: string
+  metaRobots?: string
+  structuredData?: string | StructuredData
+  metaViewport?: string
+  canonicalURL?: string
+  metaSocial?: MetaSocial[]
+  metaImage?: MetaImage
+}
+
+export interface HomePageData {
+  id: number
+  seo?: SEOData
+  homeSection: HomeSectionData[]
+}
+
 export type HomeSectionData =
   | HeroSectionData
   | FeatureSectionData
@@ -244,41 +337,30 @@ export type HomeSectionData =
   | StatsSectionData
   | BlogSectionData
   | VideoSectionData
+  | BootcampSectionData
 
-export interface Seo {
-  id: number
-  metaTitle?: string
-  metaDescription?: string
-  metaKeywords?: string
-  metaRobots?: string
-  structuredData?: {
-    '@context'?: string
-    '@type'?: string
-    name?: string
-    description?: string
-    provider?: {
-      '@type'?: string
-      name?: string
-      sameAs?: string
-    }
-  }
-  metaViewport?: string
-  canonicalURL?: string
-  metaSocial?: Array<{
-    id: number
-    socialNetwork?: string
-    title?: string
-    description?: string
-  }>
-}
+// Define component types and mapping (same as before)
+export type ComponentType =
+  | 'hero-layout.hero-layout'
+  | 'home-layout.platform-feature'
+  | 'technology-layout.technology-layout'
+  | 'home-layout.feature-course'
+  | 'home-layout.feature-bootcamp'
+  | 'review-layout.review-layout'
+  | 'home-layout.home-stats'
+  | 'home-layout.feature-post'
+  | 'demo-videos-layout.demo-videos'
 
-export interface HomePageData {
-  title: string
-  id: number
-  documentId: string
-  slug: string
-  seo?: Seo
-  homeSection: HomeSectionData
+export type ComponentDataMap = {
+  'hero-layout.hero-layout': HeroSectionData
+  'home-layout.platform-feature': FeatureSectionData
+  'technology-layout.technology-layout': TechSectionData
+  'home-layout.feature-course': CourseSectionData
+  'home-layout.feature-bootcamp': BootcampSectionData
+  'review-layout.review-layout': ReviewSectionData
+  'home-layout.home-stats': StatsSectionData
+  'home-layout.feature-post': BlogSectionData
+  'demo-videos-layout.demo-videos': VideoSectionData
 }
 
 export interface StrapiResponse<T> {

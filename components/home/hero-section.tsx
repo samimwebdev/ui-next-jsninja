@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowUpRight, CirclePlay } from 'lucide-react'
 import React from 'react'
 import { HeroMarquee } from './hero-marquee'
-import { HeroSectionData } from '@/types/homePage'
+import { HeroSectionData } from '@/types/home-page-types'
 import Image from 'next/image'
 
 export const HeroSection: React.FC<{ data: HeroSectionData }> = ({

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/card'
 import { useOutsideClick } from '@/hooks/user-outside-click'
 import Link from 'next/link'
-import { BootcampSectionData, Course } from '@/types/homePage'
+import { BootcampSectionData, Course } from '@/types/home-page-types'
 import { formatDuration } from '@/lib/utils'
 
 // Helper function to format date

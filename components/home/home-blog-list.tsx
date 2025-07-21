@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import React from 'react'
-import { BlogSectionData } from '@/types/homePage'
+import { BlogSectionData } from '@/types/home-page-types'
 import { calculateReadingTime, formatDuration, getExcerpt } from '@/lib/utils'
 
 const HomeBlogList: React.FC<{ data: BlogSectionData }> = ({

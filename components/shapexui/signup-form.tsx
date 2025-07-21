@@ -17,7 +17,7 @@ import {
 import { PASSWORD_REQUIREMENTS, registerSchema } from '@/lib/validation'
 import { registerAction } from '@/app/(auth)/actions'
 import { useRouter } from 'next/navigation'
-import GitHubAuthButton from '../shared/oauth/GithubAuthButton'
+import GitHubAuthButton from '../shared/github-button'
 
 type StrengthScore = 0 | 1 | 2 | 3 | 4 | 5
 
@@ -105,7 +105,7 @@ const SignUp = () => {
 
   // Handle password change to re-validate confirm password
   const handlePasswordChange = async (
-    _: React.ChangeEvent<HTMLInputElement>
+    evt: React.ChangeEvent<HTMLInputElement>
   ) => {
     // Trigger validation for confirm password when password changes
     if (touchedFields.confirmPassword) {

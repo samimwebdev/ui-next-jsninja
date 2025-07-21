@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Course, CourseSectionData } from '@/types/homePage'
+import { Course, CourseSectionData } from '@/types/home-page-types'
 import { formatDuration } from '@/lib/utils'
 
 const CourseCard = ({ course }: { course: Course }) => {

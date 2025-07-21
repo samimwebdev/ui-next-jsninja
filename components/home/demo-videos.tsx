@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { PlayCircle } from 'lucide-react'
 import { useState } from 'react'
 import Link from 'next/link'
-import { VideoSectionData } from '@/types/homePage'
+import { VideoSectionData } from '@/types/home-page-types'
 import { extractYouTubeId, getYouTubeThumbnail } from '@/lib/utils'
 
 export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({

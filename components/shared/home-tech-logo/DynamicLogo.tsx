@@ -1,6 +1,6 @@
 'use client'
 
-import { StrapiIcon } from '@/types/homePage'
+import { StrapiIcon } from '@/types/home-page-types'
 
 export default function DynamicLogo({
   icon,
