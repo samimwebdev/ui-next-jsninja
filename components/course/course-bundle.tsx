@@ -11,8 +11,11 @@ import {
   Layout,
 } from 'lucide-react'
 import Image from 'next/image'
+import { CourseBundleContentSection } from '@/types/course-page-types'
 
-export const CourseBundle = () => {
+export const CourseBundle: React.FC<{
+  data: CourseBundleContentSection | undefined
+}> = ({ data }) => {
   return (
     <div className="bg-background text-foreground">
       <div className="max-w-7xl mx-auto space-y-8">

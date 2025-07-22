@@ -7,6 +7,7 @@ import { Footer } from '@/components/shared/footer'
 import { Toaster } from '@/components/ui/sonner'
 import AuthProvider from '@/components/context/AuthProvider'
 import { getUser } from '@/lib/auth'
+import { VideoProvider } from '@/components/context/video-provider'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -114,7 +115,7 @@ export default async function RootLayout({
           >
             <Navigation />
             <Toaster position="top-right" />
-            {children}
+            <VideoProvider>{children}</VideoProvider>
             <Footer />
           </ThemeProvider>
         </AuthProvider>

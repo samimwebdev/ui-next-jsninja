@@ -1,95 +1,58 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
-import { ReactNode } from 'react'
-
-type AnimationType = 'fadeInUp' | 'revealSection' | 'scrollFadeIn'
+import { useInView } from 'framer-motion'
+import { useRef, ReactNode } from 'react'
 
 interface AnimatedSectionProps {
   children: ReactNode
-  animation?: AnimationType
+  animation?: 'fadeInUp' | 'fadeIn' | 'revealSection' | 'scrollFadeIn'
   delay?: number
   className?: string
 }
 
-// Animation variants
-const fadeInUp = {
-  hidden: {
-    opacity: 0,
-    y: 60,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.6,
-      ease: 'easeOut',
+const animationVariants = {
+  fadeInUp: {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
     },
+  },
+  fadeIn: {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+  },
+  revealSection: {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1 },
+  },
+  scrollFadeIn: {
+    hidden: { opacity: 0, y: 30 },
+    visible: { opacity: 1, y: 0 },
   },
 }
 
-const revealSection = {
-  hidden: {
-    opacity: 0,
-    scale: 0.8,
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.8,
-      ease: 'easeOut',
-    },
-  },
-}
-
-const scrollFadeIn = {
-  hidden: {
-    opacity: 0,
-    x: -50,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.7,
-      ease: 'easeOut',
-    },
-  },
-}
-
-export const AnimatedSection = ({
+export function AnimatedSection({
   children,
   animation = 'fadeInUp',
   delay = 0,
   className = '',
-}: AnimatedSectionProps) => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-    rootMargin: '-50px 0px',
-  })
-
-  const getAnimationVariant = () => {
-    switch (animation) {
-      case 'revealSection':
-        return revealSection
-      case 'scrollFadeIn':
-        return scrollFadeIn
-      case 'fadeInUp':
-      default:
-        return fadeInUp
-    }
-  }
+}: AnimatedSectionProps) {
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '0px 0px -100px 0px' })
 
   return (
     <motion.div
       ref={ref}
       initial="hidden"
-      animate={inView ? 'visible' : 'hidden'}
-      variants={getAnimationVariant()}
-      transition={{ delay }}
+      animate={isInView ? 'visible' : 'hidden'}
+      variants={animationVariants[animation]}
+      transition={{
+        duration: 0.6,
+        delay,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
       className={className}
     >
       {children}

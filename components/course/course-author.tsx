@@ -1,6 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { AuthorContentSection } from '@/types/course-page-types'
 
-export function CourseAuthor() {
+export const CourseAuthor: React.FC<{ data: AuthorContentSection }> = ({
+  data,
+}) => {
   return (
     <section id="instructor" className="my-12">
       <h2 className="text-3xl font-bold mb-6">Meet Your Instructor</h2>

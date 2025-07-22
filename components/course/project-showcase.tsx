@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Image from 'next/image'
+import { ProjectContentSection } from '@/types/course-page-types'
 
 const projectLists = [
   {
@@ -84,7 +85,9 @@ const projectLists = [
   },
 ]
 
-export const ProjectShowcase = () => {
+export const ProjectShowcase: React.FC<{ data: ProjectContentSection }> = ({
+  data,
+}) => {
   const [projectItem, setProjectItem] = useState<
     (typeof projectLists)[0] | null
   >(null)

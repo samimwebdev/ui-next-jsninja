@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Review } from '@/types/shared-types'
+import { ReviewContentSection } from '@/types/course-page-types'
 
 const reviews = [
   {
@@ -26,7 +28,9 @@ const reviews = [
   },
 ]
 
-export function ReviewSlider() {
+export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
+  data,
+}) => {
   const [currentReview, setCurrentReview] = useState(0)
 
   useEffect(() => {

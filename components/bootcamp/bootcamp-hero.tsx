@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { PlayCircle, Wallet2Icon } from 'lucide-react'
 
 import React, { useState } from 'react'
-import VideoModal from './video-modal'
+import VideoModal from '../shared/video-modal'
 import Image from 'next/image'
 import BootcampAssessment from './bootcamp-assessment'
 import BootcampShortFeature from './bootcamp-short-features'

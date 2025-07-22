@@ -1,61 +1,33 @@
-export interface StrapiImage {
+import {
+  StrapiImage,
+  StrapiIcon,
+  Category,
+  ButtonType,
+  Profile,
+  Review,
+  SEOData,
+  StrapiResponse,
+} from './shared-types'
+
+// Extend CourseBase for home page specific needs
+export interface Course {
   id: number
   documentId: string
-  name: string
-  url: string
-  alternativeText?: string
-  caption?: string
-  width: number
-  height: number
-  formats?: {
-    thumbnail?: {
-      name: string
-      hash: string
-      ext: string
-      mime: string
-      width: number
-      height: number
-      size: number
-      url: string
-    }
-    small?: {
-      name: string
-      hash: string
-      ext: string
-      mime: string
-      width: number
-      height: number
-      size: number
-      url: string
-    }
-    medium?: {
-      name: string
-      hash: string
-      ext: string
-      mime: string
-      width: number
-      height: number
-      size: number
-      url: string
-    }
-    large?: {
-      name: string
-      hash: string
-      ext: string
-      mime: string
-      width: number
-      height: number
-      size: number
-      url: string
-    }
-  }
-}
-
-export interface StrapiIcon {
-  iconName: string
-  iconData: string
-  width: number
-  height: number
+  title: string
+  shortDescription?: string
+  longDescription?: string
+  startingFrom?: string
+  slug: string
+  price: number
+  level: string
+  totalStudents: number
+  averageRating: number
+  duration: number | string
+  totalLessons: number
+  courseType?: 'course' | 'bootcamp' | 'workshop'
+  featureImage?: StrapiImage
+  categories: Category[]
+  browseCoursesBtn?: ButtonType
 }
 
 export interface HeroSectionData {
@@ -97,40 +69,6 @@ export interface TechSectionData {
   }>
 }
 
-interface Category {
-  id: number
-  documentId: string
-  name: string
-  description: string
-  slug: string
-}
-
-interface ButtonType {
-  id: number
-  btnLabel: string
-  btnLink: string
-  btnIcon?: StrapiIcon
-}
-export interface Course {
-  id: number
-  documentId: string
-  title: string
-  shortDescription?: string
-  longDescription?: string
-  startingFrom?: string
-  slug: string
-  price: number
-  level: string
-  totalStudents: number
-  averageRating: number
-  duration: number | string
-  totalLessons: number
-  courseType?: 'course' | 'bootcamp' | 'workshop'
-  featureImage?: StrapiImage
-  categories: Category[]
-  browseCoursesBtn: ButtonType
-}
-
 export interface CourseSectionData {
   id: number
   __component: 'home-layout.feature-course'
@@ -148,27 +86,6 @@ export interface BootcampSectionData {
   courseBases: Course[]
 }
 
-export interface Profile {
-  id: number
-  firstName: string
-  lastName: string
-  bio?: string
-  discordUsername?: string
-  documentId: string
-  image: StrapiImage
-  imageUrl?: string
-}
-
-export interface Review {
-  id: number
-  rating: number
-  reviewApproved: boolean
-  reviewDetails: string
-  reviewerName: string
-  course: Course
-  profile: Profile
-}
-
 export interface ReviewSectionData {
   id: number
   __component: 'review-layout.review-layout'
@@ -176,6 +93,7 @@ export interface ReviewSectionData {
   description: string
   reviews: Review[]
 }
+
 export interface StatsCounter {
   id: number
   statsLabel: string
@@ -219,13 +137,6 @@ export interface Video {
   videoURL: string
 }
 
-export interface BrowseVideosBtn {
-  id: number
-  btnLabel: string
-  btnIcon: StrapiIcon
-  btnLink: string
-}
-
 export interface VideoSectionData {
   id: number
   __component: 'demo-videos-layout.demo-videos'
@@ -233,93 +144,6 @@ export interface VideoSectionData {
   description: string
   videos: Video[]
   browseVideosBtn: ButtonType
-}
-
-export interface ImageFormat {
-  name: string
-  hash: string
-  ext: string
-  mime: string
-  path: string | null
-  width: number
-  height: number
-  size: number
-  sizeInBytes: number
-  url: string
-  provider_metadata?: {
-    public_id: string
-    resource_type: string
-  }
-}
-
-export interface MetaImage {
-  id: number
-  documentId?: string
-  name: string
-  alternativeText?: string | null
-  caption?: string | null
-  width?: number
-  height?: number
-  formats?: {
-    large?: ImageFormat
-    medium?: ImageFormat
-    small?: ImageFormat
-    thumbnail?: ImageFormat
-  }
-  hash: string
-  ext: string
-  mime: string
-  size: number
-  url: string
-  previewUrl?: string | null
-  provider: string
-  provider_metadata?: {
-    public_id: string
-    resource_type: string
-  }
-  folderPath: string
-  createdAt: string
-  updatedAt: string
-  publishedAt: string
-  locale?: string | null
-}
-
-export interface MetaSocial {
-  id: number
-  socialNetwork: string
-  title: string
-  description: string
-  image?: MetaImage
-}
-
-export interface StructuredData {
-  '@context': string
-  '@type': string
-  name: string
-  url: string
-  description: string
-  provider: {
-    '@type': string
-    name: string
-    logo: {
-      '@type': string
-      url: string
-    }
-    sameAs: string[]
-  }
-}
-
-export interface SEOData {
-  id: number
-  metaTitle?: string
-  metaDescription?: string
-  keywords?: string
-  metaRobots?: string
-  structuredData?: string | StructuredData
-  metaViewport?: string
-  canonicalURL?: string
-  metaSocial?: MetaSocial[]
-  metaImage?: MetaImage
 }
 
 export interface HomePageData {
@@ -339,19 +163,19 @@ export type HomeSectionData =
   | VideoSectionData
   | BootcampSectionData
 
-// Define component types and mapping (same as before)
-export type ComponentType =
-  | 'hero-layout.hero-layout'
-  | 'home-layout.platform-feature'
-  | 'technology-layout.technology-layout'
-  | 'home-layout.feature-course'
-  | 'home-layout.feature-bootcamp'
-  | 'review-layout.review-layout'
-  | 'home-layout.home-stats'
-  | 'home-layout.feature-post'
-  | 'demo-videos-layout.demo-videos'
+// Re-export shared types for convenience
+export type {
+  StrapiImage,
+  StrapiIcon,
+  Category,
+  ButtonType,
+  Profile,
+  Review,
+  SEOData,
+  StrapiResponse,
+}
 
-export type ComponentDataMap = {
+export interface ComponentDataMap {
   'hero-layout.hero-layout': HeroSectionData
   'home-layout.platform-feature': FeatureSectionData
   'technology-layout.technology-layout': TechSectionData
@@ -363,14 +187,4 @@ export type ComponentDataMap = {
   'demo-videos-layout.demo-videos': VideoSectionData
 }
 
-export interface StrapiResponse<T> {
-  data: T
-  meta: {
-    pagination?: {
-      page: number
-      pageSize: number
-      pageCount: number
-      total: number
-    }
-  }
-}
+export type ComponentType = keyof ComponentDataMap

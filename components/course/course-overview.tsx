@@ -1,3 +1,4 @@
+import { OverviewFeature } from '@/types/course-page-types'
 import { Check } from 'lucide-react'
 
 const overviewSections = [
@@ -37,7 +38,7 @@ const overviewSections = [
   },
 ]
 
-export function Overview() {
+export const Overview: React.FC<{ data: OverviewFeature[] }> = ({ data }) => {
   return (
     <section id="overview" className="my-12">
       <div className="grid gap-8 md:grid-cols-2">

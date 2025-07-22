@@ -9,6 +9,7 @@ import {
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Lock, PlayCircle, FileText } from 'lucide-react'
 import { DialogTitle } from '@radix-ui/react-dialog'
+import { Curriculum } from '@/types/course-page-types'
 
 const courseModules = [
   {
@@ -141,7 +142,7 @@ interface LectureType {
   videoUrl?: string
 }
 
-export function CourseContent() {
+export const CourseCurriculum: React.FC<{ data: Curriculum }> = ({ data }) => {
   const [selectedVideo, setSelectedVideo] = useState<{
     url: string
     title: string

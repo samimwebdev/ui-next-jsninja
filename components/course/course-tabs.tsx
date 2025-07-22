@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CoursePageData } from '@/types/course-page-types'
 
 const tabItems = [
   { id: 'overview', label: 'Overview' },
@@ -10,7 +11,7 @@ const tabItems = [
   { id: 'reviews', label: 'Reviews' },
 ]
 
-export function CourseTabs() {
+export const CourseTabs: React.FC<{ data: CoursePageData }> = ({ data }) => {
   const [activeTab, setActiveTab] = useState('overview')
 
   const handleTabChange = (value: string) => {

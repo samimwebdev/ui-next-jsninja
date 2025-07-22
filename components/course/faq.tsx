@@ -6,6 +6,7 @@ import {
   AccordionItem,
 } from '@/components/ui/accordion'
 import { cn } from '@/lib/utils'
+import { FAQContentSection } from '@/types/course-page-types'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -62,7 +63,7 @@ const faq = [
       'Our course combines theory with extensive hands-on practice, focuses on the latest frontend technologies (React, Vue, and more), and includes mentorship from industry professionals currently working at top tech companies.',
   },
 ]
-export const FAQ = () => {
+export const FAQ: React.FC<{ data: FAQContentSection }> = ({ data }) => {
   const [value, setValue] = useState<string>()
 
   return (
