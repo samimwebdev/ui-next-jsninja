@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Review } from '@/types/shared-types'
 import { ReviewContentSection } from '@/types/course-page-types'
 import Image from 'next/image'
 
@@ -44,7 +43,7 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
   }
 
   return (
-    <section className="my-12">
+    <section className="my-12" id="reviews">
       <h2 className="text-3xl font-bold mb-6">
         {data?.title || 'What Our Students Say'}
       </h2>
@@ -56,7 +55,7 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.25 }}
           >
             <p className="text-lg mb-4">
               {getCleanReviewText(reviews[currentReview].reviewDetails)}
@@ -72,11 +71,13 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
                     height={40}
                   />
                 ) : (
-                  <img
+                  <Image
                     className="h-10 w-10 rounded-full"
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
                       reviews[currentReview].reviewerName
                     )}`}
+                    width={40}
+                    height={40}
                     alt={reviews[currentReview].reviewerName}
                   />
                 )}

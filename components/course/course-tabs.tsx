@@ -9,9 +9,11 @@ const tabItems = [
   { id: 'curriculum', label: 'Curriculum' },
   { id: 'instructor', label: 'Instructor' },
   { id: 'reviews', label: 'Reviews' },
+  { id: 'projects', label: 'Projects' },
 ]
 
 export const CourseTabs: React.FC<{ data: CoursePageData }> = ({ data }) => {
+  console.log('CourseTabs data:', { data })
   const [activeTab, setActiveTab] = useState('overview')
 
   const handleTabChange = (value: string) => {
@@ -43,7 +45,7 @@ export const CourseTabs: React.FC<{ data: CoursePageData }> = ({ data }) => {
         initial={{ width: '25%' }}
         animate={{
           width: `${
-            (tabItems.findIndex((item) => item.id === activeTab) + 1) * 25
+            (tabItems.findIndex((item) => item.id === activeTab) + 1) * 20
           }%`,
         }}
         transition={{ duration: 0.3 }}

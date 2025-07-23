@@ -47,7 +47,7 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
     mode: 'onBlur',
     defaultValues: {
-      identifier: 'pamkor@gmail.com',
+      identifier: 'pmakor@gmail.com',
       password: 'sfazlu123',
     },
   })

@@ -14,15 +14,34 @@ import { ReviewSlider } from '@/components/course/review-slider'
 import { FAQ } from '@/components/course/faq'
 import { ProjectShowcase } from '@/components/course/project-showcase'
 import { CourseBundle } from '@/components/course/course-bundle'
-import { CourseSidebar } from '@/components/course/course-sidebar'
+import { CoursePriceSidebar } from '@/components/course/course-price-sidebar'
 import { AnimatedSection } from '@/components/shared/animated-section'
 import { notFound } from 'next/navigation'
-import { CoursePageData } from '@/types/course-page-types'
+import { CoursePageData, Curriculum } from '@/types/course-page-types'
 
 interface CoursePageProps {
   params: Promise<{
     slug: string
   }>
+}
+
+// Helper function to sanitize curriculum data
+const sanitizeCurriculumData = (curriculum: Curriculum): Curriculum => {
+  if (!curriculum?.modules) return curriculum
+
+  const sanitizedModules = curriculum.modules.map((module) => ({
+    ...module,
+    lessons: module.lessons?.map((lesson) => ({
+      ...lesson,
+      // Remove videoUrl for non-free lessons
+      videoUrl: lesson.isFree ? lesson.videoUrl : undefined,
+    })),
+  }))
+
+  return {
+    ...curriculum,
+    modules: sanitizedModules,
+  }
 }
 
 // Generate metadata for SEO
@@ -68,6 +87,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     courseData,
     'hero-layout.hero-layout'
   )
+
   const projectData = getCourseContentSection(
     courseData,
     'project-layout.project-layout'
@@ -85,8 +105,12 @@ export default async function CoursePage({ params }: CoursePageProps) {
     'course-layout.course-bundle-layout'
   )
 
-  console.log({ courseData }, 'Course Page Data', { courseBundleData })
   const faqData = getCourseContentSection(courseData, 'faq-layout.faq-section')
+
+  // Sanitize curriculum data to remove video URLs for non-free lessons
+  const sanitizedCurriculum = courseData.baseContent?.curriculum
+    ? sanitizeCurriculumData(courseData.baseContent.curriculum)
+    : undefined
 
   // Format data for components
   const courseInfo = {
@@ -103,67 +127,76 @@ export default async function CoursePage({ params }: CoursePageProps) {
       <div className="bg-background text-foreground">
         <main className="container mx-auto px-4 max-w-screen-xl">
           {/* Hero Section - Server Component with Animation Wrapper */}
-          <AnimatedSection animation="fadeInUp" delay={0.1} className="mb-8">
-            {heroData && <CourseHero data={heroData} />}
-          </AnimatedSection>
+          {heroData && (
+            <AnimatedSection animation="fadeInUp" delay={0.1} className="mb-8">
+              <CourseHero data={heroData} />
+            </AnimatedSection>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
-            <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
-              {/* Course Tabs - Server Component with Animation */}
-              <AnimatedSection
-                animation="fadeInUp"
-                delay={0.2}
-                className="mb-8"
-              >
-                <CourseTabs data={courseData} />
-              </AnimatedSection>
 
-              {/* Overview Section */}
-              <AnimatedSection animation="fadeInUp" delay={0.3}>
-                <Overview data={courseData.overviewFeatures} />
-              </AnimatedSection>
-
-              {/* Curriculum Section */}
-              <AnimatedSection animation="fadeInUp" delay={0.4}>
-                <CourseCurriculum data={courseData.baseContent?.curriculum} />
-              </AnimatedSection>
-
-              {/* Author Section */}
-              {authorData && (
-                <AnimatedSection animation="fadeInUp" delay={0.5}>
-                  <CourseAuthor data={authorData} />
+            {courseData && (
+              <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
+                {/* Course Tabs - Server Component with Animation */}
+                <AnimatedSection
+                  animation="fadeInUp"
+                  delay={0.2}
+                  className="mb-8"
+                >
+                  <CourseTabs data={courseData} />
                 </AnimatedSection>
-              )}
 
-              {/* Review Section */}
-              {reviewData && (
-                <AnimatedSection animation="revealSection" delay={0.6}>
-                  <ReviewSlider data={reviewData} />
-                </AnimatedSection>
-              )}
+                {/* Overview Section */}
+                {courseData.overviewFeatures && (
+                  <AnimatedSection animation="fadeInUp" delay={0.3}>
+                    <Overview data={courseData.overviewFeatures} />
+                  </AnimatedSection>
+                )}
 
-              {/* FAQ Section */}
-              {faqData && (
-                <AnimatedSection animation="fadeInUp" delay={0.7}>
-                  <FAQ data={faqData} />
-                </AnimatedSection>
-              )}
+                {/* Curriculum Section - Using sanitized data */}
+                {sanitizedCurriculum && (
+                  <AnimatedSection animation="fadeInUp" delay={0.4}>
+                    <CourseCurriculum data={sanitizedCurriculum} />
+                  </AnimatedSection>
+                )}
 
-              {/* Project Section */}
-              {projectData && (
-                <AnimatedSection animation="scrollFadeIn" delay={0.8}>
-                  <ProjectShowcase data={projectData} />
-                </AnimatedSection>
-              )}
+                {/* Author Section */}
+                {authorData && (
+                  <AnimatedSection animation="fadeInUp" delay={0.5}>
+                    <CourseAuthor data={authorData} />
+                  </AnimatedSection>
+                )}
 
-              {/* Course Bundle Section */}
-              {courseBundleData && (
-                <AnimatedSection animation="fadeInUp" delay={0.9}>
-                  <CourseBundle data={courseBundleData} />
-                </AnimatedSection>
-              )}
-            </div>
+                {/* Review Section */}
+                {reviewData && (
+                  <AnimatedSection animation="revealSection" delay={0.6}>
+                    <ReviewSlider data={reviewData} />
+                  </AnimatedSection>
+                )}
+
+                {/* FAQ Section */}
+                {faqData && (
+                  <AnimatedSection animation="fadeInUp" delay={0.7}>
+                    <FAQ data={faqData} />
+                  </AnimatedSection>
+                )}
+
+                {/* Project Section */}
+                {projectData && (
+                  <AnimatedSection animation="scrollFadeIn" delay={0.8}>
+                    <ProjectShowcase data={projectData} />
+                  </AnimatedSection>
+                )}
+
+                {/* Course Bundle Section */}
+                {courseBundleData && (
+                  <AnimatedSection animation="fadeInUp" delay={0.9}>
+                    <CourseBundle data={courseBundleData} />
+                  </AnimatedSection>
+                )}
+              </div>
+            )}
 
             {/* Sidebar - Client Component for Interactivity */}
             <div className="lg:col-span-1 space-y-6 order-1 md:order-1 lg:order-2">
@@ -172,7 +205,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 delay={0.3}
                 className="sticky top-4"
               >
-                <CourseSidebar courseInfo={courseInfo} slug={slug} />
+                <CoursePriceSidebar courseInfo={courseInfo} slug={slug} />
               </AnimatedSection>
             </div>
           </div>

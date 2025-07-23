@@ -1,40 +1,42 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
-import { Lock, PlayCircle, FileText } from 'lucide-react'
-import { DialogTitle } from '@radix-ui/react-dialog'
-import { Curriculum, Lesson } from '@/types/course-page-types'
 
-export const CourseCurriculum: React.FC<{ data?: Curriculum }> = ({ data }) => {
-  const [selectedVideo, setSelectedVideo] = useState<{
-    url: string
-    title: string
-  } | null>(null)
+import { Lock, PlayCircle, FileText } from 'lucide-react'
+import { Curriculum, Lesson } from '@/types/course-page-types'
+import { useVideo } from '../context/video-provider'
+import { formatDuration } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { useUser } from '../context/AuthProvider'
+import { CourseCurriculumSkeleton } from './course-curriculum-skeleton'
+
+export const CourseCurriculum: React.FC<{
+  data?: Curriculum
+  isLoading?: boolean
+}> = ({ data, isLoading = false }) => {
+  const { openVideo } = useVideo()
+  const user = useUser()
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  // Handle client-side mounting
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Use data from API
   const modules = data?.modules || []
-  const title = data?.title || 'কোর্সের পরিপূর্ণ কারিকুলাম'
+  const title = data?.title || 'Course Curriculum'
 
-  const handleLectureClick = (lecture: Lesson) => {
-    if (lecture.isFree && lecture.type === 'Video' && lecture.videoUrl) {
-      setSelectedVideo({
-        url: lecture.videoUrl,
-        title: lecture.title,
-      })
-    }
-  }
-
-  // Helper function to format duration (assuming it's in seconds)
-  const formatDuration = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  // Show skeleton while loading or not mounted
+  if (isLoading || !mounted) {
+    return <CourseCurriculumSkeleton />
   }
 
   if (!modules.length) {
@@ -46,6 +48,29 @@ export const CourseCurriculum: React.FC<{ data?: Curriculum }> = ({ data }) => {
         </p>
       </section>
     )
+  }
+
+  const handleLessonClick = (lesson: Lesson) => {
+    // Check if lesson is free and has video
+    if (lesson.isFree && lesson.videoUrl && lesson.type === 'Video') {
+      // Check if user is authenticated
+      if (!user) {
+        // Store current page and intended video for redirect after login
+        const currentPath = window.location.pathname
+
+        // Show toast message
+        toast.error('Please log in to watch free lectures', {
+          description: 'You will be redirected back after login',
+        })
+
+        // Redirect to login page
+        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
+        return
+      }
+
+      // User is authenticated, play the video
+      openVideo(lesson.videoUrl)
+    }
   }
 
   return (
@@ -63,21 +88,37 @@ export const CourseCurriculum: React.FC<{ data?: Curriculum }> = ({ data }) => {
             </AccordionTrigger>
             <AccordionContent>
               <div className="divide-y">
-                {module.lessons?.map((lesson, lectureIndex) => (
+                {module.lessons?.map((lesson) => (
                   <div
                     key={lesson.id}
-                    onClick={() => handleLectureClick(lesson)}
-                    className={`flex items-center justify-between p-4 hover:bg-muted/50 transition-colors ${
-                      lesson.isFree ? 'cursor-pointer' : 'cursor-default'
+                    onClick={() => handleLessonClick(lesson)}
+                    className={`flex items-center justify-between p-4 transition-colors ${
+                      lesson.isFree &&
+                      lesson.videoUrl &&
+                      lesson.type === 'Video'
+                        ? 'cursor-pointer hover:bg-muted/50 hover:bg-blue-50/50'
+                        : 'cursor-default opacity-75'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       {lesson.type === 'Video' ? (
-                        <PlayCircle className="h-5 w-5 text-blue-500" />
+                        <PlayCircle
+                          className={`h-5 w-5 ${
+                            lesson.isFree ? 'text-blue-500' : 'text-gray-400'
+                          }`}
+                        />
                       ) : (
                         <FileText className="h-5 w-5 text-gray-500" />
                       )}
-                      <span>{lesson.title}</span>
+                      <span
+                        className={
+                          lesson.isFree
+                            ? 'text-foreground'
+                            : 'text-muted-foreground'
+                        }
+                      >
+                        {lesson.title}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground">
@@ -85,10 +126,12 @@ export const CourseCurriculum: React.FC<{ data?: Curriculum }> = ({ data }) => {
                       </span>
                       {lesson.isFree ? (
                         <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                          ফ্রি ভিডিও
+                          Free
                         </span>
                       ) : (
-                        <Lock className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center gap-2">
+                          <Lock className="h-4 w-4 text-gray-400" />
+                        </div>
                       )}
                     </div>
                   </div>
@@ -98,26 +141,6 @@ export const CourseCurriculum: React.FC<{ data?: Curriculum }> = ({ data }) => {
           </AccordionItem>
         ))}
       </Accordion>
-
-      <Dialog
-        open={!!selectedVideo}
-        onOpenChange={() => setSelectedVideo(null)}
-      >
-        <DialogContent className="sm:max-w-[800px]">
-          <DialogHeader>
-            <DialogTitle>{selectedVideo?.title}</DialogTitle>
-          </DialogHeader>
-          <div className="aspect-video">
-            <video
-              controls
-              className="w-full h-full rounded-lg"
-              src={selectedVideo?.url}
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   )
 }

@@ -122,3 +122,13 @@ body {
       }
     }
 }
+
+
+.noscript\:grid {
+  display: none;
+}
+
+/* Show grid when JavaScript is disabled */
+noscript .noscript\:grid {
+  display: grid;
+}

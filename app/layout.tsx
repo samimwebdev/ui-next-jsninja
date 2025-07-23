@@ -114,7 +114,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <Navigation />
-            <Toaster position="top-right" />
+            <Toaster position="top-right" richColors />
             <VideoProvider>{children}</VideoProvider>
             <Footer />
           </ThemeProvider>

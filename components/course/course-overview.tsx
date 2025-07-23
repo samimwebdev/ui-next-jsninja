@@ -18,8 +18,8 @@ export const Overview: React.FC<{ data?: OverviewFeature[] }> = ({ data }) => {
   return (
     <section id="overview" className="my-12">
       <div className="grid gap-8 md:grid-cols-2">
-        {overviewFeatures.map((section, index) => (
-          <div key={section.id || index} className="bg-card rounded-lg p-6">
+        {overviewFeatures.map((section) => (
+          <div key={section.id} className="bg-card rounded-lg p-6">
             <h3 className="text-xl font-semibold mb-4">{section.title}</h3>
             <ul className="space-y-3">
               {section.features?.map((item, itemIndex) => (

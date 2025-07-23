@@ -18,14 +18,6 @@ export const CourseAuthor: React.FC<{ data: AuthorContentSection }> = ({
     )
   }
 
-  // Helper function to clean HTML content
-  const getCleanBio = (htmlContent: string) => {
-    return htmlContent
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .trim()
-  }
-
   // Get initials for avatar fallback
   const getInitials = (name: string) => {
     return name

@@ -14,34 +14,17 @@ import {
   CourseBase,
   CourseBundleContentSection,
 } from '@/types/course-page-types'
+import { formatDuration } from '@/lib/utils'
+import { formatPrice } from '@/lib/course-utils'
 
 export const CourseBundle: React.FC<{
   data: CourseBundleContentSection | undefined
 }> = ({ data }) => {
-  console.log(data, 'Course Bundle Data')
   const bundle = data?.courseBundle
   const title = data?.title || 'Course Bundle to take a look'
   const description =
     data?.description ||
     'Enroll the course bundle to get access to all the courses at a affordable price'
-
-  // Helper function to format price
-  const formatPrice = (price: number) => {
-    return `${price} tk`
-  }
-
-  // Helper function to format duration
-  const formatDuration = (duration: string | number) => {
-    if (typeof duration === 'string' && duration.includes('weeks')) {
-      return duration
-    }
-    const num =
-      typeof duration === 'number' ? duration : parseInt(duration) || 0
-    if (num > 1000) {
-      return `${Math.floor(num / 60)} mins`
-    }
-    return `${num} hrs`
-  }
 
   // Calculate bundle savings
   const calculateSavings = (bundlePrice: number, courses: CourseBase[]) => {
@@ -101,7 +84,8 @@ export const CourseBundle: React.FC<{
                     variant="secondary"
                     className="bg-primary/10 text-primary"
                   >
-                    {course.totalLessons} Lessons
+                    {course.totalLessons + ''}{' '}
+                    {course.totalLessons > 1 ? 'Lessons' : 'Lesson'}
                   </Badge>
                   <div className="flex items-center gap-1 text-muted-foreground">
                     <Clock className="w-4 h-4" />

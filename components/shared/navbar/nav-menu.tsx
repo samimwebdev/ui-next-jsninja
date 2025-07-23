@@ -40,7 +40,7 @@ export const NavMenu = (props: NavigationMenuProps) => (
                 key={course.title}
                 title={course.title}
                 icon={course.icon}
-                href="/courses/random"
+                href="/courses/mastering-java-script-1"
               >
                 {course.description}
               </ListItem>

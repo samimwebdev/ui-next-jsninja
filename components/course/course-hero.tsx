@@ -1,5 +1,3 @@
-'use client'
-
 import { Badge } from '@/components/ui/badge'
 import { HeroContentSection } from '@/types/course-page-types'
 import { HeroCTA } from '../shared/hero-cta'
