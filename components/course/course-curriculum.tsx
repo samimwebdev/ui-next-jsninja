@@ -9,163 +9,52 @@ import {
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Lock, PlayCircle, FileText } from 'lucide-react'
 import { DialogTitle } from '@radix-ui/react-dialog'
-import { Curriculum } from '@/types/course-page-types'
+import { Curriculum, Lesson } from '@/types/course-page-types'
 
-const courseModules = [
-  {
-    title: 'Getting Started with React',
-    lectures: [
-      {
-        title: 'Welcome to Frontend Ninja',
-        type: 'video',
-        duration: '5:30',
-        isFree: true,
-        videoUrl: '/lecture1.mp4',
-      },
-      {
-        title: 'Setting Up Your Development Environment',
-        type: 'text',
-        duration: '10:00',
-        isFree: true,
-      },
-      {
-        title: 'React Fundamentals & JSX',
-        type: 'video',
-        duration: '15:00',
-        isFree: false,
-      },
-    ],
-  },
-  {
-    title: 'React Hooks & State Management',
-    lectures: [
-      {
-        title: 'Understanding useState and useEffect',
-        type: 'video',
-        duration: '20:00',
-        isFree: true,
-        videoUrl: '/react-hooks.mp4',
-      },
-      {
-        title: 'Custom Hooks for Reusable Logic',
-        type: 'video',
-        duration: '18:00',
-        isFree: false,
-      },
-      {
-        title: 'Global State with Context API',
-        type: 'video',
-        duration: '25:00',
-        isFree: false,
-      },
-    ],
-  },
-  {
-    title: 'Next.js Fundamentals',
-    lectures: [
-      {
-        title: 'Introduction to Next.js',
-        type: 'video',
-        duration: '18:00',
-        isFree: true,
-        videoUrl: '/nextjs-intro.mp4',
-      },
-      {
-        title: 'Routing in Next.js',
-        type: 'video',
-        duration: '22:00',
-        isFree: false,
-      },
-      {
-        title: 'Server Components vs Client Components',
-        type: 'video',
-        duration: '25:00',
-        isFree: false,
-      },
-    ],
-  },
-  {
-    title: 'Building UI with Tailwind & Shadcn',
-    lectures: [
-      {
-        title: 'Tailwind CSS Fundamentals',
-        type: 'video',
-        duration: '20:00',
-        isFree: true,
-        videoUrl: '/tailwind-basics.mp4',
-      },
-      {
-        title: 'Component-Driven Development with Shadcn UI',
-        type: 'video',
-        duration: '25:00',
-        isFree: false,
-      },
-      {
-        title: 'Email Automation',
-        type: 'video',
-        duration: '25:00',
-        isFree: false,
-      },
-    ],
-  },
-  {
-    title: 'Content Marketing',
-    lectures: [
-      {
-        title: 'Content Strategy Basics',
-        type: 'video',
-        duration: '20:00',
-        isFree: true,
-        videoUrl: '/content1.mp4',
-      },
-      {
-        title: 'Content Creation Tools',
-        type: 'video',
-        duration: '18:00',
-        isFree: false,
-      },
-      {
-        title: 'Content Distribution',
-        type: 'video',
-        duration: '22:00',
-        isFree: false,
-      },
-    ],
-  },
-]
-
-interface LectureType {
-  title: string
-  type: string
-  duration: string
-  isFree: boolean
-  videoUrl?: string
-}
-
-export const CourseCurriculum: React.FC<{ data: Curriculum }> = ({ data }) => {
+export const CourseCurriculum: React.FC<{ data?: Curriculum }> = ({ data }) => {
   const [selectedVideo, setSelectedVideo] = useState<{
     url: string
     title: string
   } | null>(null)
 
-  const handleLectureClick = (lecture: LectureType) => {
-    if (lecture.isFree && lecture.type === 'video') {
+  // Use data from API
+  const modules = data?.modules || []
+  const title = data?.title || 'কোর্সের পরিপূর্ণ কারিকুলাম'
+
+  const handleLectureClick = (lecture: Lesson) => {
+    if (lecture.isFree && lecture.type === 'Video' && lecture.videoUrl) {
       setSelectedVideo({
-        url: lecture.videoUrl as string,
+        url: lecture.videoUrl,
         title: lecture.title,
       })
     }
   }
 
+  // Helper function to format duration (assuming it's in seconds)
+  const formatDuration = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  if (!modules.length) {
+    return (
+      <section id="curriculum" className="my-12">
+        <h2 className="text-3xl font-bold tracking-tight mb-6">{title}</h2>
+        <p className="text-muted-foreground">
+          No curriculum available at the moment.
+        </p>
+      </section>
+    )
+  }
+
   return (
     <section id="curriculum" className="my-12">
-      <h2 className="text-3xl font-bold tracking-tight mb-6">
-        কোর্সের পরিপূর্ণ কারিকুলাম
-      </h2>
+      <h2 className="text-3xl font-bold tracking-tight mb-6">{title}</h2>
       <Accordion type="single" collapsible className="mt-8 space-y-4">
-        {courseModules.map((module, moduleIndex) => (
+        {modules.map((module, moduleIndex) => (
           <AccordionItem
-            key={moduleIndex}
+            key={module.id}
             value={`module-${moduleIndex}`}
             className="bg-accent py-1 px-4 rounded-xl border-none"
           >
@@ -174,27 +63,27 @@ export const CourseCurriculum: React.FC<{ data: Curriculum }> = ({ data }) => {
             </AccordionTrigger>
             <AccordionContent>
               <div className="divide-y">
-                {module.lectures.map((lecture, lectureIndex) => (
+                {module.lessons?.map((lesson, lectureIndex) => (
                   <div
-                    key={lectureIndex}
-                    onClick={() => handleLectureClick(lecture)}
+                    key={lesson.id}
+                    onClick={() => handleLectureClick(lesson)}
                     className={`flex items-center justify-between p-4 hover:bg-muted/50 transition-colors ${
-                      lecture.isFree ? 'cursor-pointer' : 'cursor-default'
+                      lesson.isFree ? 'cursor-pointer' : 'cursor-default'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      {lecture.type === 'video' ? (
+                      {lesson.type === 'Video' ? (
                         <PlayCircle className="h-5 w-5 text-blue-500" />
                       ) : (
                         <FileText className="h-5 w-5 text-gray-500" />
                       )}
-                      <span>{lecture.title}</span>
+                      <span>{lesson.title}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground">
-                        {lecture.duration}
+                        {formatDuration(lesson.duration)}
                       </span>
-                      {lecture.isFree ? (
+                      {lesson.isFree ? (
                         <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
                           ফ্রি ভিডিও
                         </span>

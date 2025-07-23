@@ -84,6 +84,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
     courseData,
     'course-layout.course-bundle-layout'
   )
+
+  console.log({ courseData }, 'Course Page Data', { courseBundleData })
   const faqData = getCourseContentSection(courseData, 'faq-layout.faq-section')
 
   // Format data for components
@@ -156,7 +158,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
               )}
 
               {/* Course Bundle Section */}
-              {courseData.baseContent?.courseBundles && (
+              {courseBundleData && (
                 <AnimatedSection animation="fadeInUp" delay={0.9}>
                   <CourseBundle data={courseBundleData} />
                 </AnimatedSection>

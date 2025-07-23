@@ -77,11 +77,8 @@ export interface CourseBundle {
   shortDescription: string
   price: number
   helperText?: string | null
-  courses: CourseBase[]
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
+  features?: CourseFeature[]
+  courseBases: CourseBase[]
 }
 
 // Project types
@@ -156,7 +153,7 @@ export interface CourseBundleContentSection {
   id: number
   title: string
   description: string
-  courseBundles: CourseBundle[]
+  courseBundle: CourseBundle
 }
 
 export interface ReviewContentSection {

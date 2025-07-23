@@ -18,10 +18,10 @@ export function getCourseContentSection<T extends CourseComponentType>(
 
 // Helper to format price
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('BDT', {
     style: 'currency',
-    currency: 'USD',
-  }).format(price / 100) // Assuming price is in cents
+    currency: 'BDT',
+  }).format(price) // Assuming price is in cents
 }
 
 // Helper to get highlight features

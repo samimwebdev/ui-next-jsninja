@@ -3,46 +3,51 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Review } from '@/types/shared-types'
 import { ReviewContentSection } from '@/types/course-page-types'
-
-const reviews = [
-  {
-    id: 1,
-    name: 'John Doe',
-    rating: 5,
-    comment:
-      'This course exceeded my expectations. The content is top-notch and the instructor is excellent.',
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    rating: 4,
-    comment:
-      'Great course overall. I learned a lot and feel much more confident with React and Next.js now.',
-  },
-  {
-    id: 3,
-    name: 'Mike Johnson',
-    rating: 5,
-    comment:
-      'The projects in this course are fantastic. They really helped me apply what I learned.',
-  },
-]
+import Image from 'next/image'
 
 export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
   data,
 }) => {
   const [currentReview, setCurrentReview] = useState(0)
 
+  // Use data from API or fallback to empty array
+  const reviews = data?.reviews || []
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentReview((prev) => (prev + 1) % reviews.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [])
+    if (reviews.length > 0) {
+      const timer = setInterval(() => {
+        setCurrentReview((prev) => (prev + 1) % reviews.length)
+      }, 5000)
+      return () => clearInterval(timer)
+    }
+  }, [reviews.length])
+
+  if (!reviews.length) {
+    return (
+      <section className="my-12">
+        <h2 className="text-3xl font-bold mb-6">
+          {data?.title || 'What Our Students Say'}
+        </h2>
+        <p className="text-muted-foreground">
+          No reviews available at the moment.
+        </p>
+      </section>
+    )
+  }
+
+  // Helper function to clean HTML content
+  const getCleanReviewText = (htmlContent: string) => {
+    return htmlContent
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .trim()
+  }
 
   return (
     <section className="my-12">
-      <h2 className="text-3xl font-bold mb-6">What Our Students Say</h2>
+      <h2 className="text-3xl font-bold mb-6">
+        {data?.title || 'What Our Students Say'}
+      </h2>
       <div className="relative h-48">
         <AnimatePresence>
           <motion.div
@@ -53,17 +58,33 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-lg mb-4">{reviews[currentReview].comment}</p>
+            <p className="text-lg mb-4">
+              {getCleanReviewText(reviews[currentReview].reviewDetails)}
+            </p>
             <div className="flex items-center">
               <div className="flex-shrink-0 mr-3">
-                <img
-                  className="h-10 w-10 rounded-full"
-                  src={`https://ui-avatars.com/api/?name=${reviews[currentReview].name}`}
-                  alt={reviews[currentReview].name}
-                />
+                {reviews[currentReview].profile?.image?.url ? (
+                  <Image
+                    className="h-10 w-10 rounded-full object-cover"
+                    src={reviews[currentReview].profile.image.url}
+                    alt={reviews[currentReview].reviewerName}
+                    width={40}
+                    height={40}
+                  />
+                ) : (
+                  <img
+                    className="h-10 w-10 rounded-full"
+                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      reviews[currentReview].reviewerName
+                    )}`}
+                    alt={reviews[currentReview].reviewerName}
+                  />
+                )}
               </div>
               <div>
-                <p className="font-semibold">{reviews[currentReview].name}</p>
+                <p className="font-semibold">
+                  {reviews[currentReview].reviewerName}
+                </p>
                 <div className="flex items-center">
                   {[...Array(reviews[currentReview].rating)].map((_, i) => (
                     <svg

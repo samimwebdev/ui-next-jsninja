@@ -17,6 +17,7 @@ interface CourseSidebarProps {
 }
 
 export function CourseSidebar({ courseInfo, slug }: CourseSidebarProps) {
+  console.log({ courseInfo, slug }, 'Course Sidebar Data')
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 

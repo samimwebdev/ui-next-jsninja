@@ -153,10 +153,6 @@ export interface CourseBase {
   categories: Category[]
   featureImage?: StrapiImage
   seo?: SEOData
-  createdAt: string
-  updatedAt: string
-  publishedAt: string
-  locale: string | null
 }
 
 // Shared Strapi Response type
