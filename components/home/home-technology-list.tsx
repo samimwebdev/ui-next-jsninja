@@ -1,5 +1,5 @@
 import Marquee from '@/components/ui/marquee'
-import DynamicLogo from '@/components/shared/home-tech-logo/DynamicLogo'
+import DynamicIcon from '@/components/shared/DynamicIcon'
 import { TechSectionData } from '@/types/home-page-types'
 
 const HomeTechLogos: React.FC<{ data: TechSectionData }> = ({ data }) => {
@@ -18,7 +18,7 @@ const HomeTechLogos: React.FC<{ data: TechSectionData }> = ({ data }) => {
               >
                 <div className="flex items-center">
                   <div className="w-14 h-14 flex items-center justify-center flex-shrink-0">
-                    <DynamicLogo icon={tech.icon} width={34} height={34} />
+                    <DynamicIcon icon={tech.icon} width={34} height={34} />
                   </div>
                   <span className="font-bold text-2xl text-[#23216E] whitespace-nowrap">
                     {tech.name}
@@ -36,7 +36,7 @@ const HomeTechLogos: React.FC<{ data: TechSectionData }> = ({ data }) => {
               >
                 <div className="flex items-center">
                   <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
-                    <DynamicLogo icon={tech.icon} width={34} height={34} />
+                    <DynamicIcon icon={tech.icon} width={34} height={34} />
                   </div>
                   <span className="font-bold text-2xl text-[#23216E] whitespace-nowrap">
                     {tech.name}

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { BootcampStepsContentSection } from '@/types/bootcamp-page-types'
 
 interface Step {
   id: number
@@ -111,7 +112,7 @@ const steps: Step[] = [
   },
 ]
 
-const Steps = () => {
+const Steps: React.FC<{ data: BootcampStepsContentSection }> = ({ data }) => {
   const [expandedStep, setExpandedStep] = useState(1)
 
   const totalSteps = steps.length

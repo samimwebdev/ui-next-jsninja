@@ -9,8 +9,11 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel'
 import { techLogos } from '@/data/tech-logos'
+import { TechnologyLayoutContentSection } from '@/types/bootcamp-page-types'
 
-export const BootcampLogoSlider = () => {
+export const BootcampLogoSlider: React.FC<{
+  data: TechnologyLayoutContentSection
+}> = ({ data }) => {
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
 

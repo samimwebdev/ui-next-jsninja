@@ -9,7 +9,7 @@ import { CourseHero } from '@/components/course/course-hero'
 import { CourseTabs } from '@/components/course/course-tabs'
 import { Overview } from '@/components/course/course-overview'
 import { CourseCurriculum } from '@/components/course/course-curriculum'
-import { CourseAuthor } from '@/components/course/course-author'
+import { CourseAuthor } from '@/components/shared/course-author'
 import { ReviewSlider } from '@/components/course/review-slider'
 import { FAQ } from '@/components/course/faq'
 import { ProjectShowcase } from '@/components/course/project-showcase'
@@ -17,7 +17,8 @@ import { CourseBundle } from '@/components/course/course-bundle'
 import { CoursePriceSidebar } from '@/components/course/course-price-sidebar'
 import { AnimatedSection } from '@/components/shared/animated-section'
 import { notFound } from 'next/navigation'
-import { CoursePageData, Curriculum } from '@/types/course-page-types'
+import { Curriculum } from '@/types/shared-types'
+import { CoursePageData } from '@/types/course-page-types'
 
 interface CoursePageProps {
   params: Promise<{

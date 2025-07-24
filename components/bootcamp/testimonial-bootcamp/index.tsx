@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import Marquee from '@/components/ui/marquee'
+import { ReviewLayoutContentSection } from '@/types/bootcamp-page-types'
 import Link from 'next/link'
 import React, { ComponentProps } from 'react'
 
@@ -61,7 +62,9 @@ const testimonials = [
   },
 ]
 
-const TestimonialBootcamp = () => (
+const TestimonialBootcamp: React.FC<{ data: ReviewLayoutContentSection }> = ({
+  data,
+}) => (
   <div className=" flex justify-center items-center py-12">
     <div className="h-full w-full text-center">
       <div className="mb-12">

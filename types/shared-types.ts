@@ -111,6 +111,63 @@ export interface Review {
   locale: string | null
 }
 
+export interface Video {
+  id: number
+  title: string
+  shortDescription: string
+  videoURL: string
+}
+export interface Instructor {
+  id: number
+  documentId: string
+  name: string
+  title: string
+  bio: string
+  profile: Profile
+  createdAt: string
+  updatedAt: string
+  publishedAt: string | null
+  locale: string | null
+}
+
+export interface Lesson {
+  id: number
+  documentId: string
+  title: string
+  order: number
+  duration: number
+  type: 'Video' | 'Text' | 'Quiz' | 'Assignment'
+  content?: string | null
+  videoUrl?: string
+  isFree: boolean
+  icon?: StrapiIcon | null
+  createdAt: string
+  updatedAt: string
+  publishedAt: string | null
+  locale: string | null
+}
+
+export interface Module {
+  id: number
+  documentId: string
+  title: string
+  description?: string | null
+  order: number
+  duration: number
+  lessons: Lesson[]
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+  locale: string | null
+}
+
+export interface Curriculum {
+  id: number
+  title: string
+  description: string
+  modules: Module[]
+}
+
 // Shared SEO types
 export interface MetaSocial {
   id: number
@@ -153,6 +210,31 @@ export interface CourseBase {
   categories: Category[]
   featureImage?: StrapiImage
   seo?: SEOData
+}
+
+export interface Project {
+  id: number
+  documentId: string
+  title: string
+  description: string
+  technology: string
+  image: StrapiImage
+  createdAt: string
+  updatedAt: string
+  publishedAt: string | null
+  locale: string | null
+}
+
+export interface Feature {
+  id: number
+  feature: string
+}
+
+export interface HighlightFeature {
+  id: number
+  title: string
+  icon: StrapiIcon | null
+  features: Feature[]
 }
 
 // Shared Strapi Response type

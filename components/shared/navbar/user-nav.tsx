@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { profile } from 'console'
 import { LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 

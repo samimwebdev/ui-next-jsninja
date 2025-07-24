@@ -1,4 +1,4 @@
-const STRAPI = process.env.STRAPI_URL!
+const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL!
 
 // This file is used to interact with the Strapi API.
 // It provides a function to fetch data from the Strapi backend.
@@ -17,6 +17,7 @@ export async function strapiFetch<T>(
   const { cache = 'no-store', token, next, ...rest } = options
 
   try {
+    console.log(`Fetching API endpoint: ${STRAPI}${path}`)
     const res = await fetch(`${STRAPI}${path}`, {
       headers: {
         'Content-Type': 'application/json',

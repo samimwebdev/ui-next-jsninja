@@ -6,6 +6,7 @@ import { CardHoverEffect } from './card-hover-effect'
 import { Play } from 'lucide-react'
 import Image from 'next/image'
 import { DialogTitle } from '@radix-ui/react-dialog'
+import { DemoVideosLayoutContentSection } from '@/types/bootcamp-page-types'
 
 interface Video {
   id: string
@@ -50,7 +51,9 @@ const videos: Video[] = [
   },
 ]
 
-export function PromoVideos() {
+export const PromoVideos: React.FC<{
+  data: DemoVideosLayoutContentSection
+}> = ({ data }) => {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
 
   return (

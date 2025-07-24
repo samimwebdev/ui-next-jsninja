@@ -132,3 +132,15 @@ body {
 noscript .noscript\:grid {
   display: grid;
 }
+
+/* To Avoid Assessment Styles issue from  Rich text editor */
+.prose [style*="background-color"] {
+  background-color: transparent !important;
+}
+
+.prose [style*="color"] {
+  color: inherit !important;
+}
+
+
+

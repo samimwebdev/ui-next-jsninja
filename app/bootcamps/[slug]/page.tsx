@@ -1,5 +1,3 @@
-'use client'
-
 import { BootcampHero } from '@/components/bootcamp/bootcamp-hero'
 import { BootcampProjectShowcase } from '@/components/bootcamp/project-showcase/bootcamp-project-showcase'
 import { BootcampSpeciality } from '@/components/bootcamp/bootcamp-speciality'
@@ -13,112 +11,161 @@ import CallToAction from '@/components/shapexui/cta'
 import BootcampSteps from '@/components/shapexui/steps'
 import { BootcampPricing } from '@/components/bootcamp/bootcamp-pricing'
 import { BootcampCurriculum } from '@/components/bootcamp/bootcamp-curriculum'
+import { AnimatedSection } from '@/components/shared/animated-section'
+import { BootcampPageData } from '@/types/bootcamp-page-types'
+import { getBootcampContentSection } from '@/lib/bootcamp-utils'
+import { getBootcampData } from '@/lib/bootcamp'
+import { CourseAuthor } from '@/components/shared/course-author'
 
-import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
-import { fadeInUp, revealSection, scrollFadeIn } from '@/lib/micro-animations'
+export default async function BootcampPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  // Await params before using its properties
+  const { slug } = await params
 
-// Define the animation type options based on the available variants
-type AnimationType = 'fadeInUp' | 'revealSection' | 'scrollFadeIn'
+  const bootcampData: BootcampPageData = await getBootcampData(slug)
 
-// Interface for AnimatedSection props
-interface AnimatedSectionProps {
-  children: React.ReactNode
-  animation?: AnimationType
-  delay?: number
-  className?: string
-}
-
-// Animation wrapper component to handle scroll-triggered animations
-const AnimatedSection = ({
-  children,
-  animation = 'fadeInUp',
-  delay = 0,
-  className = '',
-}: AnimatedSectionProps) => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-
-  const getAnimationVariant = () => {
-    switch (animation) {
-      case 'revealSection':
-        return revealSection
-      case 'scrollFadeIn':
-        return scrollFadeIn
-      case 'fadeInUp':
-      default:
-        return fadeInUp
-    }
-  }
-
-  return (
-    <motion.div
-      ref={ref}
-      initial="hidden"
-      animate={inView ? 'visible' : 'hidden'}
-      variants={getAnimationVariant()}
-      transition={{ delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+  // Extract content sections from contentBlock
+  const overviewData = getBootcampContentSection(
+    bootcampData,
+    'bootcamp-layout.overview'
   )
-}
+  const pricingData = getBootcampContentSection(
+    bootcampData,
+    'bootcamp-layout.pricing-package'
+  )
+  const scheduleData = getBootcampContentSection(
+    bootcampData,
+    'bootcamp-layout.batch-schedule'
+  )
+  const stepsData = getBootcampContentSection(
+    bootcampData,
+    'bootcamp-layout.bootcamp-steps'
+  )
+  const specialityData = getBootcampContentSection(
+    bootcampData,
+    'bootcamp-layout.bootcamp-speciality'
+  )
+  const logoSliderData = getBootcampContentSection(
+    bootcampData,
+    'technology-layout.technology-layout'
+  )
+  const callToActionData = getBootcampContentSection(
+    bootcampData,
+    'bootcamp-layout.call-to-action'
+  )
 
-export default function BootcampDetails() {
+  const assessmentData = bootcampData.assessmentQuiz || []
+
+  // Extract data from baseContent.contentSection (project showcase and FAQ)
+  const projectShowcaseData = bootcampData.baseContent.contentSection?.find(
+    (section) => section.__component === 'project-layout.project-layout'
+  )
+  const faqData = bootcampData.baseContent.contentSection?.find(
+    (section) => section.__component === 'faq-layout.faq-section'
+  )
+  const heroData = bootcampData.baseContent.contentSection?.find(
+    (section) => section.__component === 'hero-layout.hero-layout'
+  )
+  const authorData = bootcampData.baseContent.contentSection?.find(
+    (section) => section.__component === 'author-layout.author-layout'
+  )
+  const demoVideosData = bootcampData.baseContent.contentSection?.find(
+    (section) => section.__component === 'demo-videos-layout.demo-videos'
+  )
+  const reviewData = bootcampData.baseContent.contentSection?.find(
+    (section) => section.__component === 'review-layout.review-layout'
+  )
+
   return (
     <>
-      <BootcampHero />
+      {heroData && (
+        <BootcampHero
+          data={heroData}
+          assessmentData={assessmentData}
+          slug={slug}
+        />
+      )}
 
-      <AnimatedSection>
-        <BootcampOverview />
-      </AnimatedSection>
+      {overviewData && (
+        <AnimatedSection animation="fadeInUp" delay={0.1}>
+          <BootcampOverview data={overviewData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="scrollFadeIn" delay={0.1}>
-        <BatchSchedule />
-      </AnimatedSection>
+      {scheduleData && (
+        <AnimatedSection animation="scrollFadeIn" delay={0.1}>
+          <BatchSchedule data={scheduleData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="revealSection" delay={0.2}>
-        <BootcampSteps />
-      </AnimatedSection>
+      {stepsData && (
+        <AnimatedSection animation="revealSection" delay={0.2}>
+          <BootcampSteps data={stepsData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="fadeInUp" delay={0.2}>
-        <BootcampSpeciality />
-      </AnimatedSection>
+      {specialityData && (
+        <AnimatedSection animation="fadeInUp" delay={0.2}>
+          <BootcampSpeciality data={specialityData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="scrollFadeIn">
-        <BootcampLogoSlider />
-      </AnimatedSection>
+      {logoSliderData && (
+        <AnimatedSection animation="scrollFadeIn">
+          <BootcampLogoSlider data={logoSliderData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="revealSection" delay={0.2}>
-        <BootcampProjectShowcase />
-      </AnimatedSection>
+      {projectShowcaseData && (
+        <AnimatedSection animation="revealSection" delay={0.2}>
+          <BootcampProjectShowcase data={projectShowcaseData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="fadeInUp" delay={0.1}>
-        <BootcampPricing />
-      </AnimatedSection>
+      {pricingData && (
+        <AnimatedSection animation="fadeInUp" delay={0.1}>
+          <BootcampPricing data={pricingData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="revealSection" delay={0.2}>
-        <BootcampCurriculum />
-      </AnimatedSection>
+      {bootcampData?.baseContent?.curriculum && (
+        <AnimatedSection animation="revealSection" delay={0.2}>
+          <BootcampCurriculum data={bootcampData.baseContent.curriculum} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="scrollFadeIn" delay={0.2}>
-        <PromoVideos />
-      </AnimatedSection>
+      {demoVideosData && (
+        <AnimatedSection animation="scrollFadeIn" delay={0.2}>
+          <PromoVideos data={demoVideosData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="revealSection">
-        <TestimonialBootcamp />
-      </AnimatedSection>
+      {authorData && (
+        <AnimatedSection animation="fadeInUp" delay={0.1}>
+          <CourseAuthor data={authorData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="fadeInUp" delay={0.1}>
-        <FAQBootcamp />
-      </AnimatedSection>
+      {reviewData && (
+        <AnimatedSection animation="revealSection" delay={0.2}>
+          <TestimonialBootcamp data={reviewData} />
+        </AnimatedSection>
+      )}
 
-      <AnimatedSection animation="scrollFadeIn" delay={0.2}>
-        <CallToAction />
-      </AnimatedSection>
+      {faqData && (
+        <AnimatedSection animation="fadeInUp" delay={0.1}>
+          <FAQBootcamp data={faqData} />
+        </AnimatedSection>
+      )}
+
+      {callToActionData && (
+        <AnimatedSection animation="scrollFadeIn" delay={0.2}>
+          <CallToAction data={callToActionData} />
+        </AnimatedSection>
+      )}
     </>
   )
 }

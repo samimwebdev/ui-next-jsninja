@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { BatchScheduleContentSection } from '@/types/bootcamp-page-types'
 import { ClipboardList, Users, School, CalendarCheck } from 'lucide-react'
 
 interface ScheduleItem {
@@ -38,7 +39,9 @@ const scheduleItems: ScheduleItem[] = [
   },
 ]
 
-export function BatchSchedule() {
+export const BatchSchedule: React.FC<{ data: BatchScheduleContentSection }> = ({
+  data,
+}) => {
   return (
     <section className="w-full px-4 py-12">
       <div className="container mx-auto max-w-screen-xl">

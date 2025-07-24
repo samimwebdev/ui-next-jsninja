@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ProjectCard } from './bootcamp-project-card'
 import Masonry from 'react-masonry-css'
+import { ProjectShowcaseContentSection } from '@/types/bootcamp-page-types'
 
 const projects = [
   {
@@ -72,7 +73,9 @@ const breakpointColumns = {
   640: 1,
 }
 
-export function BootcampProjectShowcase() {
+export const BootcampProjectShowcase: React.FC<{
+  data: ProjectShowcaseContentSection
+}> = ({ data }) => {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {

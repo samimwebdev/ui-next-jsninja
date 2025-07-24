@@ -6,6 +6,10 @@ import {
   AccordionItem,
 } from '@/components/ui/accordion'
 import { cn } from '@/lib/utils'
+import {
+  FAQLayoutContentSection,
+  ReviewLayoutContentSection,
+} from '@/types/bootcamp-page-types'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { PlusIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -62,7 +66,7 @@ const faq = [
       "Click the 'Enroll Now' button on the bootcamp page and follow the instructions to complete your registration and payment.",
   },
 ]
-const FAQBootcamp = () => {
+const FAQBootcamp: React.FC<{ data: FAQLayoutContentSection }> = ({ data }) => {
   const [value, setValue] = useState<string>()
 
   return (

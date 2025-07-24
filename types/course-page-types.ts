@@ -8,66 +8,12 @@ import {
   SEOData,
   CourseBase,
   StrapiResponse,
+  Project,
+  HighlightFeature,
+  Feature,
+  Instructor,
+  Curriculum,
 } from './shared-types'
-
-// Course-specific feature types
-export interface CourseFeature {
-  id: number
-  feature: string
-}
-
-export interface OverviewFeature {
-  id: number
-  title: string
-  icon: StrapiIcon
-  features: CourseFeature[]
-}
-
-export interface HighlightFeature {
-  id: number
-  title: string
-  icon: StrapiIcon
-  features: CourseFeature[]
-}
-
-// Curriculum types
-export interface Lesson {
-  id: number
-  documentId: string
-  title: string
-  order: number
-  duration: number
-  type: 'Video' | 'Text' | 'Quiz' | 'Assignment'
-  content?: string | null
-  videoUrl?: string
-  isFree: boolean
-  icon?: StrapiIcon | null
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
-}
-
-export interface Module {
-  id: number
-  documentId: string
-  title: string
-  description?: string | null
-  order: number
-  duration: number
-  lessons: Lesson[]
-  createdAt: string
-  updatedAt: string
-  publishedAt: string
-  locale: string | null
-}
-
-export interface Curriculum {
-  id: number
-  title: string
-  description: string
-  modules: Module[]
-}
 
 // Course bundle types
 export interface CourseBundle {
@@ -77,36 +23,8 @@ export interface CourseBundle {
   shortDescription: string
   price: number
   helperText?: string | null
-  features?: CourseFeature[]
+  features?: Feature[]
   courseBases: CourseBase[]
-}
-
-// Project types
-export interface Project {
-  id: number
-  documentId: string
-  title: string
-  description: string
-  technology: string
-  image: StrapiImage
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
-}
-
-// Instructor types
-export interface Instructor {
-  id: number
-  documentId: string
-  name: string
-  title: string
-  bio: string
-  profile: Profile
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
 }
 
 // FAQ types
@@ -188,13 +106,19 @@ export type CourseContentSection =
   | FAQContentSection
   | CourseBundleContentSection // Add this line
 
+interface OverviewFeature {
+  id: number
+  title: string
+  icon: StrapiIcon | null
+  features: Feature[]
+}
 // Main course page data type
 export interface CoursePageData {
   id: number
   documentId: string
   courseName: string
   overviewFeatures: OverviewFeature[]
-  highlightFeature: HighlightFeature
+  highlightFeature: HighlightFeature[]
   baseContent: CourseBase & {
     courseBundles: CourseBundle[]
     curriculum: Curriculum

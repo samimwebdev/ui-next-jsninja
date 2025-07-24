@@ -59,7 +59,7 @@ export const NavMenu = (props: NavigationMenuProps) => (
                 key={bootcamp.title}
                 title={bootcamp.title}
                 icon={bootcamp.icon}
-                href="/bootcamps/random"
+                href="/bootcamps/mastering-java-script-bootcamp"
               >
                 {bootcamp.description}
               </ListItem>

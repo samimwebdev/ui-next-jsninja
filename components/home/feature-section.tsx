@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { cardVariants, iconVariants } from '@/lib/animation'
-import DynamicLogo from '@/components/shared/home-tech-logo/DynamicLogo'
+import DynamicIcon from '@/components/shared/DynamicIcon'
 
 interface FeatureSectionProps {
   data: {
@@ -70,7 +70,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({ data }) => {
                 className="mb-3 h-10 w-10 flex items-center justify-center bg-muted rounded-full"
                 variants={iconVariants}
               >
-                <DynamicLogo icon={feature.icon} width={40} height={40} />
+                <DynamicIcon icon={feature.icon} width={40} height={40} />
               </motion.div>
               <span className="text-lg font-bold tracking-tight">
                 {feature.title}

@@ -7,6 +7,7 @@ import {
   Review,
   SEOData,
   StrapiResponse,
+  Video,
 } from './shared-types'
 
 // Extend CourseBase for home page specific needs
@@ -128,13 +129,6 @@ export interface BlogSectionData {
   title: string
   description: string
   blogs: Blog[]
-}
-
-export interface Video {
-  id: number
-  title: string
-  shortDescription: string
-  videoURL: string
 }
 
 export interface VideoSectionData {

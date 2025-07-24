@@ -13,6 +13,7 @@ import {
   Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { BootcampOverviewContentSection } from '@/types/bootcamp-page-types'
 
 // Utility function
 const debounce = (func: (...args: any[]) => void, delay: number) => {
@@ -300,7 +301,9 @@ const WhoSection: React.FC = () => (
 )
 
 // Main CourseOverview Component
-export function BootcampOverview() {
+export const BootcampOverview: React.FC<{
+  data: BootcampOverviewContentSection
+}> = ({ data }) => {
   const contentRef = useRef<HTMLDivElement>(null)
   const [activeSection, setActiveSection] = useState<Section>('tools')
   const sections: Section[] = useMemo(() => ['tools', 'learn', 'who'], [])

@@ -5,8 +5,11 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Video, Code, RefreshCw, FileCheck } from 'lucide-react'
+import { CallToActionContentSection } from '@/types/bootcamp-page-types'
 
-const CallToAction = () => {
+const CallToAction: React.FC<{ data: CallToActionContentSection }> = ({
+  data,
+}) => {
   return (
     <section className="py-20 relative overflow-hidden bg-gradient-to-br from-accent/10 via-accent/5 to-accent/15 dark:from-primary/20 dark:via-primary/15 dark:to-primary/25">
       {/* Background pattern */}

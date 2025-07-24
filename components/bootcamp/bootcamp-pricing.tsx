@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, Zap } from 'lucide-react'
+import { PricingPackageContentSection } from '@/types/bootcamp-page-types'
 
-export function BootcampPricing() {
+export const BootcampPricing: React.FC<{
+  data: PricingPackageContentSection
+}> = ({ data }) => {
   return (
     <section className="w-full py-16 bg-background">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">

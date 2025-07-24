@@ -11,6 +11,7 @@ import {
   GraduationCap,
   Briefcase,
 } from 'lucide-react'
+import { BootcampSpecialityContentSection } from '@/types/bootcamp-page-types'
 
 const projects = [
   {
@@ -50,7 +51,9 @@ const projects = [
   },
 ]
 
-export function BootcampSpeciality() {
+export const BootcampSpeciality: React.FC<{
+  data: BootcampSpecialityContentSection
+}> = ({ data }) => {
   const container = useRef(null)
   const { scrollYProgress } = useScroll({
     target: container,

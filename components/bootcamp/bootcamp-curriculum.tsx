@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Lock, PlayCircle, FileText, BookOpen } from 'lucide-react'
 import { DialogTitle } from '@radix-ui/react-dialog'
 import { motion } from 'framer-motion'
+import { Curriculum } from '@/types/shared-types'
 
 const bootcampModules = [
   {
@@ -143,7 +144,9 @@ interface LectureType {
   videoUrl?: string
 }
 
-export function BootcampCurriculum() {
+export const BootcampCurriculum: React.FC<{
+  data: Curriculum
+}> = ({ data }) => {
   const [selectedVideo, setSelectedVideo] = useState<{
     url: string
     title: string

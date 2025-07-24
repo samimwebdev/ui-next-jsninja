@@ -30,7 +30,9 @@ export function AnimatedAvatars({
     lg: { width: 48, height: 48 },
   }
 
-  const defaultMessage = `Join ${totalUsers.toLocaleString()}+ developers who have elevated their skills`
+  const messageContent = `Join ${totalUsers.toLocaleString()} ${
+    totalUsers === 1 ? 'user' : 'users'
+  } ${message ? message : ' who Elevate their skills with us'}`
 
   return (
     <div
@@ -60,7 +62,7 @@ export function AnimatedAvatars({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.9, duration: 0.6 }}
       >
-        {message || defaultMessage}
+        {messageContent}
       </motion.p>
     </div>
   )
