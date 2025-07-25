@@ -176,6 +176,7 @@ export interface BatchScheduleContentSection {
   enrollEndBtn: StrapiIcon
   orientationStartBtn: StrapiIcon
   classStartBtn: StrapiIcon
+  nextBatchScheduleBtn?: ButtonType | null
 }
 
 export interface CallToActionContentSection {

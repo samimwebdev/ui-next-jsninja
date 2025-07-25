@@ -10,46 +10,32 @@ import {
   HeadphonesIcon,
   GraduationCap,
   Briefcase,
+  LucideIcon,
 } from 'lucide-react'
-import { BootcampSpecialityContentSection } from '@/types/bootcamp-page-types'
+import {
+  BootcampSpecialityContentSection,
+  StrapiIcon,
+} from '@/types/bootcamp-page-types'
+import DynamicIcon from '@/components/shared/DynamicIcon'
 
-const projects = [
-  {
-    title: 'Daily Lecture Update',
-    description:
-      'Get daily lecture updates with comprehensive materials and resources. Our expert instructors provide clear explanations and practical examples.',
-    icon: BookOpen,
-    color: '#16357F',
-  },
-  {
-    title: 'Must Complete On Time',
-    description:
-      'Time-bound assignments with clear deadlines help you stay on track. Our structured approach ensures you develop consistent coding habits.',
-    icon: ClipboardCheck,
-    color: '#53CD99',
-  },
-  {
-    title: 'Daily Support',
-    description:
-      'Get 24/7 support from our team of experienced developers. Ask questions, get code reviews, and receive guidance whenever you need it.',
-    icon: HeadphonesIcon,
-    color: '#6A177D',
-  },
-  {
-    title: 'Exam After Ending',
-    description:
-      "Comprehensive assessments at the end of each module ensure you've mastered the material before moving on to more advanced concepts.",
-    icon: GraduationCap,
-    color: '#02a95c',
-  },
-  {
-    title: 'Internship',
-    description:
-      "Real-world experience through our partner companies. Apply what you've learned in actual projects and build your professional portfolio.",
-    icon: Briefcase,
-    color: '#5428B8',
-  },
-]
+// Default icons mapping for fallback
+const getDefaultIcon = (index: number) => {
+  const defaultIcons = [
+    BookOpen,
+    ClipboardCheck,
+    HeadphonesIcon,
+    GraduationCap,
+    Briefcase,
+    BookOpen,
+  ]
+  return defaultIcons[index % defaultIcons.length]
+}
+
+// Default colors for visual variety
+const getDefaultColor = (index: number) => {
+  const colors = ['#16357F', '#53CD99', '#6A177D', '#02a95c', '#5428B8']
+  return colors[index % colors.length]
+}
 
 export const BootcampSpeciality: React.FC<{
   data: BootcampSpecialityContentSection
@@ -60,32 +46,40 @@ export const BootcampSpeciality: React.FC<{
     offset: ['start start', 'end end'],
   })
 
+  // Transform Strapi data to match component structure
+  const sections = data.specialitySection.map((section, index) => ({
+    id: section.id,
+    title: section.title,
+    description: section.details.replace(/<[^>]*>/g, ''), // Strip HTML tags for description
+    icon: section.icon ? section.icon : null, // Use default if no icon/ Store custom icon name
+    defaultIcon: getDefaultIcon(index),
+    color: getDefaultColor(index),
+  }))
+
   return (
     <ReactLenis root>
       <main ref={container} className="text-foreground bg-background">
         <section className="w-full py-12 md:py-16 lg:py-20 grid place-content-center text-center">
           <h2 className="text-3xl md:text-4xl lg:text-5xl px-8 mb-6 font-semibold text-center tracking-tight leading-[120%]">
-            Why Choose Our JavaScript Bootcamp?
+            {data.title}
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-4">
-            Our JavaScript Bootcamp is designed to accelerate your journey from
-            beginner to job-ready developer. Experience hands-on learning,
-            real-world projects, and dedicated mentorship to launch your career
-            in web development.
+            {data.description}
           </p>
         </section>
 
         <section className="w-full">
-          {projects.map((project, i) => {
-            const targetScale = 1 - (projects.length - i) * 0.05
+          {sections.map((section, i) => {
+            const targetScale = 1 - (sections.length - i) * 0.05
             return (
               <Card
                 key={`p_${i}`}
                 i={i}
-                icon={project.icon}
-                title={project.title}
-                color={project.color}
-                description={project.description}
+                icon={section.icon}
+                defaultIcon={section.defaultIcon}
+                title={section.title}
+                color={section.color}
+                description={section.description}
                 progress={scrollYProgress}
                 range={[i * 0.25, 1]}
                 targetScale={targetScale}
@@ -102,7 +96,8 @@ interface CardProps {
   i: number
   title: string
   description: string
-  icon: React.ElementType
+  icon: StrapiIcon | null
+  defaultIcon: LucideIcon
   color: string
   progress: MotionValue<number>
   range: [number, number]
@@ -113,9 +108,10 @@ export const Card: React.FC<CardProps> = ({
   i,
   title,
   description,
-  icon: Icon,
+  icon,
   color,
   progress,
+  defaultIcon: DefaultIcon,
   range,
   targetScale,
 }) => {
@@ -164,7 +160,7 @@ export const Card: React.FC<CardProps> = ({
               {description}
             </motion.p>
 
-            <motion.button
+            {/* <motion.button
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
@@ -176,7 +172,7 @@ export const Card: React.FC<CardProps> = ({
               className="mt-6 px-4 py-2 rounded-md text-sm font-medium bg-white/20 text-white transition-all duration-300"
             >
               Learn More
-            </motion.button>
+            </motion.button> */}
           </div>
 
           <motion.div
@@ -229,10 +225,20 @@ export const Card: React.FC<CardProps> = ({
                     ease: 'easeInOut',
                   }}
                 >
-                  <Icon
-                    size={150}
-                    className="text-white/90 drop-shadow-2xl filter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                  />
+                  {icon ? (
+                    <DynamicIcon
+                      icon={icon}
+                      className="text-white/90 drop-shadow-2xl filter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                      width={150}
+                      height={150}
+                    />
+                  ) : (
+                    <DefaultIcon
+                      className="text-white/90 drop-shadow-2xl filter drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                      width={150}
+                      height={150}
+                    />
+                  )}
                 </motion.div>
 
                 {/* Particle effects */}

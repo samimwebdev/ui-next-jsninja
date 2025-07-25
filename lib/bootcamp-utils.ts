@@ -18,7 +18,7 @@ export function formatBootcampPrice(price: number): string {
   return `${price.toLocaleString()} TK`
 }
 
-export function formatBootcampDate(dateString: string): string {
+export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
