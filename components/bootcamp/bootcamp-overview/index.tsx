@@ -3,61 +3,34 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
-import {
-  Clapperboard,
-  Palette,
-  Bot,
-  Briefcase,
-  Wrench,
-  GraduationCap,
-  Users,
-} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { BootcampOverviewContentSection } from '@/types/bootcamp-page-types'
+import DynamicIcon from '@/components/shared/DynamicIcon'
 
-// Utility function
-const debounce = (func: (...args: any[]) => void, delay: number) => {
-  let timeoutId: NodeJS.Timeout
-  return (...args: any[]) => {
-    clearTimeout(timeoutId)
+// Utility function for debouncing scroll events
+const debounce = <T extends (...args: never[]) => void>(
+  func: T,
+  delay: number
+): ((...args: Parameters<T>) => void) => {
+  let timeoutId: NodeJS.Timeout | null = null
+
+  return (...args: Parameters<T>): void => {
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
     timeoutId = setTimeout(() => func(...args), delay)
   }
 }
 
-// Types
-type Section = 'tools' | 'learn' | 'who'
-
-// TabItem Component
 const TabItem: React.FC<{
-  section: Section
+  section: BootcampOverviewContentSection['sections'][0]
+  sectionKey: string
   isActive: boolean
   onClick: () => void
-}> = ({ section, isActive, onClick }) => {
-  const getIcon = () => {
-    switch (section) {
-      case 'tools':
-        return <Wrench className="h-5 w-5" />
-      case 'learn':
-        return <GraduationCap className="h-5 w-5" />
-      case 'who':
-        return <Users className="h-5 w-5" />
-    }
-  }
-
-  const getLabel = () => {
-    switch (section) {
-      case 'tools':
-        return 'Software And Tools'
-      case 'learn':
-        return 'What You Will Learn'
-      case 'who':
-        return 'Who Is This Course For'
-    }
-  }
-
+}> = ({ section, sectionKey, isActive, onClick }) => {
   return (
     <TabsTrigger
-      value={section}
+      value={sectionKey}
       onClick={onClick}
       className={cn(
         'w-full justify-start gap-3 p-4 text-base relative',
@@ -75,279 +48,178 @@ const TabItem: React.FC<{
         )}
       />
       <div className="flex items-center gap-3 relative z-10">
-        {getIcon()}
-        {getLabel()}
+        {/* Dynamic icon from Strapi data */}
+        {section.primaryLabelIcon && (
+          <DynamicIcon
+            icon={section.primaryLabelIcon}
+            width={section.primaryLabelIcon.width}
+            height={section.primaryLabelIcon.height}
+            className="h-5 w-5"
+          />
+        )}
+        {section.primaryLabel}
       </div>
     </TabsTrigger>
   )
 }
 
-// SidebarTabs Component
+// SidebarTabs Component - now dynamic
 const SidebarTabs: React.FC<{
-  activeSection: Section
-  onSectionChange: (section: Section) => void
-}> = ({ activeSection, onSectionChange }) => {
-  const sections: Section[] = ['tools', 'learn', 'who']
-
+  sections: BootcampOverviewContentSection['sections']
+  activeSection: string
+  onSectionChange: (section: string) => void
+}> = ({ sections, activeSection, onSectionChange }) => {
   return (
     <Tabs
       value={activeSection}
-      onValueChange={onSectionChange as (value: string) => void}
+      onValueChange={onSectionChange}
       className="w-full"
     >
       <TabsList className="flex flex-col h-auto bg-card dark:bg-card p-2 space-y-2">
-        {sections.map((section) => (
-          <TabItem
-            key={section}
-            section={section}
-            isActive={activeSection === section}
-            onClick={() => onSectionChange(section)}
-          />
-        ))}
+        {sections.map((section) => {
+          // Create a unique section key from the primary label
+          const sectionKey = section.primaryLabel
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+
+          return (
+            <TabItem
+              key={section.id}
+              section={section}
+              sectionKey={sectionKey}
+              isActive={activeSection === sectionKey}
+              onClick={() => onSectionChange(sectionKey)}
+            />
+          )
+        })}
       </TabsList>
     </Tabs>
   )
 }
 
-// ToolsSection Component
-const ToolsSection: React.FC = () => (
+// Dynamic Section Component
+const DynamicSection: React.FC<{
+  section: BootcampOverviewContentSection['sections'][0]
+}> = ({ section }) => (
   <>
-    <h3 className="text-3xl font-bold mb-8">
-      What You&apos;ll Master In This Course
-    </h3>
+    <h3 className="text-3xl font-bold mb-8">{section.secondaryHeading}</h3>
     <div className="space-y-12">
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Clapperboard className="h-6 w-6 text-primary" />
+      {section.sectionContent.map((content) => (
+        <div
+          key={content.id}
+          className="bg-card/50 p-6 rounded-lg border border-border/50"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            {/* Content icon */}
+            {content.icon && (
+              <div className="p-2 rounded-lg bg-primary/10">
+                <DynamicIcon
+                  icon={content.icon}
+                  width={content.icon.width}
+                  height={content.icon.height}
+                  className="h-6 w-6 text-primary"
+                />
+              </div>
+            )}
+            <h4 className="text-xl font-semibold">{content.title}</h4>
           </div>
-          <h4 className="text-xl font-semibold">Video Editing Mastery</h4>
+
+          <div
+            className="prose prose-sm max-w-none dark:prose-invert [&_ul]:ml-8 [&_ul]:space-y-3 [&_ul]:list-disc [&_ul]:text-muted-foreground [&_p]:ml-8 [&_p]:text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: content.details }}
+          />
         </div>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>
-            Dominate the fundamentals and advanced techniques of video editing
-          </li>
-          <li>
-            Unlock the secrets of professional editors and their workflows
-          </li>
-          <li>
-            Create captivating content across various formats: viral reels,
-            documentaries, podcasts, and more
-          </li>
-          <li>Elevate your storytelling through powerful editing techniques</li>
-        </ul>
-      </div>
-
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Palette className="h-6 w-6 text-primary" />
-          </div>
-          <h4 className="text-xl font-semibold">
-            Graphic Design & Motion Graphics
-          </h4>
-        </div>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>
-            Transform from novice to expert in photo editing and graphic design
-          </li>
-          <li>
-            Craft stunning visuals for ads, thumbnails, posters, and banners
-          </li>
-          <li>
-            Bring your designs to life with dynamic animation and motion
-            graphics
-          </li>
-          <li>Dive into 3D environments and create complex visual stories</li>
-        </ul>
-      </div>
-
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Bot className="h-6 w-6 text-primary" />
-          </div>
-          <h4 className="text-xl font-semibold">Cutting-Edge AI Integration</h4>
-        </div>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>
-            Harness the power of generative AI tools for next-level editing
-          </li>
-          <li>
-            Master prompt writing for text-to-image, text-to-video, and
-            text-to-audio transformations
-          </li>
-          <li>Explore voice cloning and other innovative AI technologies</li>
-          <li>
-            Stay ahead of the curve with the latest AI advancements in media
-            creation
-          </li>
-        </ul>
-      </div>
-
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Briefcase className="h-6 w-6 text-primary" />
-          </div>
-          <h4 className="text-xl font-semibold">
-            Launch Your Freelance Career
-          </h4>
-        </div>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>Turn your newfound skills into a thriving freelance business</li>
-          <li>
-            Design an irresistible portfolio that attracts high-paying clients
-          </li>
-          <li>Navigate freelancing platforms like a pro</li>
-          <li>
-            Learn the roadmap to building your own successful service-based
-            agency
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <p className="mt-12 text-muted-foreground text-lg leading-relaxed">
-      By the end of this course, you&apos;ll have the skills, knowledge, and
-      confidence to create professional-grade videos, graphics, and animations.
-      Whether you&apos;re looking to enhance your personal projects, boost your
-      career, or start a lucrative freelance business, this comprehensive
-      program will equip you with everything you need to succeed in the dynamic
-      world of digital media creation.
-    </p>
-  </>
-)
-
-// LearnSection Component
-const LearnSection: React.FC = () => (
-  <>
-    <h3 className="text-3xl font-bold mb-8">Learning Path</h3>
-    <div className="space-y-8">
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <h4 className="text-xl font-semibold mb-4">
-          1. Foundations of Digital Media
-        </h4>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>Understanding digital formats and compression</li>
-          <li>Color theory and its application in digital media</li>
-          <li>Basics of composition and framing</li>
-          <li>Introduction to industry-standard software</li>
-        </ul>
-      </div>
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <h4 className="text-xl font-semibold mb-4">
-          2. Advanced Video Editing Techniques
-        </h4>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>Mastering timeline editing and keyframing</li>
-          <li>Color grading and color correction</li>
-          <li>Audio editing and sound design</li>
-          <li>Creating compelling transitions and effects</li>
-        </ul>
-      </div>
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <h4 className="text-xl font-semibold mb-4">
-          3. Graphic Design for Digital Media
-        </h4>
-        <ul className="ml-8 space-y-3 list-disc text-muted-foreground">
-          <li>Typography and layout design</li>
-          <li>Creating engaging thumbnails and posters</li>
-          <li>Logo design and branding elements</li>
-          <li>Infographic creation for data visualization</li>
-        </ul>
-      </div>
+      ))}
     </div>
   </>
 )
 
-// WhoSection Component
-const WhoSection: React.FC = () => (
-  <>
-    <h3 className="text-3xl font-bold mb-8">Target Audience</h3>
-    <div className="space-y-8">
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <h4 className="text-xl font-semibold mb-4">
-          Aspiring Content Creators
-        </h4>
-        <p className="text-muted-foreground">
-          If you&apos;re looking to start a YouTube channel, create engaging
-          social media content, or dive into the world of digital storytelling,
-          this course will provide you with the essential skills to bring your
-          ideas to life.
-        </p>
-      </div>
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <h4 className="text-xl font-semibold mb-4">Marketing Professionals</h4>
-        <p className="text-muted-foreground">
-          For those in marketing roles looking to enhance their digital media
-          skills, this course will empower you to create high-quality visual
-          content that resonates with your audience and drives engagement.
-        </p>
-      </div>
-      <div className="bg-card/50 p-6 rounded-lg border border-border/50">
-        <h4 className="text-xl font-semibold mb-4">
-          Freelancers and Entrepreneurs
-        </h4>
-        <p className="text-muted-foreground">
-          Whether you&apos;re starting a freelance career in digital media or
-          looking to create compelling content for your own business, this
-          course will equip you with the skills to stand out in a competitive
-          market.
-        </p>
-      </div>
-    </div>
-  </>
-)
-
-// Main CourseOverview Component
+// Main BootcampOverview Component
 export const BootcampOverview: React.FC<{
   data: BootcampOverviewContentSection
 }> = ({ data }) => {
   const contentRef = useRef<HTMLDivElement>(null)
-  const [activeSection, setActiveSection] = useState<Section>('tools')
-  const sections: Section[] = useMemo(() => ['tools', 'learn', 'who'], [])
-  const sectionRefs = useRef<{ [key in Section]: HTMLDivElement | null }>({
-    tools: null,
-    learn: null,
-    who: null,
-  })
+  const isScrollingToSection = useRef(false) // Add this ref to track manual scrolling
 
-  const scrollToSection = useCallback((sectionId: Section) => {
+  // Create section keys from the dynamic data
+  const sectionKeys = useMemo(
+    () =>
+      data.sections.map((section) =>
+        section.primaryLabel.toLowerCase().replace(/\s+/g, '-')
+      ),
+    [data.sections]
+  )
+
+  const [activeSection, setActiveSection] = useState<string>(
+    sectionKeys[0] || ''
+  )
+
+  const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
+
+  // Initialize section refs
+  useEffect(() => {
+    const refs: { [key: string]: HTMLDivElement | null } = {}
+    sectionKeys.forEach((key) => {
+      refs[key] = null
+    })
+    sectionRefs.current = refs
+  }, [sectionKeys])
+
+  const scrollToSection = useCallback((sectionId: string) => {
+    // Immediately set the active section without any delays
     setActiveSection(sectionId)
+
+    // Temporarily disable scroll handler
+    isScrollingToSection.current = true
+
     const element = sectionRefs.current[sectionId]
     if (element) {
-      const yOffset = -100
+      const yOffset = -120
       const y =
         element.getBoundingClientRect().top + window.pageYOffset + yOffset
       window.scrollTo({ top: y, behavior: 'smooth' })
+
+      // Re-enable scroll handler after animation
+      setTimeout(() => {
+        isScrollingToSection.current = false
+      }, 1000)
     }
   }, [])
 
   const handleScroll = useCallback(() => {
-    const scrollPosition = window.scrollY + window.innerHeight / 2
+    // Skip all scroll handling during programmatic scrolling
+    if (isScrollingToSection.current) {
+      return
+    }
 
-    let newActiveSection = activeSection
-    for (const section of sections) {
-      const element = sectionRefs.current[section]
+    const scrollPosition = window.scrollY + 200
+
+    let newActiveSection = sectionKeys[0] || ''
+
+    // Find which section is currently most visible
+    for (let i = sectionKeys.length - 1; i >= 0; i--) {
+      const sectionKey = sectionKeys[i]
+      const element = sectionRefs.current[sectionKey]
+
       if (element) {
-        const { top, bottom } = element.getBoundingClientRect()
+        const { top } = element.getBoundingClientRect()
         const elementTop = top + window.scrollY
-        const elementBottom = bottom + window.scrollY
-        if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
-          newActiveSection = section
+
+        if (elementTop <= scrollPosition) {
+          newActiveSection = sectionKey
           break
         }
       }
     }
 
+    // Only update if there's a change
     if (newActiveSection !== activeSection) {
       setActiveSection(newActiveSection)
     }
-  }, [activeSection, sections])
+  }, [activeSection, sectionKeys])
 
   const debouncedHandleScroll = useMemo(
-    () => debounce(handleScroll, 10),
+    () => debounce(handleScroll, 50),
     [handleScroll]
   )
 
@@ -361,23 +233,21 @@ export const BootcampOverview: React.FC<{
   }, [debouncedHandleScroll])
 
   const setSectionRef = useCallback(
-    (el: HTMLDivElement | null, section: Section) => {
+    (el: HTMLDivElement | null, sectionKey: string) => {
       if (el) {
-        sectionRefs.current[section] = el
+        sectionRefs.current[sectionKey] = el
       }
     },
     []
   )
 
   return (
-    <section className="s max-w-screen-xl container mx-auto  bg-background py-12 dark:bg-background">
+    <section className="max-w-screen-xl container mx-auto bg-background py-12 dark:bg-background">
       <div className="text-center mb-6">
         <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-          Course <span className="text-primary">Overview</span>
+          {data.title}
         </h2>
-        <p className="text-muted-foreground text-lg">
-          Detail information about course
-        </p>
+        <p className="text-muted-foreground text-lg">{data.description}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-8 mt-16">
@@ -385,6 +255,7 @@ export const BootcampOverview: React.FC<{
         <div className="md:sticky md:top-24 h-fit">
           <Card className="overflow-hidden">
             <SidebarTabs
+              sections={data.sections}
               activeSection={activeSection}
               onSectionChange={scrollToSection}
             />
@@ -394,21 +265,25 @@ export const BootcampOverview: React.FC<{
         {/* Right Content - Full height scrollable */}
         <Card className="p-8 relative">
           <div ref={contentRef} className="space-y-16">
-            {sections.map((section) => (
-              <div
-                key={section}
-                id={section}
-                ref={(el) => setSectionRef(el, section)}
-                className={cn(
-                  'pt-16 pb-16 transition-opacity duration-300',
-                  activeSection === section ? 'opacity-100' : 'opacity-70'
-                )}
-              >
-                {section === 'tools' && <ToolsSection />}
-                {section === 'learn' && <LearnSection />}
-                {section === 'who' && <WhoSection />}
-              </div>
-            ))}
+            {data.sections.map((section) => {
+              const sectionKey = section.primaryLabel
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+
+              return (
+                <div
+                  key={section.id}
+                  id={sectionKey}
+                  ref={(el) => setSectionRef(el, sectionKey)}
+                  className={cn(
+                    'scroll-mt-32 transition-opacity duration-300', // Added scroll-mt-32 for better scroll positioning
+                    activeSection === sectionKey ? 'opacity-100' : 'opacity-70'
+                  )}
+                >
+                  <DynamicSection section={section} />
+                </div>
+              )
+            })}
           </div>
         </Card>
       </div>
