@@ -7,8 +7,10 @@ export default function DynamicIcon({
   width,
   height,
   className,
+  style,
 }: {
   icon: StrapiIcon
+  style?: React.CSSProperties
   width: number
   height: number
   className?: string
@@ -17,7 +19,8 @@ export default function DynamicIcon({
     <svg
       width={width}
       height={height}
-      className={` ${className}`}
+      className={`${className}`}
+      style={style}
       viewBox={`0 0 ${icon.width} ${icon.height}`}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 import BootcampAssessment from './bootcamp-assessment'
-import BootcampShortFeature from './bootcamp-short-features'
+import BootcampShortFeature from './bootcamp-short-feature'
 
 import {
   AssessmentQuiz,

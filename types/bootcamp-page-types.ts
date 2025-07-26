@@ -1,3 +1,4 @@
+import { FAQ } from './shared-types'
 import {
   StrapiImage,
   StrapiIcon,
@@ -78,6 +79,7 @@ export interface TechIconContent {
   name: string
   alt: string
   icon: StrapiIcon | null
+  btnColor?: string
 }
 
 export interface SpecialitySection {
@@ -117,7 +119,7 @@ export interface Package {
   details: string
   price: number
   packageIcon: StrapiIcon | null
-  btn: ButtonType | null
+  btn: ButtonType
 }
 
 // Bootcamp content section types
@@ -176,7 +178,7 @@ export interface BatchScheduleContentSection {
   enrollEndBtn: StrapiIcon
   orientationStartBtn: StrapiIcon
   classStartBtn: StrapiIcon
-  nextBatchScheduleBtn?: ButtonType | null
+  nextBatchScheduleBtn?: ButtonType
 }
 
 export interface CallToActionContentSection {
@@ -184,7 +186,12 @@ export interface CallToActionContentSection {
   id: number
   title: string
   description: string
-  btnLabel: string
+  btn: {
+    id: number
+    btnLabel: string
+    btnLink: string | null
+    btnIcon?: StrapiIcon
+  }
   callToActionContent: CallToActionContent[]
 }
 
@@ -214,10 +221,7 @@ export interface FAQLayoutContentSection {
   id: number
   title: string
   description: string
-  faqItems: Array<{
-    question: string
-    answer: string
-  }>
+  faq: FAQ
 }
 
 export interface ReviewLayoutContentSection {

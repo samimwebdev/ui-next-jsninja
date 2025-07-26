@@ -105,6 +105,7 @@ export interface Review {
   reviewDetails: string
   reviewerName: string
   profile?: Profile
+  designation?: string
   createdAt: string
   updatedAt: string
   publishedAt: string | null
@@ -168,6 +169,23 @@ export interface Curriculum {
   modules: Module[]
 }
 
+export interface QuestionAnswer {
+  id: number
+  question: string
+  answer: string
+}
+
+export interface FAQ {
+  id: number
+  documentId: string
+  title: string
+  questionAnswer: QuestionAnswer[]
+  createdAt: string
+  updatedAt: string
+  publishedAt: string | null
+  locale: string | null
+}
+
 // Shared SEO types
 export interface MetaSocial {
   id: number
@@ -219,10 +237,6 @@ export interface Project {
   description: string
   technology: string
   image: StrapiImage
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
 }
 
 export interface Feature {

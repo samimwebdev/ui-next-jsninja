@@ -8,58 +8,8 @@ const BootcampShortFeature = ({
 }: {
   highlightedFeatures: HighlightFeature[]
 }) => {
-  // Default fallback features if no data provided
-  const defaultFeatures: HighlightFeature[] = [
-    {
-      id: 1,
-      title: '400+ Videos',
-      icon: {
-        iconName: 'mdi:video',
-        width: 24,
-        height: 24,
-        iconData:
-          "<path fill='currentColor' d='M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z'/>",
-      },
-      features: [
-        {
-          id: 1,
-          feature: 'Comprehensive video tutorials covering all aspects',
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: '12+ Projects',
-      icon: {
-        iconName: 'mdi:folder-multiple',
-        width: 24,
-        height: 24,
-        iconData:
-          "<path fill='currentColor' d='M3,6H21V8H3V6M5,10H19V12H5V10M7,14H17V16H7V14Z'/>",
-      },
-      features: [
-        { id: 2, feature: 'Real-world projects to build your portfolio' },
-      ],
-    },
-    {
-      id: 3,
-      title: '12+ Assignments',
-      icon: {
-        iconName: 'mdi:file-document',
-        width: 24,
-        height: 24,
-        iconData:
-          "<path fill='currentColor' d='M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z'/>",
-      },
-      features: [
-        { id: 3, feature: 'Hands-on assignments to practice your skills' },
-      ],
-    },
-  ]
-
   // Use provided data or fallback to defaults
-  const features =
-    highlightedFeatures?.length > 0 ? highlightedFeatures : defaultFeatures
+  const features = highlightedFeatures?.length > 0 ? highlightedFeatures : []
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-center py-6 gap-4 w-full">

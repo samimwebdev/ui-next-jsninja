@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ReviewContentSection } from '@/types/course-page-types'
 import Image from 'next/image'
+import { getCleanText } from '@/lib/utils'
 
 export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
   data,
@@ -34,14 +35,6 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
     )
   }
 
-  // Helper function to clean HTML content
-  const getCleanReviewText = (htmlContent: string) => {
-    return htmlContent
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .trim()
-  }
-
   return (
     <section className="my-12" id="reviews">
       <h2 className="text-3xl font-bold mb-6">
@@ -58,7 +51,7 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
             transition={{ duration: 0.25 }}
           >
             <p className="text-lg mb-4">
-              {getCleanReviewText(reviews[currentReview].reviewDetails)}
+              {getCleanText(reviews[currentReview].reviewDetails)}
             </p>
             <div className="flex items-center">
               <div className="flex-shrink-0 mr-3">

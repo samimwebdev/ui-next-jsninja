@@ -48,6 +48,7 @@ export function VideoPlayer({
   const videoType = getVideoType(videoUrl)
 
   // Get thumbnail for YouTube videos
+
   const getYouTubeThumbnail = (url: string) => {
     const regExp =
       /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/

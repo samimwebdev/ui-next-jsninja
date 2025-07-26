@@ -1,114 +1,62 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { ProjectCard } from './bootcamp-project-card'
-import Masonry from 'react-masonry-css'
 import { ProjectShowcaseContentSection } from '@/types/bootcamp-page-types'
-
-const projects = [
-  {
-    title: 'TIC-TAC-TOE',
-    description:
-      'Master the classic game of Tic-Tac-Toe with this step-by-step tutorial. Learn about game state management and AI algorithms for creating unbeatable computer opponents.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['React', 'NextJS', 'TypeScript'],
-  },
-  {
-    title: 'TASKER',
-    description:
-      'A comprehensive task management solution with real-time updates and team collaboration features.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['React', 'Redux', 'TailwindCSS'],
-  },
-  {
-    title: 'CINERENTAL',
-    description:
-      'Movie rental and streaming platform with recommendation engine. Discover new films based on your viewing history and preferences.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['NextJS', 'Prisma', 'PostgreSQL'],
-  },
-  {
-    title: 'WEATHER DASHBOARD',
-    description:
-      'Real-time weather monitoring and forecasting with interactive maps and detailed analytics. Get accurate predictions and historical data visualization.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['React', 'OpenWeather API', 'D3.js'],
-  },
-  {
-    title: 'FACEHOOK',
-    description:
-      'Social media platform with real-time features, chat, and content sharing capabilities. Connect with friends, share moments, and engage in group discussions.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['NextJS', 'Socket.io', 'MongoDB'],
-  },
-  {
-    title: 'QUIZ APPLICATION',
-    description:
-      'A Dynamic Platform for Engaging and Interactive Quizzes with Multiple Participants. Features real-time scoring, leaderboards, and customizable question types to enhance learning and assessment.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['React', 'TypeScript', 'Firebase'],
-  },
-  {
-    title: 'EDUCONNECT',
-    description:
-      'A collaborative platform for dynamic and interactive learning with video conferencing and resource sharing. Facilitate remote education with virtual classrooms, breakout rooms, and integrated assignment submissions.',
-    image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-EKCpTqWzjpcoT7RcBQuRqCZtMIIAAA.png',
-    technologies: ['NextJS', 'WebRTC', 'Firebase'],
-  },
-]
-
-const breakpointColumns = {
-  default: 3,
-  1536: 3,
-  1280: 3,
-  1024: 2,
-  768: 2,
-  640: 1,
-}
+import { ProjectShowcaseClient } from './bootcamp-project-showcase-client'
+import { extractFeatures, getCleanText } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
+import Image from 'next/image'
 
 export const BootcampProjectShowcase: React.FC<{
   data: ProjectShowcaseContentSection
 }> = ({ data }) => {
-  const [mounted, setMounted] = useState(false)
+  const projects = data?.projects || []
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
+  // Prepare data for client component
+  const projectsData = projects.map((project) => ({
+    ...project,
+    cleanDescription: getCleanText(project.description),
+    features: extractFeatures(project.description),
+    technologies:
+      project.technology?.split(',').map((tech) => tech.trim()) || [],
+  }))
 
   return (
     <section className="container mx-auto max-w-screen-xl px-4 py-12">
       <div className="text-center mb-12">
         <h2 className="text-4xl md:text-4xl font-black tracking-tight text-center mb-6">
-          JavaScript Bootcamp Project Showcase
+          {data.title}
         </h2>
-        <p className="text-muted-foreground text-lg">
-          Explore hands-on projects you ll build during the bootcamp, designed
-          to reinforce your JavaScript and frontend skills with real-world
-          challenges.
-        </p>
+        <p className="text-muted-foreground text-lg">{data.description}</p>
       </div>
-      <Masonry
-        breakpointCols={breakpointColumns}
-        className="flex -ml-6 w-auto"
-        columnClassName="pl-6 bg-clip-padding"
-      >
-        {projects.map((project) => (
-          <div key={project.title} className="mb-6">
-            <ProjectCard {...project} />
+      {/* SSR fallback grid */}
+      {/* SSR: Show static grid for no-JS users */}
+      <div className="hidden noscript:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {projectsData.slice(0, 6).map((project) => (
+          <div key={project.id} className="bg-card rounded-lg overflow-hidden">
+            <Image
+              src={project.image?.url || '/placeholder.svg'}
+              alt={project.title}
+              className="w-full h-[200px] object-cover"
+              width="300"
+              height="200"
+            />
+            <div className="p-4">
+              <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                {project.cleanDescription.substring(0, 100)}...
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {project.technologies.map((tech, index) => (
+                  <Badge key={index} variant="secondary">
+                    {tech}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
         ))}
-      </Masonry>
+      </div>
+
+      {/* Client Masonry enhancement */}
+      <ProjectShowcaseClient projectsData={projectsData} />
     </section>
   )
 }

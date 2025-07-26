@@ -13,6 +13,8 @@ import {
   Feature,
   Instructor,
   Curriculum,
+  FAQ,
+  Lesson,
 } from './shared-types'
 
 // Course bundle types
@@ -25,24 +27,6 @@ export interface CourseBundle {
   helperText?: string | null
   features?: Feature[]
   courseBases: CourseBase[]
-}
-
-// FAQ types
-export interface QuestionAnswer {
-  id: number
-  question: string
-  answer: string
-}
-
-export interface FAQ {
-  id: number
-  documentId: string
-  title: string
-  questionAnswer: QuestionAnswer[]
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
 }
 
 // Course content section types
@@ -153,10 +137,13 @@ export type {
   StrapiImage,
   StrapiIcon,
   Category,
+  Project,
   ButtonType,
   Profile,
   Review,
   SEOData,
   CourseBase,
   StrapiResponse,
+  Curriculum,
+  Lesson,
 }

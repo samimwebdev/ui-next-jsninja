@@ -20,7 +20,7 @@ const HomeTechLogos: React.FC<{ data: TechSectionData }> = ({ data }) => {
                   <div className="w-14 h-14 flex items-center justify-center flex-shrink-0">
                     <DynamicIcon icon={tech.icon} width={34} height={34} />
                   </div>
-                  <span className="font-bold text-2xl text-[#23216E] whitespace-nowrap">
+                  <span className="font-bold text-2xl text-[#23216E] dark:text-[#A0AEC0] whitespace-nowrap">
                     {tech.name}
                   </span>
                 </div>
@@ -38,7 +38,7 @@ const HomeTechLogos: React.FC<{ data: TechSectionData }> = ({ data }) => {
                   <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
                     <DynamicIcon icon={tech.icon} width={34} height={34} />
                   </div>
-                  <span className="font-bold text-2xl text-[#23216E] whitespace-nowrap">
+                  <span className="font-bold text-2xl text-[#23216E] dark:text-[#A0AEC0] whitespace-nowrap">
                     {tech.name}
                   </span>
                 </div>

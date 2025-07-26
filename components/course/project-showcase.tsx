@@ -2,29 +2,7 @@ import { ProjectContentSection } from '@/types/course-page-types'
 import { ProjectSlider } from './project-slider'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
-
-// Helper functions (can be used on server)
-const getCleanDescription = (htmlContent: string) => {
-  return htmlContent
-    .replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .trim()
-}
-
-const extractFeatures = (htmlContent: string): string[] => {
-  const features: string[] = []
-  const listItemRegex = /<li[^>]*>(.*?)<\/li>/g
-  let match
-
-  while ((match = listItemRegex.exec(htmlContent)) !== null) {
-    const feature = match[1].replace(/<[^>]*>/g, '').trim()
-    if (feature) {
-      features.push(feature)
-    }
-  }
-
-  return features
-}
+import { extractFeatures, getCleanText } from '@/lib/utils'
 
 export const ProjectShowcase: React.FC<{ data: ProjectContentSection }> = ({
   data,
@@ -47,7 +25,7 @@ export const ProjectShowcase: React.FC<{ data: ProjectContentSection }> = ({
   // Prepare data for client component
   const projectsData = projects.map((project) => ({
     ...project,
-    cleanDescription: getCleanDescription(project.description),
+    cleanDescription: getCleanText(project.description),
     features: extractFeatures(project.description),
     technologies:
       project.technology?.split(',').map((tech) => tech.trim()) || [],
@@ -101,5 +79,3 @@ export const ProjectShowcase: React.FC<{ data: ProjectContentSection }> = ({
     </section>
   )
 }
-
-export { getCleanDescription, extractFeatures }

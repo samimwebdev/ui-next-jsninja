@@ -4,7 +4,7 @@ import { BootcampSpeciality } from '@/components/bootcamp/bootcamp-speciality'
 import { PromoVideos } from '@/components/bootcamp/promo-videos'
 import { BatchSchedule } from '@/components/bootcamp/next-batch-schedule'
 import { BootcampOverview } from '@/components/bootcamp/bootcamp-overview'
-import FAQBootcamp from '@/components/bootcamp/faq/faq-bootcamp'
+import FAQBootcamp from '@/components/bootcamp/faq-bootcamp'
 import TestimonialBootcamp from '@/components/bootcamp/testimonial-bootcamp'
 import { BootcampLogoSlider } from '@/components/bootcamp/bootcamp-logo-slider'
 import CallToAction from '@/components/shapexui/cta'
@@ -15,7 +15,7 @@ import { AnimatedSection } from '@/components/shared/animated-section'
 import { BootcampPageData } from '@/types/bootcamp-page-types'
 import { getBootcampContentSection } from '@/lib/bootcamp-utils'
 import { getBootcampData } from '@/lib/bootcamp'
-import { CourseAuthor } from '@/components/shared/course-author'
+import { BootcampAuthor } from '@/components/bootcamp/bootcamp-author'
 
 export default async function BootcampPage({
   params,
@@ -145,7 +145,7 @@ export default async function BootcampPage({
 
       {authorData && (
         <AnimatedSection animation="fadeInUp" delay={0.1}>
-          <CourseAuthor data={authorData} />
+          <BootcampAuthor data={authorData} />
         </AnimatedSection>
       )}
 

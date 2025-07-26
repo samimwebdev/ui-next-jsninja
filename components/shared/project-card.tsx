@@ -11,23 +11,22 @@ import {
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { Project } from '@/types/shared-types'
 
-interface ProjectCardProps {
-  title: string
-  description: string
-  image: string
+interface ProjectCardProps extends Project {
+  cleanDescription: string
+  features: string[]
   technologies: string[]
-  fullDescription?: string
   className?: string
 }
 
 export function ProjectCard({
   title,
-  description,
   image,
+  cleanDescription,
+  features,
   technologies,
-  fullDescription,
-  className,
+  className = '',
 }: ProjectCardProps) {
   return (
     <Dialog>
@@ -43,7 +42,7 @@ export function ProjectCard({
           <CardContent className="p-6">
             <div className="aspect-video relative rounded-lg overflow-hidden mb-4">
               <Image
-                src={image || '/placeholder.svg'}
+                src={image?.url || '/images/placeholder.svg'}
                 alt={title}
                 fill
                 className="object-cover w-full h-full"
@@ -53,7 +52,7 @@ export function ProjectCard({
               {title}
             </h3>
             <p className="text-muted-foreground dark:text-gray-300 text-sm mb-4">
-              {description}
+              {cleanDescription.substring(0, 100)}...
             </p>
           </CardContent>
           <CardFooter className="px-6 pb-6 pt-0">
@@ -77,14 +76,21 @@ export function ProjectCard({
         </DialogHeader>
         <div className="grid gap-4">
           <Image
-            src={image || '/placeholder.svg'}
+            src={image?.url || '/images/placeholder.svg'}
             alt={title}
             width={600}
             height={338}
             className="aspect-video object-cover rounded-lg"
           />
           <p className="text-muted-foreground dark:text-gray-400">
-            {fullDescription || description}
+            <div>
+              <h4 className="font-semibold mb-2">Project Features:</h4>
+              <ul className="list-disc pl-4 space-y-1">
+                {features.map((feature, index) => (
+                  <li key={index}>{feature}</li>
+                ))}
+              </ul>
+            </div>
           </p>
           <div className="flex flex-wrap gap-2">
             {technologies.map((tech) => (

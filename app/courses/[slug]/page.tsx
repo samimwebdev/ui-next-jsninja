@@ -11,7 +11,7 @@ import { Overview } from '@/components/course/course-overview'
 import { CourseCurriculum } from '@/components/course/course-curriculum'
 import { CourseAuthor } from '@/components/shared/course-author'
 import { ReviewSlider } from '@/components/course/review-slider'
-import { FAQ } from '@/components/course/faq'
+import { CourseFAQ } from '@/components/course/course-faq'
 import { ProjectShowcase } from '@/components/course/project-showcase'
 import { CourseBundle } from '@/components/course/course-bundle'
 import { CoursePriceSidebar } from '@/components/course/course-price-sidebar'
@@ -179,7 +179,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 {/* FAQ Section */}
                 {faqData && (
                   <AnimatedSection animation="fadeInUp" delay={0.7}>
-                    <FAQ data={faqData} />
+                    <CourseFAQ data={faqData} />
                   </AnimatedSection>
                 )}
 

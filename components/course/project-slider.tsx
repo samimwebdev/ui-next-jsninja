@@ -1,18 +1,9 @@
 'use client'
-
-import { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Image from 'next/image'
 import { Project } from '@/types/course-page-types'
+import { ProjectCard } from '../shared/project-card'
+import { useRef } from 'react'
 
 interface EnhancedProject extends Project {
   cleanDescription: string
@@ -25,8 +16,8 @@ interface ProjectSliderProps {
 }
 
 export const ProjectSlider: React.FC<ProjectSliderProps> = ({ projects }) => {
-  const [selectedProject, setSelectedProject] =
-    useState<EnhancedProject | null>(null)
+  // const [selectedProject, setSelectedProject] =
+  //   useState<EnhancedProject | null>(null)
   const sliderRef = useRef<HTMLDivElement>(null)
 
   const scroll = (direction: 'left' | 'right') => {
@@ -57,41 +48,47 @@ export const ProjectSlider: React.FC<ProjectSliderProps> = ({ projects }) => {
         className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide"
       >
         {projects.map((project) => (
-          <motion.div
-            key={project.id}
-            className="flex-shrink-0 w-[300px] snap-start"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setSelectedProject(project)}
+          <div
+            key={project.title}
+            className="flex-shrink-0 w-[340px] snap-start"
           >
-            <div className="bg-card rounded-lg overflow-hidden cursor-pointer">
-              <Image
-                src={project.image?.url || '/placeholder.svg'}
-                alt={project.title}
-                className="w-full h-[200px] object-cover"
-                width="300"
-                height="200"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  {project.cleanDescription.substring(0, 100)}...
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.technologies.map((tech, index) => (
-                    <Badge key={index} variant="secondary">
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
+            <ProjectCard {...project} />
+          </div>
+          // <motion.div
+          //   key={project.id}
+          //   className="flex-shrink-0 w-[300px] snap-start"
+          //   whileHover={{ scale: 1.02 }}
+          //   transition={{ duration: 0.2 }}
+          //   onClick={() => setSelectedProject(project)}
+          // >
+          //   <div className="bg-card rounded-lg overflow-hidden cursor-pointer">
+          //     <Image
+          //       src={project.image?.url || '/placeholder.svg'}
+          //       alt={project.title}
+          //       className="w-full h-[200px] object-cover"
+          //       width="300"
+          //       height="200"
+          //     />
+          //     <div className="p-4">
+          //       <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
+          //       <p className="text-muted-foreground text-sm mb-4">
+          //         {project.cleanDescription.substring(0, 100)}...
+          //       </p>
+          //       <div className="flex flex-wrap gap-2 mb-4">
+          //         {project.technologies.map((tech, index) => (
+          //           <Badge key={index} variant="secondary">
+          //             {tech}
+          //           </Badge>
+          //         ))}
+          //       </div>
+          //     </div>
+          //   </div>
+          // </motion.div>
         ))}
       </div>
 
       {/* Project details modal */}
-      <Dialog
+      {/* <Dialog
         open={!!selectedProject}
         onOpenChange={() => setSelectedProject(null)}
       >
@@ -131,7 +128,7 @@ export const ProjectSlider: React.FC<ProjectSliderProps> = ({ projects }) => {
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </>
   )
 }

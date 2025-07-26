@@ -104,3 +104,27 @@ export const formatDuration = (duration: number | string): string => {
     return `${minutes} ${minutes === 1 ? 'min' : 'mins'}`
   }
 }
+
+// Helper function to clean HTML content
+export const getCleanText = (htmlContent: string) => {
+  return htmlContent
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim()
+}
+
+//Helper function to extract features from HTML content
+export const extractFeatures = (htmlContent: string): string[] => {
+  const features: string[] = []
+  const listItemRegex = /<li[^>]*>(.*?)<\/li>/g
+  let match
+
+  while ((match = listItemRegex.exec(htmlContent)) !== null) {
+    const feature = match[1].replace(/<[^>]*>/g, '').trim()
+    if (feature) {
+      features.push(feature)
+    }
+  }
+
+  return features
+}

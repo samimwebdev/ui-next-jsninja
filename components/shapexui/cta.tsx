@@ -1,131 +1,35 @@
 'use client'
 
 import React from 'react'
-
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Video, Code, RefreshCw, FileCheck } from 'lucide-react'
 import { CallToActionContentSection } from '@/types/bootcamp-page-types'
+import { CTAClientWrapper } from './cta-client'
 
 const CallToAction: React.FC<{ data: CallToActionContentSection }> = ({
   data,
 }) => {
   return (
-    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-accent/10 via-accent/5 to-accent/15 dark:from-primary/20 dark:via-primary/15 dark:to-primary/25">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-20 dark:opacity-10">
+    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      {/* Subtle geometric background pattern */}
+      <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '24px 24px',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e2e8f0' fill-opacity='0.3'%3E%3Ccircle cx='20' cy='20' r='1'/%3E%3Ccircle cx='10' cy='10' r='1'/%3E%3Ccircle cx='30' cy='10' r='1'/%3E%3Ccircle cx='10' cy='30' r='1'/%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '40px 40px',
           }}
         ></div>
       </div>
+
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-accent/5 dark:from-primary/10 dark:via-transparent dark:to-accent/10"></div>
+
+      {/* Optional floating elements */}
+      <div className="absolute top-10 left-10 w-32 h-32 bg-primary/5 dark:bg-primary/10 rounded-full blur-2xl"></div>
+      <div className="absolute bottom-10 right-10 w-40 h-40 bg-accent/5 dark:bg-accent/10 rounded-full blur-2xl"></div>
+
       <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="max-w-3xl mx-auto text-center"
-        >
-          <h2 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl text-foreground dark:text-foreground">
-            Unlock the Power of{' '}
-            <span className="text-accent-foreground dark:text-accent-foreground relative inline-block">
-              Javascript Bootcamp
-              <span className="absolute -bottom-2 left-0 w-full h-1 bg-accent-foreground dark:bg-accent-foreground rounded-full"></span>
-            </span>
-          </h2>
-          <p className="max-w-xl mx-auto mt-6 text-lg leading-relaxed text-foreground/80 dark:text-foreground/80">
-            Learn Programming Problem Solving, Logic Development and Prepare for
-            Future
-          </p>
-        </motion.div>
-
-        <div className="mt-16 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            {
-              icon: <Video className="h-8 w-8" />,
-              title: '400+ videos',
-              text: 'Tailor every component to fit your brand',
-            },
-            {
-              icon: <Code className="h-8 w-8" />,
-              title: 'Programming and Problem Solving',
-              text: 'Optimized for all devices',
-            },
-            {
-              icon: <RefreshCw className="h-8 w-8" />,
-              title: 'Regular Updates',
-              text: 'Stay ahead with new features',
-            },
-            {
-              icon: <FileCheck className="h-8 w-8" />,
-              title: '20+ projects and assessments',
-              text: 'Comprehensive guides for easy setup',
-            },
-          ].map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className="flex items-start rounded-xl p-6 backdrop-blur-sm bg-background/80 border border-border hover:border-accent-foreground/50 hover:bg-background/90 transition-all duration-300 shadow-lg dark:bg-card/10 dark:border-border/20 dark:hover:bg-card/15"
-            >
-              <div className="p-3 rounded-lg bg-accent/10 text-accent-foreground dark:bg-accent-foreground/20 dark:text-accent-foreground">
-                {feature.icon}
-              </div>
-              <div className="ml-4">
-                <h3 className="text-xl font-bold text-foreground dark:text-foreground">
-                  {feature.title}
-                </h3>
-                <p className="mt-1.5 text-sm text-foreground/70 dark:text-foreground/80">
-                  {feature.text}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="max-w-xl mx-auto mt-12"
-        >
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full sm:w-auto"
-            >
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full sm:w-auto px-12 py-7 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground dark:from-accent-foreground dark:to-accent-foreground/80 dark:text-accent hover:from-primary/90 hover:to-primary/80 dark:hover:from-accent-foreground/90 dark:hover:to-accent-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-accent-foreground focus:ring-offset-2 focus:ring-offset-background transition duration-300 shadow-lg shadow-primary/20 dark:shadow-accent-foreground/30 relative overflow-hidden group rounded-full font-bold"
-              >
-                <span className="absolute inset-0 w-full h-full bg-white/30 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                <span className="relative flex items-center justify-center gap-2">
-                  Enroll Now
-                  <svg
-                    className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </span>
-              </Button>
-            </motion.div>
-          </div>
-        </motion.div>
+        {/* Pass all data to client wrapper to maintain exact animations */}
+        <CTAClientWrapper data={data} />
       </div>
     </section>
   )
