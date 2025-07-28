@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/sonner'
 import AuthProvider from '@/components/context/AuthProvider'
 import { getUser } from '@/lib/auth'
 import { VideoProvider } from '@/components/context/video-provider'
+import { strapiFetch } from '@/lib/strapi'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -93,12 +94,49 @@ export const metadata: Metadata = {
   },
 }
 
+export interface NestedMenu {
+  id: number
+  title: string
+  url: string
+  target?: string
+  isProtected?: boolean
+  children?: NestedMenu[]
+  shortDescription?: string
+  icon?: string
+}
+export interface MenuItem {
+  id: number
+  title: string
+  url: string
+  target?: string
+  isProtected?: boolean
+  children?: NestedMenu[]
+}
+
+interface Menu {
+  id: string
+  title: string
+  slug: string
+  items: MenuItem[]
+}
+
+const headerMenuId = process.env.HEADER_MENU_ID || 'o7mp8egjwy3o0dympkh8sxhi'
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   const currentUser = await getUser()
+
+  const { data: menuItems } = await strapiFetch<{
+    data: Menu
+  }>(`/api/tree-menus/menu/${headerMenuId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'force-cache',
+  })
 
   return (
     <html lang="en">
@@ -113,7 +151,7 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <Navigation />
+            <Navigation menuItems={menuItems.items} />
             <Toaster position="top-right" richColors />
             <VideoProvider>{children}</VideoProvider>
             <Footer />

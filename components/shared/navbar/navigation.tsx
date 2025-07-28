@@ -10,16 +10,10 @@ import { useEffect, useState } from 'react'
 import { UserNav } from './user-nav'
 import { useUser } from '@/components/context/AuthProvider'
 import { logoutAction } from '@/app/(auth)/actions'
+import { MenuItem } from '@/app/layout'
+// import { getUserWithProfile } from '@/lib/auth'
 
-// Demo user for testing
-// const demoUser = {
-//   id: 1,
-//   documentId: '12345',
-//   email: 'demo@example.com',
-//   username: 'demoUser',
-// }
-
-export const Navigation = () => {
+export const Navigation = ({ menuItems }: { menuItems: MenuItem[] }) => {
   const user = useUser()
   const [isLoggedIn, setIsLoggedIn] = useState(false) // Set to true to show logged in state by default
 
@@ -48,7 +42,7 @@ export const Navigation = () => {
               <Logo />
             </Link>
             {/* Desktop Menu */}
-            <NavMenu className="hidden md:block" />
+            <NavMenu className="hidden md:block" menuItems={menuItems} />
           </div>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
@@ -73,6 +67,7 @@ export const Navigation = () => {
                 isLoggedIn={isLoggedIn}
                 user={isLoggedIn ? user : null}
                 onLogout={() => logout()}
+                menuItems={menuItems}
               />
             </div>
           </div>

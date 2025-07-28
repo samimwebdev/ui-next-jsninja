@@ -83,6 +83,9 @@ export function ProjectCard({
             className="aspect-video object-cover rounded-lg"
           />
           <p className="text-muted-foreground dark:text-gray-400">
+            {cleanDescription}
+          </p>
+          {features.length > 0 && (
             <div>
               <h4 className="font-semibold mb-2">Project Features:</h4>
               <ul className="list-disc pl-4 space-y-1">
@@ -91,7 +94,7 @@ export function ProjectCard({
                 ))}
               </ul>
             </div>
-          </p>
+          )}
           <div className="flex flex-wrap gap-2">
             {technologies.map((tech) => (
               <Badge key={tech} variant="secondary">

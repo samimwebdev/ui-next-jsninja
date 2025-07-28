@@ -17,7 +17,7 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({ data }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+        transition={{ duration: 0.3 }}
         className="max-w-3xl mx-auto text-center"
       >
         <h2 className="text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl text-foreground">
@@ -29,12 +29,12 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({ data }) => {
       </motion.div>
 
       <div className="mt-16 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        {data.callToActionContent.map((feature, index) => (
+        {data.callToActionContent.map((feature) => (
           <motion.div
             key={feature.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
+            transition={{ duration: 0.3 }}
             whileHover={{ y: -5, scale: 1.02 }}
             className="flex items-start rounded-xl p-6 backdrop-blur-sm bg-background/90 border border-border/50 hover:border-primary/30 hover:bg-background hover:shadow-lg transition-all duration-300 shadow-sm"
           >

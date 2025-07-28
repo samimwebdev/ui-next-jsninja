@@ -2,6 +2,7 @@
 
 import { ReactLenis } from 'lenis/react'
 import { useTransform, motion, useScroll, MotionValue } from 'framer-motion'
+
 import { useRef } from 'react'
 import {
   BookOpen,
@@ -12,6 +13,7 @@ import {
   LucideIcon,
 } from 'lucide-react'
 import { StrapiIcon } from '@/types/bootcamp-page-types'
+import { useInView } from 'react-intersection-observer'
 import DynamicIcon from '@/components/shared/DynamicIcon'
 
 interface ProcessedSection {

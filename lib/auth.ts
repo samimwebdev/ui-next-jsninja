@@ -1,6 +1,7 @@
 'use server'
 import { cookies } from 'next/headers'
 import { strapiFetch } from './strapi'
+import QueryString from 'qs'
 
 const COOKIE = 'strapi_jwt'
 export interface UserWithProfile {
@@ -48,8 +49,18 @@ export async function getUser(): Promise<User | null> {
   const token = cookieStore.get(COOKIE)?.value
   if (!token) return null
 
+  const query = QueryString.stringify({
+    populate: {
+      profile: {
+        populate: {
+          image: true,
+        },
+      },
+    },
+  })
+
   try {
-    return await strapiFetch('/api/users/me?populate=profile', { token })
+    return await strapiFetch(`/api/users/me?${query}`, { token })
   } catch {
     // await clearAuthCookie()
     return null

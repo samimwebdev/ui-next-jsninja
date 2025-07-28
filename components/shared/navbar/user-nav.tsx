@@ -85,7 +85,7 @@ export function UserNav({ user, onLogout }: UserNavProps) {
           <DropdownMenuItem>
             <UserIcon className="mr-2 h-4 w-4" />
             <span>
-              <Link href="/dashboard/courses">courses</Link>
+              <Link href="/dashboard/courses">Enrolled courses</Link>
             </span>
           </DropdownMenuItem>
         </DropdownMenuGroup>

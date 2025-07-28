@@ -1,5 +1,3 @@
-'use client'
-
 import React from 'react'
 import { CallToActionContentSection } from '@/types/bootcamp-page-types'
 import { CTAClientWrapper } from './cta-client'
