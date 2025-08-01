@@ -195,13 +195,30 @@ export interface MetaSocial {
   image?: StrapiImage
 }
 
+type StructuredData = {
+  '@context': 'https://schema.org'
+  '@type': 'website'
+  name: string
+  url: string
+  description: string
+  provider: {
+    '@type': 'Organization'
+    name: string
+    logo: {
+      '@type': 'ImageObject'
+      url: string
+    }
+    sameAs: string[]
+  }
+}
+
 export interface SEOData {
   id: number
   metaTitle?: string
   metaDescription?: string
   keywords?: string
   metaRobots?: string
-  structuredData?: Record<string, unknown> | string | null
+  structuredData?: StructuredData
   metaViewport?: string
   canonicalURL?: string
   metaSocial?: MetaSocial[]
@@ -249,6 +266,33 @@ export interface HighlightFeature {
   title: string
   icon: StrapiIcon | null
   features: Feature[]
+}
+
+export interface NestedMenu {
+  id: number
+  title: string
+  url: string
+  target?: string
+  isProtected?: boolean
+  children?: NestedMenu[]
+  shortDescription?: string
+  icon?: string
+}
+export interface MenuItem {
+  id: number
+  title: string
+  url: string
+  target?: string
+  isProtected?: boolean
+  children?: NestedMenu[]
+}
+
+export interface Menu {
+  id: string
+  documentId: string
+  title: string
+  slug: string
+  items: MenuItem[]
 }
 
 // Shared Strapi Response type

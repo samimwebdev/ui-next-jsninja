@@ -16,6 +16,39 @@ import { BootcampPageData } from '@/types/bootcamp-page-types'
 import { getBootcampContentSection } from '@/lib/bootcamp-utils'
 import { getBootcampData } from '@/lib/bootcamp'
 import { BootcampAuthor } from '@/components/bootcamp/bootcamp-author'
+import { generateSEOMetadata } from '@/lib/seo'
+
+interface BootcampPageProps {
+  params: Promise<{
+    slug: string
+  }>
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: BootcampPageProps) {
+  const { slug } = await params
+  try {
+    const bootcampData = await getBootcampData(slug)
+
+    return generateSEOMetadata(
+      bootcampData.baseContent?.seo,
+      {
+        title: bootcampData.baseContent?.title,
+      },
+      {
+        path: `/bootcamps/${slug}`,
+        type: 'article',
+      }
+    )
+  } catch (error) {
+    console.error('Error generating bootcamp metadata:', error)
+    return generateSEOMetadata(
+      undefined,
+      { title: 'Bootcamp Not Found' },
+      { path: `/bootcamps/${slug}` }
+    )
+  }
+}
 
 export default async function BootcampPage({
   params,

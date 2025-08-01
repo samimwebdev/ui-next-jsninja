@@ -10,10 +10,19 @@ import { useEffect, useState } from 'react'
 import { UserNav } from './user-nav'
 import { useUser } from '@/components/context/AuthProvider'
 import { logoutAction } from '@/app/(auth)/actions'
-import { MenuItem } from '@/app/layout'
+import { MenuItem, StrapiImage } from '@/types/shared-types'
+import Image from 'next/image'
+
 // import { getUserWithProfile } from '@/lib/auth'
 
-export const Navigation = ({ menuItems }: { menuItems: MenuItem[] }) => {
+export const Navigation = ({
+  menuItems,
+  logo,
+}: {
+  menuItems: MenuItem[]
+  logo?: StrapiImage
+}) => {
+  console.log('Rendering Navigation component', logo)
   const user = useUser()
   const [isLoggedIn, setIsLoggedIn] = useState(false) // Set to true to show logged in state by default
 
@@ -39,7 +48,17 @@ export const Navigation = ({ menuItems }: { menuItems: MenuItem[] }) => {
         <div className="h-full flex items-center justify-between max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-8">
             <Link href="/">
-              <Logo />
+              {logo?.url ? (
+                <Image
+                  width={200}
+                  height={50}
+                  src={logo.url}
+                  alt={logo.alternativeText || 'Logo'}
+                  className="h-8 w-auto"
+                />
+              ) : (
+                <Logo />
+              )}
             </Link>
             {/* Desktop Menu */}
             <NavMenu className="hidden md:block" menuItems={menuItems} />

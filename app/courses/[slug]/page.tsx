@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: CoursePageProps) {
     return generateSEOMetadata(
       courseData.baseContent?.seo,
       {
-        title: courseData.baseContent?.title || courseData.courseName,
+        title: courseData.baseContent?.title,
       },
       {
         path: `/courses/${slug}`,

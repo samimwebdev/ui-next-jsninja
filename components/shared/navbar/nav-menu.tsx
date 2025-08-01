@@ -10,11 +10,11 @@ import {
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
 import { cn } from '@/lib/utils'
+import { MenuItem } from '@/types/shared-types'
 import { NavigationMenuProps } from '@radix-ui/react-navigation-menu'
 import { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
-import { MenuItem } from '@/app/layout'
 
 // Component to safely render SVG strings from API
 const SVGIcon = ({ svgString }: { svgString: string }) => {
