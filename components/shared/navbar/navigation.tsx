@@ -13,8 +13,6 @@ import { logoutAction } from '@/app/(auth)/actions'
 import { MenuItem, StrapiImage } from '@/types/shared-types'
 import Image from 'next/image'
 
-// import { getUserWithProfile } from '@/lib/auth'
-
 export const Navigation = ({
   menuItems,
   logo,

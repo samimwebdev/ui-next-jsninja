@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { strapiFetch } from '@/lib/strapi'
-import { setAuthCookie, clearAuthCookie } from '@/lib/auth'
+import { setAuthCookie, clearAuthCookie, getAuthToken } from '@/lib/auth'
 import { registerSchema, loginSchema } from '@/lib/validation'
 import { ValidationError } from 'yup'
 import { nanoid } from 'nanoid'
@@ -336,6 +336,100 @@ export async function resetPasswordAction(
       message:
         'Failed to reset password. The reset link may be invalid or expired.',
       errors: {},
+      success: false,
+    }
+  }
+}
+
+const profileUpdateSchema = yup.object({
+  discordUsername: yup.string().optional(),
+  bio: yup.string().max(500, 'Bio must be less than 500 characters').optional(),
+  address: yup.string().optional(),
+  phoneNumber: yup
+    .string()
+    .matches(
+      /^(\+880|880|0)?(1[3-9]\d{8})$/,
+      'Please enter a valid Bangladeshi phone number'
+    )
+    .optional(),
+})
+
+//Update Profile Action
+export async function updateProfileAction(
+  profileId: string,
+  _prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  try {
+    const token = await getAuthToken()
+    if (!token) {
+      return {
+        message: 'You must be logged in to update your profile',
+        errors: { auth: ['Authentication required'] },
+        success: false,
+      }
+    }
+
+    const data = Object.fromEntries(formData)
+    const avatarFile = formData.get('image') as File
+
+    const validated = await profileUpdateSchema.validate(data, {
+      abortEarly: false,
+      stripUnknown: true,
+    })
+
+    let requestBody: FormData | string
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    }
+
+    if (avatarFile && avatarFile.size > 0) {
+      const formDataForUpload = new FormData()
+      formDataForUpload.append('data', JSON.stringify(validated))
+      // Change from 'files.image' to just 'image' to match your Strapi controller
+      formDataForUpload.append('image', avatarFile)
+      requestBody = formDataForUpload
+    } else {
+      requestBody = JSON.stringify({ data: validated })
+      headers['Content-Type'] = 'application/json'
+    }
+
+    await strapiFetch(`/api/profiles/${profileId}?populate=image`, {
+      method: 'PUT',
+      headers,
+      body: requestBody,
+    })
+
+    // console.log({ response }, 'Profile update response')
+
+    revalidatePath('/dashboard')
+
+    return {
+      message: 'Profile updated successfully!',
+      errors: {},
+      success: true,
+    }
+  } catch (error) {
+    console.error('Profile update error:', error)
+
+    if (error instanceof ValidationError) {
+      const fieldErrors: Record<string, string[]> = {}
+      error.inner.forEach((err) => {
+        if (!err.path) return
+        if (!fieldErrors[err.path]) fieldErrors[err.path] = []
+        fieldErrors[err.path].push(err.message)
+      })
+
+      return {
+        message: 'Invalid input',
+        errors: fieldErrors,
+        success: false,
+      }
+    }
+
+    return {
+      message: 'Failed to update profile. Please try again.',
+      errors: error instanceof Error ? { server: [error.message] } : {},
       success: false,
     }
   }

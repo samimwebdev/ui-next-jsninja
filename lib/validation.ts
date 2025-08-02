@@ -88,3 +88,30 @@ export const loginSchema = yup.object().shape({
 
   password: yup.string().required('Password is required'),
 })
+
+const discordUsernameRegex = /^[a-zA-Z0-9_]{3,32}#[0-9]{4}$/
+
+export const profileUpdateSchema = yup.object({
+  firstName: yup
+    .string()
+    .required('First name is required')
+    .min(3, 'First name must be at least 3 characters'),
+  lastName: yup
+    .string()
+    .required('Last name is required')
+    .min(3, 'Last name must be at least 3 characters'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  discordUsername: yup
+    .string()
+    .optional()
+    .min(3, 'Discord username must be at least 3 characters')
+    .max(32, 'Discord username must be less than 32 characters')
+    .matches(discordUsernameRegex, 'Invalid Discord username format'),
+  bio: yup.string().max(150, 'Bio must be less than 150 characters').optional(),
+  address: yup
+    .string()
+    .max(50, 'Address must be less than 50 characters')
+    .optional(),
+})
+
+export type ProfileUpdateFormData = yup.InferType<typeof profileUpdateSchema>

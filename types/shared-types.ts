@@ -83,13 +83,13 @@ export interface Profile {
   documentId: string
   firstName: string
   lastName: string
-  address?: string
-  bio?: string
-  discordUsername?: string
-  phoneNumber?: string | null
-  email?: string | null
-  imageUrl?: string | null
-  image?: StrapiImage
+  address: string
+  bio: string
+  discordUsername: string
+  phoneNumber: string
+  email: string
+  imageUrl: string
+  image: StrapiImage
   createdAt: string
   updatedAt: string
   publishedAt: string
@@ -293,6 +293,27 @@ export interface Menu {
   title: string
   slug: string
   items: MenuItem[]
+}
+
+// Define the user type
+export type User = {
+  id: number
+  documentId: string // Assuming this is the user ID in your Strapi setup
+  email: string
+  username: string
+  confirmed: boolean
+  blocked: boolean
+  profile: Profile
+} | null
+
+export interface UserWithProfile {
+  id: number
+  email: string
+  documentId: string
+  username: string
+  confirmed?: boolean
+  blocked?: boolean
+  profile?: Profile
 }
 
 // Shared Strapi Response type

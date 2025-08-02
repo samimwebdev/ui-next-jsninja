@@ -2,31 +2,9 @@
 import { cookies } from 'next/headers'
 import { strapiFetch } from './strapi'
 import QueryString from 'qs'
+import { User, UserWithProfile } from '@/types/shared-types'
 
 const COOKIE = 'strapi_jwt'
-export interface UserWithProfile {
-  id: number
-  email: string
-  documentId: string
-  username: string
-  confirmed?: boolean
-  blocked?: boolean
-  profile?: {
-    firstName?: string
-    lastName?: string
-    bio?: string
-    avatar?: string
-  }
-}
-
-interface User {
-  id: number
-  email: string
-  documentId: string
-  username: string
-  confirmed?: boolean
-  blocked?: boolean
-}
 
 export async function setAuthCookie(token: string) {
   const cookieStore = await cookies()
@@ -79,7 +57,7 @@ export async function getUserWithProfile(): Promise<UserWithProfile | null> {
     if (!token) return null
 
     const profile = await strapiFetch<UserWithProfile | null>(
-      '/api/users/me?populate=profile',
+      '/api/users/me?populate=profile.image',
       { token }
     )
 

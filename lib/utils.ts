@@ -1,3 +1,4 @@
+import { User } from '@/types/shared-types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -127,4 +128,32 @@ export const extractFeatures = (htmlContent: string): string[] => {
   }
 
   return features
+}
+
+export function getProfileImageUrl(user: User | null): string | undefined {
+  // First, check if imageUrl exists (direct URL like GitHub avatar)
+  if (user?.profile?.imageUrl) {
+    return user.profile.imageUrl
+  }
+
+  // Then, check if there's a Strapi uploaded image
+  if (user?.profile?.image?.formats?.medium?.url) {
+    // If it's a relative URL, prepend Strapi base URL
+    const imageUrl = user.profile.image.formats.medium.url
+    if (imageUrl.startsWith('/')) {
+      return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
+    }
+    return imageUrl
+  }
+
+  // Fallback to original image if medium doesn't exist
+  if (user?.profile?.image?.url) {
+    const imageUrl = user.profile.image.url
+    if (imageUrl.startsWith('/')) {
+      return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
+    }
+    return imageUrl
+  }
+
+  return undefined
 }

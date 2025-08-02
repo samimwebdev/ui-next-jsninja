@@ -1,4 +1,3 @@
-import type { User } from '@/components/context/AuthProvider'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 
@@ -11,40 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { getProfileImageUrl } from '@/lib/utils'
+import { User } from '@/types/shared-types'
 import { LayoutDashboard, LogOut, User as UserIcon } from 'lucide-react'
 import Link from 'next/link'
 
 interface UserNavProps {
   user: User | null
   onLogout?: () => void
-}
-
-export function getProfileImageUrl(user: User | null): string | undefined {
-  // First, check if imageUrl exists (direct URL like GitHub avatar)
-  if (user?.profile?.imageUrl) {
-    return user.profile.imageUrl
-  }
-
-  // Then, check if there's a Strapi uploaded image
-  if (user?.profile?.image?.formats?.medium?.url) {
-    // If it's a relative URL, prepend Strapi base URL
-    const imageUrl = user.profile.image.formats.medium.url
-    if (imageUrl.startsWith('/')) {
-      return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
-    }
-    return imageUrl
-  }
-
-  // Fallback to original image if medium doesn't exist
-  if (user?.profile?.image?.url) {
-    const imageUrl = user.profile.image.url
-    if (imageUrl.startsWith('/')) {
-      return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
-    }
-    return imageUrl
-  }
-
-  return undefined
 }
 
 export function UserNav({ user, onLogout }: UserNavProps) {
