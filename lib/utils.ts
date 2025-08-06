@@ -130,7 +130,7 @@ export const extractFeatures = (htmlContent: string): string[] => {
   return features
 }
 
-export function getProfileImageUrl(user: User | null): string | undefined {
+export function getProfileImageUrl(user: User): string | undefined {
   // First, check if imageUrl exists (direct URL like GitHub avatar)
   if (user?.profile?.imageUrl) {
     return user.profile.imageUrl

@@ -5,7 +5,7 @@ import { UserProfile } from '@/components/dashboard/user-profile'
 const sidebarNavItems = [
   {
     title: 'Profile',
-    href: '/dashboard',
+    href: '/dashboard/profile',
   },
   {
     title: 'Orders',

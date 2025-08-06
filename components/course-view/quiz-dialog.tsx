@@ -15,7 +15,8 @@ import {
   DialogTitle,
   DialogClose,
 } from '@/components/ui/dialog'
-import type { QuizQuestion, QuizState, QuizStorageData } from './types/course'
+import type { QuizQuestion } from '@/types/course-view-types'
+import { QuizState, QuizStorageData } from './types/course'
 
 interface QuizDialogProps {
   open: boolean

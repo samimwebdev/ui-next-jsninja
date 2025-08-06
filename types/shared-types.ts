@@ -137,15 +137,11 @@ export interface Lesson {
   title: string
   order: number
   duration: number
-  type: 'Video' | 'Text' | 'Quiz' | 'Assignment'
+  type: 'video' | 'text'
   content?: string | null
   videoUrl?: string
   isFree: boolean
   icon?: StrapiIcon | null
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
 }
 
 export interface Module {
@@ -156,10 +152,6 @@ export interface Module {
   order: number
   duration: number
   lessons: Lesson[]
-  createdAt: string
-  updatedAt: string
-  publishedAt: string
-  locale: string | null
 }
 
 export interface Curriculum {
@@ -301,9 +293,9 @@ export type User = {
   documentId: string // Assuming this is the user ID in your Strapi setup
   email: string
   username: string
-  confirmed: boolean
-  blocked: boolean
-  profile: Profile
+  confirmed?: boolean
+  blocked?: boolean
+  profile?: Profile
 } | null
 
 export interface UserWithProfile {
@@ -327,4 +319,113 @@ export interface StrapiResponse<T> {
       total: number
     }
   }
+}
+
+// Assignment related types
+export interface AssignmentRequirement {
+  id: number
+  order: number
+  instruction: string
+}
+
+export interface Assignment {
+  id: number
+  documentId: string
+  title: string
+  description: string
+  dueDate: string
+  score: number
+  submissionType: string
+  requirements: AssignmentRequirement[]
+}
+
+// Resource related types
+export interface LessonResource {
+  id: number
+  documentId: string
+  title: string
+  description: string
+  type: string
+  url: string
+  resourceIcon: StrapiIcon | null
+}
+
+// Quiz related types
+export interface QuizOption {
+  id: string
+  text: string
+}
+
+export interface QuizQuestion {
+  id: number
+  documentId: string
+  title: string
+  options: QuizOption[]
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  questionType: 'multipleChoice' | 'singleChoice' | 'trueFalse' | 'essay'
+  text: string
+  tags: string
+  points: number
+  timeLimit: number
+}
+
+export interface Quiz {
+  id: number
+  documentId: string
+  title: string
+  passingScore: number
+  instructions: string
+  questions: QuizQuestion[]
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+  locale: string | null
+}
+
+// Video link types
+export interface VideoLink {
+  id: number
+  documentId: string
+  title: string
+  piracyNotice: string
+  videoNotPlayed: string
+  community: string
+}
+
+// Enhanced Lesson type (extending the existing one)
+export interface LessonDetailed extends Lesson {
+  assignment?: Assignment
+  resources?: LessonResource[]
+  quiz?: Quiz
+  videoLink?: VideoLink
+}
+
+// Enhanced Module type
+export interface ModuleDetailed extends Omit<Module, 'lessons'> {
+  lessons: LessonDetailed[]
+}
+
+// Enhanced Curriculum type
+export interface CurriculumDetailed extends Omit<Curriculum, 'modules'> {
+  modules: ModuleDetailed[]
+}
+
+// User progress types
+export interface CompletedLesson extends Lesson {
+  completed: boolean
+}
+
+export interface UserProgress {
+  id: number
+  documentId: string
+  certificateIssued: boolean
+  certificateIssuedAt: string | null
+  certificateUrl: string | null
+  isCourseCompleted: boolean
+  courseType: 'course' | 'bootcamp' | 'workshop'
+  startDate: string
+  lastAccessDate: string
+  progress: number
+  totalLessons: number
+  completedLessons: CompletedLesson[]
 }

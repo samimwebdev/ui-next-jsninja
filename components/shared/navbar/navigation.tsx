@@ -20,7 +20,6 @@ export const Navigation = ({
   menuItems: MenuItem[]
   logo?: StrapiImage
 }) => {
-  console.log('Rendering Navigation component', logo)
   const user = useUser()
   const [isLoggedIn, setIsLoggedIn] = useState(false) // Set to true to show logged in state by default
 

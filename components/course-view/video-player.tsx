@@ -1,5 +1,6 @@
 'use client'
-import type { CurrentContent } from './types/course'
+
+import { CurrentContent } from '@/types/course-view-types'
 
 interface VideoPlayerProps {
   currentContent: CurrentContent

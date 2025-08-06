@@ -1,10 +1,10 @@
-import type React from "react"
+import type React from 'react'
 export interface BaseLessonType {
   id: string
   title: string
   duration: string
   completed: boolean
-  type: "video" | "text"
+  type: 'video' | 'text'
 }
 
 export interface Lesson extends BaseLessonType {
@@ -25,17 +25,14 @@ export interface CurrentContent {
   lessonId: string
   title: string
   description?: string
-  type: "video" | "text"
+  type: 'video' | 'text'
 }
 
 export interface ActionButton {
-  icon: React.ComponentType<{ className?: string }>
+  icon?: React.ComponentType<{ className?: string }> | null
   label: string
-  content: {
-    title: string
-    description: string
-    body: React.ReactNode
-  }
+  active: boolean // Indicates if the button is currently active
+  content: string // Content to display in the dialog
 }
 
 export interface Resource {
@@ -58,10 +55,10 @@ export interface QuizQuestion {
   question: string
   options: string[]
   correctAnswer: number[]
-  type: "multiple"
+  type: 'multiple'
 }
 
-export type QuizState = "intro" | "question" | "results"
+export type QuizState = 'intro' | 'question' | 'results'
 
 export interface QuizStorageData {
   lessonId: string
@@ -72,17 +69,14 @@ export interface QuizStorageData {
 }
 
 export interface Assignment {
+  id: number
+  documentId: string
   title: string
   description: string
-  totalScore: number
   expiryDate: string
   requirements: string[]
-  submissionTypes: {
-    githubRepo: boolean
-    githubLive: boolean
-    codeEditor: boolean
-  }
-  status: "pending" | "submitted" | "graded"
+  submissionTypes: string
+  status: 'pending' | 'submitted' | 'graded'
   score?: number
   feedback?: string
   submission?: {
@@ -92,4 +86,3 @@ export interface Assignment {
     submittedAt?: string
   }
 }
-

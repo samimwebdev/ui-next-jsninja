@@ -8,6 +8,8 @@ import {
   SEOData,
   StrapiResponse,
   Video,
+  CurriculumDetailed,
+  UserProgress,
 } from './shared-types'
 
 // Extend CourseBase for home page specific needs
@@ -180,5 +182,96 @@ export interface ComponentDataMap {
   'home-layout.feature-post': BlogSectionData
   'demo-videos-layout.demo-videos': VideoSectionData
 }
+
+// Course view specific types
+export interface CourseViewData {
+  id: number
+  documentId: string
+  title: string
+  slug: string
+  price: number
+  level: string
+  featured: boolean
+  totalStudents: number
+  averageRating: number
+  totalLessons: number
+  shortDescription: string
+  longDescription: string
+  duration: string | number
+  startingFrom: string
+  courseType: 'course' | 'bootcamp' | 'workshop'
+  curriculum: CurriculumDetailed
+  userProgress: UserProgress
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+  locale: string | null
+}
+
+// API Response type
+export interface CourseViewResponse {
+  data: CourseViewData
+}
+
+// Helper types for component props
+export interface CourseViewPageProps {
+  params: {
+    slug: string
+  }
+}
+
+// Types for lesson navigation
+export interface LessonNavigationData {
+  currentLessonId?: number
+  previousLesson?: {
+    id: number
+    title: string
+    moduleTitle: string
+  } | null
+  nextLesson?: {
+    id: number
+    title: string
+    moduleTitle: string
+  } | null
+}
+
+// Types for course progress calculation
+export interface CourseProgressSummary {
+  totalLessons: number
+  completedLessons: number
+  progressPercentage: number
+  totalDuration: number
+  completedDuration: number
+  remainingLessons: number
+  currentModule?: string
+  nextLesson?: {
+    id: number
+    title: string
+    moduleTitle: string
+  }
+}
+
+// Types for lesson completion tracking
+export interface LessonCompletionPayload {
+  lessonId: number
+  courseId: number
+  completedAt: string
+  timeSpent?: number
+}
+
+// Re-export for convenience
+export type {
+  Assignment,
+  LessonResource,
+  Quiz,
+  QuizQuestion,
+  QuizOption,
+  VideoLink,
+  LessonDetailed,
+  ModuleDetailed,
+  CurriculumDetailed,
+  UserProgress,
+  CompletedLesson,
+} from './shared-types'
 
 export type ComponentType = keyof ComponentDataMap

@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import type { QuizQuestion } from './types/course'
+import type { QuizQuestion } from '@/types/course-view-types'
 import { QuizDialog } from './quiz-dialog'
 
 interface QuizSectionProps {

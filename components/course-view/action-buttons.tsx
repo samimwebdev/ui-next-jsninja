@@ -17,28 +17,31 @@ interface ActionButtonsProps {
 export function ActionButtons({ actionButtons }: ActionButtonsProps) {
   return (
     <div className="flex items-center gap-2 p-4 border-b">
-      {actionButtons.map((action, index) => (
-        <Dialog key={index}>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex flex-1 items-center gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <action.icon className="h-4 w-4" />
-              {action.label}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{action.content.title}</DialogTitle>
-              <DialogDescription>
-                {action.content.description}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4">{action.content.body}</div>
-          </DialogContent>
-        </Dialog>
-      ))}
+      {actionButtons.map((action, index) => {
+        const IconComponent = action.icon // Extract the icon component
+
+        return (
+          <Dialog key={index}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex flex-1 items-center gap-2 text-muted-foreground hover:text-foreground"
+              >
+                {IconComponent && <IconComponent className="h-4 w-4" />}
+                {action.label}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{action.label}</DialogTitle>
+                <DialogDescription
+                  dangerouslySetInnerHTML={{ __html: action.content }}
+                />
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        )
+      })}
     </div>
   )
 }
