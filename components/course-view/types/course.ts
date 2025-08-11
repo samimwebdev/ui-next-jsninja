@@ -20,13 +20,13 @@ export interface Module {
   completed?: boolean
 }
 
-export interface CurrentContent {
-  moduleId: string
-  lessonId: string
-  title: string
-  description?: string
-  type: 'video' | 'text'
-}
+// export interface CurrentContent {
+//   moduleId: string
+//   lessonId: string
+//   title: string
+//   description?: string
+//   type: 'video' | 'text'
+// }
 
 export interface ActionButton {
   icon?: React.ComponentType<{ className?: string }> | null
