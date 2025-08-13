@@ -245,8 +245,6 @@ export function AssignmentSection({
           assignmentId,
         })
 
-        console.log('Query with documentId:', query)
-
         const response = await strapiFetch<ExistingSubmissionResponse>(
           `/api/assignment-submissions?${query}`,
           {
@@ -254,8 +252,6 @@ export function AssignmentSection({
             token: await getAuthToken(),
           }
         )
-
-        console.log('Existing submissions:', response)
 
         if (response.data) {
           setExistingSubmission(response.data)

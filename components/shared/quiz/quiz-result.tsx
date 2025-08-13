@@ -40,7 +40,7 @@ export default function QuizResults({
       const option = question.options?.find(
         (opt: AssessmentQuestion['options'][number]) => opt.id === optionId
       )
-      console.log(option, 'Option for correct answer')
+
       return option?.text
     })
   }

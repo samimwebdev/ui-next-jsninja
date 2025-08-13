@@ -50,11 +50,6 @@ export default function LecturePage({
       resolvedParams?.moduleId &&
       resolvedParams?.lectureId
     ) {
-      console.log('LecturePage: Looking for lecture:', {
-        moduleId: resolvedParams.moduleId,
-        lectureId: resolvedParams.lectureId,
-      })
-
       // Find the specific module first
       const targetModule = modules.find(
         (module) => module.id.toString() === resolvedParams.moduleId
@@ -78,18 +73,11 @@ export default function LecturePage({
       )
 
       if (targetLesson) {
-        console.log('LecturePage: Found lesson:', {
-          lesson: targetLesson.title,
-          module: targetModule.title,
-          moduleId: targetModule.id,
-        })
-
         // Only update if it's different from current content
         if (
           currentContent?.lessonId !== targetLesson.id ||
           currentContent?.moduleId !== targetModule.id
         ) {
-          console.log('LecturePage: Updating current content')
           handleContentSelect(targetModule.id, targetLesson)
         }
       } else {
@@ -158,12 +146,14 @@ export default function LecturePage({
 
   return (
     <div className="relative flex flex-col">
+      {/* Render appropriate content based on type */}
       {currentContent.type === 'video' ? (
         <VideoPlayer currentContent={currentContent} />
       ) : (
         <TextContent currentContent={currentContent} />
       )}
 
+      {/* Action buttons for video lessons only */}
       {currentContent.type === 'video' && currentContent?.videoLink && (
         <ActionButtons
           actionButtons={[

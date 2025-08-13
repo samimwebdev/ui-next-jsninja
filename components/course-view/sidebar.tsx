@@ -43,7 +43,6 @@ export function Sidebar({
   // Auto-expand the module containing the current lesson
   React.useEffect(() => {
     if (currentModuleId && !openModules.includes(currentModuleId)) {
-      console.log('Auto-expanding module:', currentModuleId)
       setOpenModules((prev) => {
         if (!prev.includes(currentModuleId)) {
           return [...prev, currentModuleId]
@@ -136,13 +135,6 @@ export function Sidebar({
 
   // Fixed lesson click handler
   const handleLessonClick = (moduleId: number, lesson: Lesson) => {
-    console.log('Sidebar: Navigating to lesson:', {
-      lessonTitle: lesson.title,
-      moduleId,
-      lessonId: lesson.id,
-      documentId: lesson.documentId,
-    })
-
     // Extract slug from current pathname
     const pathSegments = pathname.split('/')
     const slugIndex = pathSegments.findIndex(
@@ -153,7 +145,7 @@ export function Sidebar({
     if (slug) {
       // Use the new route structure with moduleId
       const newUrl = `/course-view/${slug}/modules/${moduleId}/lectures/${lesson.documentId}`
-      console.log('Sidebar: Navigating to URL:', newUrl)
+
       router.push(newUrl)
     } else {
       console.error('Could not extract slug from pathname:', pathname)

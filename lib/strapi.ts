@@ -12,9 +12,17 @@ export async function strapiFetch<T>(
       revalidate?: number | false
       tags?: string[]
     }
+    allowNotFound?: boolean // New option to handle 404s differently
+    returnErrorResponse?: boolean // New option to return error responses instead of throwing
   } = {}
 ): Promise<T> {
-  const { cache = 'no-store', token, next, ...rest } = options
+  const {
+    cache = 'no-store',
+    token,
+    next,
+    returnErrorResponse = false,
+    ...rest
+  } = options
 
   try {
     console.log(`Fetching API endpoint: ${STRAPI}${path}`)
@@ -31,10 +39,40 @@ export async function strapiFetch<T>(
     if (!res.ok) {
       const errorData = await res.json()
       console.log('Error data:', errorData)
+
+      // // For 404 responses with allowNotFound=true, return the error structure
+      // if (res.status === 404 && allowNotFound) {
+      //   return {
+      //     data: null,
+      //     error: {
+      //       status: 404,
+      //       name: 'NotFoundError',
+      //       message: errorData?.error?.message || 'Resource not found',
+      //       details: errorData?.error?.details || {},
+      //     },
+      //   } as T
+      // }
+
+      // For security endpoints, return error responses instead of throwing
+      if (returnErrorResponse) {
+        return {
+          data: null,
+          error: {
+            status: res.status,
+            name: errorData?.error?.name || 'APIError',
+            message: errorData?.error?.message || 'Server Error',
+            details: errorData?.error?.details || {},
+          },
+        } as T
+      }
+
+      // For other status codes or when returnErrorResponse=false, throw error
       throw new Error(errorData?.error?.message || 'Server Error')
     }
+
     return res.json()
   } catch (err) {
+    // console.log(err, 'strapi fetch error')
     let message = 'Something went wrong'
 
     if (err instanceof Error) {

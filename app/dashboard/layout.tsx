@@ -1,6 +1,7 @@
 import type React from 'react'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
+import { FlashMessageHandler } from '@/components/common/flash-message-handler'
 
 const sidebarNavItems = [
   {
@@ -44,6 +45,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-gray-100 dark:bg-gray-900 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <FlashMessageHandler />
       <UserProfile />
       <div className="container flex-1 items-start py-8 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:gap-10">
         <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto md:sticky md:block">

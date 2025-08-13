@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/context/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
-import { Toaster } from '@/components/ui/sonner'
+import { Toaster } from 'sonner'
 import AuthProvider from '@/components/context/AuthProvider'
 import { getUser } from '@/lib/auth'
 import { VideoProvider } from '@/components/context/video-provider'
@@ -104,7 +104,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-// --- The rest of your layout remains unchanged ---
 const headerMenuId = process.env.HEADER_MENU_ID || 'o7mp8egjwy3o0dympkh8sxhi'
 const footerMenuId = process.env.FOOTER_MENU_ID || 'f8utr9p5klcsyouxovemwail'
 export default async function RootLayout({

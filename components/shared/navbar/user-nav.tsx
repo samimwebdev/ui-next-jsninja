@@ -22,7 +22,7 @@ interface UserNavProps {
 
 export function UserNav({ user, onLogout }: UserNavProps) {
   const profileImageUrl = getProfileImageUrl(user)
-  console.log(user, 'UserNav user data')
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

@@ -56,8 +56,6 @@ export function ProfileUpdateForm({
     }
   )
 
-  console.log(username, profile, 'ProfileUpdateForm')
-
   // Use Strapi image by default, fallback to default image
   const [profileImage, setProfileImage] = useState(
     profile.image?.url || '/images/profile-default.jpg'
@@ -92,7 +90,7 @@ export function ProfileUpdateForm({
         }
         reader.readAsDataURL(file)
       } catch (error) {
-        console.log(error)
+        console.error(error)
         toast.error('Error', {
           description: 'Failed to upload image.',
         })
@@ -120,7 +118,7 @@ export function ProfileUpdateForm({
 
       formAction(formData)
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error('Error', {
         description: 'Failed to update profile.',
       })

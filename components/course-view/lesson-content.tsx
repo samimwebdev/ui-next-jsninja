@@ -23,7 +23,6 @@ export function LessonContent({
   quizQuestions,
   assignment,
 }: LessonContentProps) {
-  console.log(currentContent, 'currentContent in LessonContent')
   return (
     <>
       {currentContent.type === 'video' ? (

@@ -51,8 +51,6 @@ export async function registerAction(
       password: validated.password,
     }
 
-    console.log({ validated })
-
     const res = await strapiFetch<{
       jwt: string
       user: {
@@ -256,12 +254,11 @@ export async function forgotPasswordAction(
       abortEarly: false,
     })
 
-    const res = await strapiFetch('/api/auth/forgot-password', {
+    await strapiFetch('/api/auth/forgot-password', {
       method: 'POST',
       body: JSON.stringify(validated),
     })
 
-    console.log('Forgot password response:', res)
     return {
       message: 'Password reset link has been sent to your email address.',
       errors: {},

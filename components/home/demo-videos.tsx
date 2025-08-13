@@ -24,8 +24,6 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
     thumbnail: getYouTubeThumbnail(extractYouTubeId(video.videoURL)),
   }))
 
-  console.log('Videos with data:', videosWithData)
-
   // Set first video as active initially
   const [activeVideo, setActiveVideo] = useState(
     videosWithData.length > 0 ? videosWithData[0].embedId : ''
@@ -185,8 +183,8 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
             {videoSectionData.browseVideosBtn && (
               <div className="flex justify-center mt-8">
                 <Button asChild className="group">
-                  <Link href={videoSectionData.browseVideosBtn.btnLink}>
-                    {videoSectionData.browseVideosBtn.btnLabel}
+                  <Link href={videoSectionData.browseVideosBtn?.btnLink}>
+                    {videoSectionData.browseVideosBtn?.btnLabel}
                   </Link>
                 </Button>
               </div>

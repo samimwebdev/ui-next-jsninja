@@ -1,8 +1,19 @@
 'use client'
 
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useState, useEffect } from 'react'
 import { useVideoProgress } from '@/hooks/useVideoProgress'
 import { CurrentContent } from '@/types/course-view-types'
+import { useCourse } from '@/components/context/course-view-provider'
+import { CheckCircle } from 'lucide-react'
+
+// Define a proper type for video content
+interface VideoContent {
+  type: 'direct' | 'iframe'
+  src: string
+  title?: string
+  allow?: string
+  style?: string
+}
 
 // Detect video source type from iframe HTML or URL
 const getVideoSourceType = (
@@ -51,17 +62,6 @@ const getVideoSourceType = (
   return 'unknown'
 }
 
-// Add signed URL to Bunny iframe
-const addSignedUrlToBunnyIframe = (
-  iframeHtml: string,
-  signedUrl?: string
-): string => {
-  if (!signedUrl) return iframeHtml
-
-  // Replace the src attribute with the signed URL
-  return iframeHtml.replace(/src\s*=\s*["']([^"']+)["']/i, `src="${signedUrl}"`)
-}
-
 const extractIframeProps = (iframeHtml: string) => {
   const srcMatch = iframeHtml.match(/src\s*=\s*["']([^"']+)["']/i)
   const titleMatch = iframeHtml.match(/title\s*=\s*["']([^"']+)["']/i)
@@ -84,40 +84,92 @@ export const VideoPlayer = ({
   currentContent: CurrentContent
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null)
+  const { courseData, modules, markLessonCompleted } = useCourse()
+  const [isVideoCompleted, setIsVideoCompleted] = useState(false)
 
-  const videoContent = useMemo(() => {
+  // Find current module and lesson for progress tracking
+  const currentModule = modules.find((m) => m.id === currentContent.moduleId)
+  const currentLesson = currentModule?.lessons.find(
+    (l) => l.id === currentContent.lessonId
+  )
+
+  // Check if lesson is already completed
+  const isLessonAlreadyCompleted = currentLesson?.completed || false
+
+  // Count completed lessons in current module (excluding current lesson)
+  const completedLessonsInModule =
+    currentModule?.lessons.filter(
+      (l) => l.completed && l.id !== currentContent.lessonId
+    ).length || 0
+
+  const videoContent = useMemo((): VideoContent => {
     const url = currentContent?.videoUrl || ''
     const type = getVideoSourceType(url)
 
     if (type === 'direct') {
-      return { type: 'direct', src: url }
+      return {
+        type: 'direct',
+        src: url,
+        title: 'Video Player',
+        allow:
+          'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;',
+        style: undefined,
+      }
     }
 
     if (url.includes('<iframe')) {
       const props = extractIframeProps(url)
-      // Use signed URL for Bunny if available
-      if (type === 'bunny' && currentContent?.signedUrl) {
-        props.src = currentContent.signedUrl
+      return {
+        type: 'iframe',
+        src: props.src || '',
+        title: props.title,
+        allow: props.allow,
+        style: props.style,
       }
-      return { type: 'iframe', ...props }
     }
 
-    // Plain URL - treat as iframe src
     return {
       type: 'iframe',
       src: url,
       title: 'Video Player',
       allow:
         'accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;',
+      style: undefined,
     }
   }, [currentContent])
 
+  // Custom completion handler for video progress hook
+  const handleVideoCompletion = (lessonDocumentId: string) => {
+    console.log('🎥 Video lesson completed via progress tracking')
+    setIsVideoCompleted(true)
+
+    // Call the original markLessonCompleted function
+    markLessonCompleted(lessonDocumentId)
+  }
+
+  // Use video progress hook
   useVideoProgress(iframeRef, {
     lectureId: String(currentContent.lessonId ?? ''),
-    userId: String(currentContent.userId ?? '123'), // Replace with actual user ID
+    courseDocumentId: courseData?.documentId || '',
+    moduleDocumentId: currentModule?.documentId || '',
+    lessonDocumentId: currentLesson?.documentId || '',
     updateInterval: 15000,
     completionThreshold: 95,
+    totalModuleLessons: currentModule?.lessons.length || 0,
+    completedModuleLessons: completedLessonsInModule,
+    onLessonCompleted: handleVideoCompletion,
+    isLessonComplete: isLessonAlreadyCompleted,
   })
+
+  // Update local completion state when lesson completion changes from external source
+  useEffect(() => {
+    if (isLessonAlreadyCompleted && !isVideoCompleted) {
+      setIsVideoCompleted(true)
+    }
+  }, [isLessonAlreadyCompleted, isVideoCompleted])
+
+  // Final completion status
+  const isFinallyCompleted = isLessonAlreadyCompleted || isVideoCompleted
 
   if (!videoContent.src) {
     return (
@@ -154,29 +206,57 @@ export const VideoPlayer = ({
               left: 0,
               height: '100%',
               width: '100%',
-              ...parseInlineStyle(videoContent.style),
+              ...(videoContent.style
+                ? parseInlineStyle(videoContent.style)
+                : {}),
             }}
             allow={videoContent.allow}
             allowFullScreen
           />
         </div>
       )}
+
+      {/* Show completion indicator for completed video lessons */}
+      {isFinallyCompleted && (
+        <div className="mt-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              Video Lesson Completed
+              {isVideoCompleted && !isLessonAlreadyCompleted && (
+                <span className="ml-2 text-xs opacity-75">
+                  (Just completed!)
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
-// Helper to parse inline CSS string to object
-function parseInlineStyle(styleString?: string): React.CSSProperties {
-  if (!styleString) return {}
+// Helper to parse inline CSS string to object with proper typing
+function parseInlineStyle(
+  styleString: string
+): Record<string, string | number> {
+  const styles: Record<string, string | number> = {}
 
-  const styles: React.CSSProperties = {}
   styleString.split(';').forEach((rule) => {
     const [property, value] = rule.split(':').map((s) => s.trim())
     if (property && value) {
+      // Convert kebab-case to camelCase
       const camelCaseProperty = property.replace(/-([a-z])/g, (_, letter) =>
         letter.toUpperCase()
       )
-      styles[camelCaseProperty as keyof React.CSSProperties] = value
+
+      // Handle numeric values
+      const numericValue = parseFloat(value)
+      if (!isNaN(numericValue) && value.match(/^\d+(\.\d+)?(px|em|rem|%)?$/)) {
+        styles[camelCaseProperty] = value
+      } else {
+        styles[camelCaseProperty] = value
+      }
     }
   })
 

@@ -7,6 +7,7 @@ import {
   useState,
   useMemo,
   useEffect,
+  useCallback,
 } from 'react'
 import type {
   CourseViewData,
@@ -15,6 +16,8 @@ import type {
   Module,
 } from '@/types/course-view-types'
 import { Sidebar } from '@/components/course-view/sidebar'
+import { UserProgressResponse, UserProgressService } from '@/lib/user-progress'
+import { getAuthToken } from '@/lib/auth'
 
 interface CourseViewContextType {
   courseData: CourseViewData | null
@@ -23,6 +26,8 @@ interface CourseViewContextType {
   error: string | null
   handleContentSelect: (moduleId: number, lesson: Lesson) => void
   modules: Module[]
+  userProgress: UserProgressResponse | null
+  markLessonCompleted: (lessonDocumentId: string) => void // Add optimistic update function
 }
 
 const CourseViewContext = createContext<CourseViewContextType | undefined>(
@@ -51,51 +56,101 @@ export default function CourseViewLayoutWrapper({
   const [currentContent, setCurrentContent] = useState<CurrentContent | null>(
     null
   )
+  const [userProgress, setUserProgress] = useState<UserProgressResponse | null>(
+    null
+  )
+  // Add state for optimistic updates
+  const [optimisticCompletedLessons, setOptimisticCompletedLessons] = useState<
+    Set<string>
+  >(new Set())
 
-  // Transform Strapi data to component format
+  // Initialize course progress on mount
+  useEffect(() => {
+    if (courseData?.documentId && !userProgress) {
+      const initializeProgress = async () => {
+        try {
+          const token = await getAuthToken()
+          const progress = await UserProgressService.initializeCourseProgress(
+            courseData.documentId,
+            token
+          )
+          setUserProgress(progress)
+        } catch (error) {
+          console.error('Failed to initialize course progress:', error)
+        }
+      }
+
+      initializeProgress()
+    }
+  }, [courseData?.documentId, userProgress])
+
+  // Optimistic update function
+  const markLessonCompleted = useCallback((lessonDocumentId: string) => {
+    setOptimisticCompletedLessons(
+      (prev) => new Set([...prev, lessonDocumentId])
+    )
+  }, [])
+
+  // Transform Strapi data to component format - Don't depend on userProgress being available
   const modules = useMemo(() => {
     if (!courseData) return []
 
-    return courseData.curriculum.modules.map(
-      (module): Module => ({
+    // Get completed lessons from userProgress if available, otherwise empty array
+    const completedLessons = userProgress?.completedLessons || []
+
+    // Combine server data with optimistic updates
+    const allCompletedLessonIds = new Set([
+      ...completedLessons.map((lesson) => lesson.documentId),
+      ...optimisticCompletedLessons,
+    ])
+
+    return courseData.curriculum.modules.map((module): Module => {
+      // Map lessons first to get completion status
+      const lessons = module.lessons.map((lesson): Lesson => {
+        const isCompleted = allCompletedLessonIds.has(lesson.documentId)
+
+        return {
+          id: lesson.id,
+          documentId: lesson.documentId,
+          order: lesson.order,
+          icon: lesson.icon || null,
+          videoUrl: lesson.videoUrl || '',
+          title: lesson.title,
+          content: lesson.content || '',
+          duration: `${Math.floor(+lesson.duration / 60)}:${(
+            +lesson.duration % 60
+          )
+            .toString()
+            .padStart(2, '0')}`,
+          type: lesson.type.toLowerCase(),
+          completed: isCompleted,
+          isFree: lesson.isFree,
+          resources: lesson.resources || [],
+          assignment: lesson.assignment,
+          quiz: lesson.quiz,
+          videoLink: lesson.videoLink,
+        }
+      })
+
+      // Calculate module completion: all lessons must be completed
+      const totalLessons = lessons.length
+      const completedLessonsCount = lessons.filter(
+        (lesson) => lesson.completed
+      ).length
+      const isModuleCompleted =
+        totalLessons > 0 && completedLessonsCount === totalLessons
+
+      return {
         id: module.id,
         documentId: module.documentId,
         order: module.order,
         duration: module.duration,
         title: module.title,
-        completed: false, // Calculate based on userProgress
-        lessons: module.lessons.map((lesson): Lesson => {
-          const isCompleted = courseData.userProgress.completedLessons.some(
-            (completedLesson) =>
-              completedLesson.documentId === lesson.documentId
-          )
-
-          return {
-            id: lesson.id,
-            documentId: lesson.documentId,
-            order: lesson.order,
-            icon: lesson.icon || null,
-            videoUrl: lesson.videoUrl || '',
-            title: lesson.title,
-            content: lesson.content || '',
-            // Now lesson.duration is guaranteed to be a number
-            duration: `${Math.floor(+lesson.duration / 60)}:${(
-              +lesson.duration % 60
-            )
-              .toString()
-              .padStart(2, '0')}`,
-            type: lesson.type.toLowerCase(),
-            completed: isCompleted,
-            isFree: lesson.isFree,
-            resources: lesson.resources || [],
-            assignment: lesson.assignment,
-            quiz: lesson.quiz,
-            videoLink: lesson.videoLink,
-          }
-        }),
-      })
-    )
-  }, [courseData])
+        completed: isModuleCompleted,
+        lessons,
+      }
+    })
+  }, [courseData, userProgress, optimisticCompletedLessons]) // Add optimisticCompletedLessons to dependencies
 
   // Set initial current content - use useEffect instead of useState
   useEffect(() => {
@@ -127,7 +182,7 @@ export default function CourseViewLayoutWrapper({
     }
   }, [courseData, currentContent])
 
-  // Update the handleContentSelect function to NOT navigate automatically:
+  // Update the handleContentSelect function
   const handleContentSelect = (moduleId: number, lesson: Lesson) => {
     if (!courseData) {
       console.log('No course data available')
@@ -168,7 +223,7 @@ export default function CourseViewLayoutWrapper({
     }
   }
 
-  // Loading state
+  // Loading state - only check for courseData
   if (!courseData && !error) {
     return (
       <CourseViewContext.Provider
@@ -179,6 +234,8 @@ export default function CourseViewLayoutWrapper({
           error: null,
           handleContentSelect: () => {},
           modules: [],
+          userProgress: null,
+          markLessonCompleted: () => {},
         }}
       >
         <div className="flex items-center justify-center h-64">
@@ -202,6 +259,8 @@ export default function CourseViewLayoutWrapper({
           error,
           handleContentSelect: () => {},
           modules: [],
+          userProgress: null,
+          markLessonCompleted: () => {},
         }}
       >
         <div className="flex items-center justify-center h-64">
@@ -223,6 +282,8 @@ export default function CourseViewLayoutWrapper({
         error,
         handleContentSelect,
         modules,
+        userProgress,
+        markLessonCompleted,
       }}
     >
       {children}
