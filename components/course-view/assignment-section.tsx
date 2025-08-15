@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { use } from 'react'
 import type { Assignment } from '@/types/course-view-types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,9 +37,8 @@ import {
 } from '@/components/ui/select'
 import dynamic from 'next/dynamic'
 import { strapiFetch } from '@/lib/strapi'
-import { toast } from 'sonner' // Add this import
+import { toast } from 'sonner'
 import { getAuthToken } from '@/lib/auth'
-import QueryString from 'qs'
 import {
   Dialog,
   DialogContent,
@@ -90,44 +90,51 @@ interface AssignmentSubmissionResponse {
   }
 }
 
-// Add this interface for the GET request response
-interface ExistingSubmissionResponse {
-  data: {
-    id: number
-    documentId: string
-    feedback: string | null
-    submissionStatus: 'submitted' | 'pending' | 'graded'
-    submittedDate: string
-    resultScore: number | null
-    repoLink: string | null
-    liveLink: string | null
-    code: string | null
-  }
+// Add this interface for the existing submission from promise
+interface ExistingAssignmentSubmission {
+  id: number
+  documentId: string
+  feedback: string | null
+  submissionStatus: 'submitted' | 'pending' | 'graded'
+  submittedDate: string
+  resultScore: number | null
+  repoLink: string | null
+  liveLink: string | null
+  code: string | null
 }
 
 interface AssignmentSectionProps {
   assignment?: Assignment
-  courseId: string // Add this prop
-  assignmentId: string // Add this prop
+  courseId: string
+  assignmentId: string
+  existingSubmissionPromise: Promise<ExistingAssignmentSubmission | null>
+}
+
+// Format the expiry date
+const formatExpiryDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
 }
 
 export function AssignmentSection({
   assignment,
   courseId,
   assignmentId,
+  existingSubmissionPromise,
 }: AssignmentSectionProps) {
   console.log(assignment, 'assignment in AssignmentSection')
 
-  const [showSubmissionForm, setShowSubmissionForm] = React.useState(false)
-  const [submissionType, setSubmissionType] = React.useState<
-    'live' | 'code' | 'repo'
-  >('repo')
-  const [codeLanguage, setCodeLanguage] = React.useState('javascript')
+  // Use the promise to get existing submission data
+  const existingSubmission = use(existingSubmissionPromise)
 
-  const [isLoading, setIsLoading] = React.useState(true) // Add loading state
-  const [existingSubmission, setExistingSubmission] = React.useState<
-    ExistingSubmissionResponse['data'] | null
-  >(null)
+  const [showSubmissionForm, setShowSubmissionForm] = React.useState(false)
+  const [codeLanguage, setCodeLanguage] = React.useState('javascript')
 
   const submissionTypes = (assignment?.submissionType
     .toLowerCase()
@@ -154,18 +161,6 @@ export function AssignmentSection({
     { value: 'css', label: 'CSS' },
   ]
 
-  // Format the expiry date
-  const formatExpiryDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date)
-  }
-
   // Check if assignment is expired
   const isExpired = new Date(assignment?.dueDate || '') < new Date()
 
@@ -191,7 +186,10 @@ export function AssignmentSection({
         {
           method: 'POST',
           body: JSON.stringify({ data: submissionData }),
-          token: await getAuthToken(),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${await getAuthToken()}`,
+          },
         }
       )
 
@@ -202,9 +200,9 @@ export function AssignmentSection({
         ).toLocaleDateString()}`,
       })
 
-      // Instead of setting submissionSuccess, trigger a re-check
-      setExistingSubmission(response.data)
       setShowSubmissionForm(false)
+      // Trigger a page refresh to update the submission data
+      window.location.reload()
     } catch (error) {
       console.error('Submission failed:', error)
 
@@ -231,65 +229,6 @@ export function AssignmentSection({
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  // Check for existing submission on component mount
-  React.useEffect(() => {
-    const checkExistingSubmission = async () => {
-      try {
-        setIsLoading(true)
-
-        // Try with documentId reference for relations
-        const query = QueryString.stringify({
-          courseId,
-          assignmentId,
-        })
-
-        const response = await strapiFetch<ExistingSubmissionResponse>(
-          `/api/assignment-submissions?${query}`,
-          {
-            method: 'GET',
-            token: await getAuthToken(),
-          }
-        )
-
-        if (response.data) {
-          setExistingSubmission(response.data)
-        }
-      } catch (error) {
-        console.error('Failed to check existing submission:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    checkExistingSubmission()
-  }, [courseId, assignmentId])
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="h-6 bg-muted animate-pulse rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-muted animate-pulse rounded w-full"></div>
-              </div>
-              <div className="flex flex-col gap-2 flex-shrink-0">
-                <div className="h-6 bg-muted animate-pulse rounded w-16"></div>
-                <div className="h-6 bg-muted animate-pulse rounded w-20"></div>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="h-4 bg-muted animate-pulse rounded w-1/2"></div>
-            <div className="h-10 bg-muted animate-pulse rounded w-full"></div>
-          </CardContent>
-        </Card>
-      </div>
-    )
   }
 
   // Show existing submission with original markup (if exists)
@@ -612,7 +551,7 @@ export function AssignmentSection({
                                 }}
                               >
                                 {submissionResult.feedback
-                                  .split('\n')
+                                  ?.split('\n')
                                   .map((line, index) => (
                                     <p
                                       key={index}
@@ -696,44 +635,17 @@ export function AssignmentSection({
             )}
 
             {/* Show a refresh button if not graded yet */}
-            {!isGraded && (
+            {/* {!isGraded && (
               <div className="text-center">
                 <Button
                   variant="outline"
-                  onClick={async () => {
-                    setIsLoading(true)
-                    try {
-                      const query = QueryString.stringify({
-                        courseId,
-                        assignmentId,
-                      })
-
-                      const response =
-                        await strapiFetch<ExistingSubmissionResponse>(
-                          `/api/assignment-submissions?${query}`,
-                          {
-                            method: 'GET',
-                            token: await getAuthToken(),
-                          }
-                        )
-
-                      if (response.data) {
-                        setExistingSubmission(response.data)
-                        toast.success('Status updated!')
-                      }
-                    } catch (error) {
-                      console.error('Failed to refresh status:', error)
-                      toast.error('Failed to refresh status')
-                    } finally {
-                      setIsLoading(false)
-                    }
-                  }}
+                  onClick={() => window.location.reload()}
                   disabled={isLoading}
                 >
                   {isLoading ? 'Refreshing...' : 'Check Grading Status'}
                 </Button>
               </div>
-            )}
+            )} */}
           </CardContent>
         </Card>
       </div>
@@ -840,12 +752,7 @@ export function AssignmentSection({
               <div className="rounded-lg border">
                 {/* Only show tabs if there are multiple submission types */}
                 {submissionTypes.length > 1 ? (
-                  <Tabs
-                    defaultValue={submissionTypes[0]}
-                    onValueChange={(v) =>
-                      setSubmissionType(v as 'repo' | 'code' | 'live')
-                    }
-                  >
+                  <Tabs defaultValue={submissionTypes[0]}>
                     <div className="border-b bg-muted/50 px-3">
                       <TabsList className="w-full justify-start rounded-none border-b-0 bg-transparent p-0">
                         {submissionTypes.includes('repo') && (
@@ -965,19 +872,7 @@ export function AssignmentSection({
                                   formatOnPaste: true,
                                   formatOnType: true,
                                 }}
-                                loading={
-                                  <div className="flex items-center justify-center h-[400px] bg-muted">
-                                    <div className="text-sm text-muted-foreground">
-                                      Loading editor...
-                                    </div>
-                                  </div>
-                                }
                               />
-                            </div>
-
-                            <div className="text-xs text-muted-foreground">
-                              Tip: Use Ctrl+Space for autocomplete, Ctrl+/ for
-                              comments
                             </div>
                           </div>
                         </TabsContent>
@@ -987,102 +882,99 @@ export function AssignmentSection({
                 ) : (
                   // Single submission type - no tabs needed
                   <div className="p-4">
-                    {submissionTypes.includes('code') && (
+                    {submissionTypes.includes('repo') && (
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <Label htmlFor="code-editor">Code Submission *</Label>
-                          <div className="flex items-center gap-2">
-                            <Label
-                              htmlFor="language-select"
-                              className="text-sm"
-                            >
-                              Language:
-                            </Label>
-                            <Select
-                              value={codeLanguage}
-                              onValueChange={setCodeLanguage}
-                            >
-                              <SelectTrigger className="w-40">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {languageOptions.map((lang) => (
-                                  <SelectItem
-                                    key={lang.value}
-                                    value={lang.value}
-                                  >
-                                    {lang.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                        <div className="space-y-2">
+                          <Label htmlFor="github-repo">
+                            GitHub Repository URL *
+                          </Label>
+                          <div className="flex items-center space-x-2">
+                            <Github className="h-4 w-4 text-muted-foreground" />
+                            <Input
+                              id="github-repo"
+                              placeholder="https://github.com/yourusername/your-repo"
+                              value={githubRepo}
+                              onChange={(e) => setGithubRepo(e.target.value)}
+                              required
+                            />
                           </div>
                         </div>
 
-                        <div className="border rounded-lg overflow-hidden">
-                          <Editor
-                            height="400px"
-                            language={codeLanguage}
-                            value={code}
-                            onChange={(value) => setCode(value || '')}
-                            theme="vs-dark"
-                            options={{
-                              minimap: { enabled: false },
-                              fontSize: 14,
-                              lineHeight: 'comfortable',
-                              padding: '1rem',
-                              lineNumbers: 'on',
-                              roundedSelection: false,
-                              scrollBeyondLastLine: false,
-                              automaticLayout: true,
-                              tabSize: 2,
-                              wordWrap: 'on',
-                              bracketPairColorization: { enabled: true },
-                              formatOnPaste: true,
-                              formatOnType: true,
-                            }}
-                            loading={
-                              <div className="flex items-center justify-center h-[400px] bg-muted">
-                                <div className="flex flex-col items-center gap-2">
-                                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Loading editor...
-                                  </div>
-                                </div>
-                              </div>
-                            }
-                            onMount={(editor) => {
-                              // Add some top margin to the editor content
-                              editor.updateOptions({
-                                padding: { top: 16, bottom: 16 },
-                              })
-
-                              // Focus the editor after mount
-                              editor.focus()
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Other single submission type fields */}
-                    {submissionTypes.includes('repo') &&
-                      !submissionTypes.includes('code') && (
-                        <div className="space-y-4">
+                        {submissionTypes.includes('live') && (
                           <div className="space-y-2">
-                            <Label htmlFor="github-repo">
-                              GitHub Repository URL *
-                            </Label>
+                            <Label htmlFor="github-live">Live Demo URL *</Label>
                             <div className="flex items-center space-x-2">
-                              <Github className="h-4 w-4 text-muted-foreground" />
+                              <Globe className="h-4 w-4 text-muted-foreground" />
                               <Input
-                                id="github-repo"
-                                placeholder="Enter your GitHub repository URL"
-                                value={githubRepo}
-                                onChange={(e) => setGithubRepo(e.target.value)}
+                                id="github-live"
+                                placeholder="https://your-project.vercel.app"
+                                value={live}
+                                onChange={(e) => setLive(e.target.value)}
                                 required
                               />
                             </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {submissionTypes.includes('code') &&
+                      !submissionTypes.includes('repo') && (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="code-editor">
+                              Code Submission *
+                            </Label>
+                            <div className="flex items-center gap-2">
+                              <Label
+                                htmlFor="language-select"
+                                className="text-sm"
+                              >
+                                Language:
+                              </Label>
+                              <Select
+                                value={codeLanguage}
+                                onValueChange={setCodeLanguage}
+                              >
+                                <SelectTrigger className="w-40">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {languageOptions.map((lang) => (
+                                    <SelectItem
+                                      key={lang.value}
+                                      value={lang.value}
+                                    >
+                                      {lang.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="border rounded-lg overflow-hidden">
+                            <Editor
+                              height="400px"
+                              language={codeLanguage}
+                              value={code}
+                              onChange={(value) => setCode(value || '')}
+                              theme="vs-dark"
+                              options={{
+                                minimap: { enabled: false },
+                                fontSize: 14,
+                                padding: { top: 16, bottom: 16 },
+                                lineNumbers: 'on',
+                                roundedSelection: false,
+                                scrollBeyondLastLine: false,
+                                automaticLayout: true,
+                                tabSize: 2,
+                                wordWrap: 'on',
+                                bracketPairColorization: { enabled: true },
+                                formatOnPaste: true,
+                                formatOnType: true,
+                              }}
+                            />
                           </div>
                         </div>
                       )}

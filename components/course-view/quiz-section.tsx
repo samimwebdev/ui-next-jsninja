@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -34,11 +34,55 @@ import CourseQuizInstructions from './course-quiz-instructions'
 import CourseQuizQuestion from './course-quiz-question'
 import CourseQuizResults from '../shared/quiz/course-quiz-results'
 
+// const QuizResultLoadingSkeleton = () => {
+//   return (
+//     <div className="space-y-4">
+//       <div className="p-6 rounded-lg border">
+//         <div className="flex flex-col items-center gap-4">
+//           {/* Icon and Percentage Skeleton */}
+//           <div className="flex items-center gap-3 mb-2">
+//             <Skeleton className="h-8 w-8 rounded-full" />
+//             <Skeleton className="h-12 w-20" />
+//           </div>
+
+//           {/* Title and Description Skeleton */}
+//           <div className="text-center space-y-2">
+//             <Skeleton className="h-5 w-48 mx-auto" />
+//             <Skeleton className="h-4 w-64 mx-auto" />
+//             <Skeleton className="h-4 w-32 mx-auto" />
+//           </div>
+
+//           {/* Progress Bar Skeleton */}
+//           <div className="w-full max-w-xs bg-muted rounded-lg p-4 mt-2">
+//             <div className="space-y-2">
+//               <div className="flex justify-between">
+//                 <Skeleton className="h-3 w-12" />
+//                 <Skeleton className="h-3 w-8" />
+//               </div>
+//               <Skeleton className="h-2 w-full rounded-full" />
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Info Box Skeleton */}
+//       <div className="p-4 rounded-lg border">
+//         <Skeleton className="h-4 w-32 mx-auto mb-2" />
+//         <Skeleton className="h-3 w-48 mx-auto" />
+//       </div>
+
+//       {/* Button Skeleton */}
+//       <Skeleton className="h-10 w-full rounded-md" />
+//     </div>
+//   )
+// }
+
 interface QuizSectionProps {
   quiz: CourseQuiz | null
   courseSlug: string
   lessonDocumentId: string
   moduleDocumentId: string
+  existingSubmissionPromise: Promise<ExistingQuizSubmission | null>
 }
 
 export function QuizSection({
@@ -46,8 +90,13 @@ export function QuizSection({
   courseSlug,
   lessonDocumentId,
   moduleDocumentId,
+  existingSubmissionPromise,
 }: QuizSectionProps) {
   const router = useRouter()
+
+  // Use the promise to get existing submission data
+  const existingSubmission = use(existingSubmissionPromise)
+  console.log({ existingSubmission })
 
   // Use dynamic data or fallback
   const quizData = quiz || {
@@ -79,10 +128,38 @@ export function QuizSection({
     useState<CourseQuizSubmissionResponse | null>(null)
   const [submissionError, setSubmissionError] = useState<string | null>(null)
 
-  // Add state for existing submission
-  const [existingSubmission, setExistingSubmission] =
-    useState<ExistingQuizSubmission | null>(null)
-  const [isCheckingSubmission, setIsCheckingSubmission] = useState(false)
+  // Convert existing submission to result format if it exists
+  useEffect(() => {
+    if (existingSubmission && questions.length > 0) {
+      const totalPoints = existingSubmission.answers.reduce((sum, answer) => {
+        const question = questions.find(
+          (q) => q.documentId === answer.questionId
+        )
+        return sum + (question?.points || 1)
+      }, 0)
+
+      const convertedResults: CourseQuizSubmissionResponse = {
+        score: existingSubmission.score,
+        totalScore: totalPoints,
+        percentage: calculateQuizPercentage(
+          existingSubmission.score,
+          existingSubmission.answers,
+          questions
+        ),
+        passed: existingSubmission.passed,
+        answers: existingSubmission.answers.map((answer) => ({
+          questionId: answer.questionId,
+          correct: answer.correct,
+          selectedAnswers: answer.userAnswer,
+          correctAnswers: answer.correctAnswers,
+          points: answer.points,
+          explanation: answer.explanation || '',
+        })),
+      }
+
+      setSubmissionResults(convertedResults)
+    }
+  }, [existingSubmission, questions])
 
   // Helper function to get selected option texts for display using utility
   const getSelectedOptionTexts = (questionIndex: number) => {
@@ -92,83 +169,6 @@ export function QuizSection({
 
     return selectedIds.map((id) => getOptionTextById(question, id))
   }
-
-  // Function to check existing submission
-  const checkExistingSubmission = useCallback(async () => {
-    if (!quizData.documentId) return
-
-    setIsCheckingSubmission(true)
-    try {
-      const apiUrl = `/api/course-view/${courseSlug}/${moduleDocumentId}/${lessonDocumentId}/${quizData.documentId}/assessment-quiz`
-
-      const existingData = await strapiFetch<ExistingQuizSubmission | null>(
-        apiUrl,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${await getAuthToken()}`,
-          },
-        }
-      )
-
-      if (existingData) {
-        setExistingSubmission(existingData)
-
-        // Convert existing submission to our result format using utility functions
-        const totalPoints = existingData.answers.reduce((sum, answer) => {
-          const question = questions.find(
-            (q) => q.documentId === answer.questionId
-          )
-          return sum + (question?.points || 1)
-        }, 0)
-
-        const convertedResults: CourseQuizSubmissionResponse = {
-          score: existingData.score,
-          totalScore: totalPoints,
-          percentage: calculateQuizPercentage(
-            existingData.score,
-            existingData.answers,
-            questions
-          ),
-          passed: existingData.passed,
-          answers: existingData.answers.map((answer) => ({
-            questionId: answer.questionId,
-            correct: answer.correct,
-            selectedAnswers: answer.userAnswer,
-            correctAnswers: answer.correctAnswers,
-            points: answer.points,
-            explanation: answer.explanation || '',
-          })),
-        }
-
-        setSubmissionResults(convertedResults)
-      }
-    } catch (error) {
-      console.log('No existing submission found or error:', error)
-      // Error is expected if no submission exists
-      setExistingSubmission(null)
-    } finally {
-      setIsCheckingSubmission(false)
-    }
-  }, [
-    courseSlug,
-    moduleDocumentId,
-    lessonDocumentId,
-    quizData.documentId,
-    questions,
-  ])
-
-  // Check for existing submission when component mounts or quiz changes
-  useEffect(() => {
-    const checkSubmission = async () => {
-      const userIsAuthenticated = await isAuthenticated()
-      if (userIsAuthenticated && quizData.documentId) {
-        await checkExistingSubmission()
-      }
-    }
-
-    checkSubmission()
-  }, [checkExistingSubmission, quizData.documentId])
 
   // Check authentication when dialog is opened
   const handleDialogOpen = async (open: boolean) => {
@@ -302,9 +302,6 @@ export function QuizSection({
       setSubmissionResults(results as CourseQuizSubmissionResponse)
       setShowResults(true)
       setIsQuizStarted(false)
-
-      // Also check for existing submission to update state
-      await checkExistingSubmission()
     } catch (error) {
       console.error('Error submitting quiz:', error)
       setSubmissionError(
@@ -323,7 +320,6 @@ export function QuizSection({
     lessonDocumentId,
     moduleDocumentId,
     quizData.documentId,
-    checkExistingSubmission,
   ])
 
   const handleNextQuestion = useCallback(() => {
@@ -423,17 +419,7 @@ export function QuizSection({
 
   return (
     <div className="space-y-6">
-      {isCheckingSubmission ? (
-        <div className="text-center p-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
-            <span className="text-lg font-medium">Checking quiz status...</span>
-          </div>
-          <p className="text-muted-foreground">
-            Please wait while we check if you have already taken this quiz.
-          </p>
-        </div>
-      ) : existingSubmission || submissionResults ? (
+      {existingSubmission || submissionResults ? (
         <div className="space-y-4">
           <div className="p-6 rounded-lg border">
             <div className="flex flex-col items-center gap-4">

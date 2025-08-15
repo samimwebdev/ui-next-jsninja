@@ -1,4 +1,3 @@
-'use client'
 import type { Resource } from '@/types/course-view-types'
 import DynamicIcon from '../shared/DynamicIcon'
 
