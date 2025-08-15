@@ -104,7 +104,7 @@ export default function CourseQuizResults({
 
                 return (
                   <div
-                    key={question.documentId}
+                    key={question.documentId || question.id}
                     className={`p-5 rounded-lg border-2 ${
                       serverResult?.correct
                         ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20'

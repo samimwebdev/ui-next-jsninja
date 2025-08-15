@@ -11,7 +11,7 @@ export interface CourseQuizQuestion {
   text: string
   timeLimit: number
   tags: string
-  questionType: 'singleChoice' | 'multipleChoice'
+  questionType: 'singleChoice' | 'multipleChoice' | 'trueFalse'
 }
 
 export interface CourseQuiz {
@@ -31,9 +31,10 @@ export interface CourseQuizSubmissionResponse {
   answers: Array<{
     questionId: string | number
     correct: boolean
-    selectedAnswers: string[] // Changed from userAnswer to selectedAnswers for consistency
     correctAnswers: string[]
     points: number
+    userAnswer?: string[]
+    selectedAnswers?: string[] // Use selectedAnswers for user answers
     explanation?: string
   }>
 }
@@ -52,10 +53,10 @@ export interface ExistingQuizSubmission {
   answers: Array<{
     questionId: string
     correct: boolean
-    explanation: string | null
     points: number
     correctAnswers: string[]
     userAnswer: string[] // This stays as userAnswer since it comes from server
+    explanation?: string
   }>
   timeSpent: number | null
   attempts: number

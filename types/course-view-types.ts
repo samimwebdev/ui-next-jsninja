@@ -161,7 +161,7 @@ export interface QuizQuestion {
   id: number
   documentId: string
   title: string
-  questionType: 'multipleChoice' | 'trueFalse' | 'singleChoice'
+  questionType: 'multipleChoice' | 'singleChoice' | 'trueFalse'
   options: Array<{
     id: string
     text: string

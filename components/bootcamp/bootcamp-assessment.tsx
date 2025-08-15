@@ -25,7 +25,7 @@ import { toast } from 'sonner'
 // Import sub-components
 import QuizInstructions from '@/components/shared/quiz/quiz-instructions'
 import QuizQuestion from '@/components/shared/quiz/quiz-question'
-import CourseQuizResults from '@/components/course-view/course-quiz-results'
+import CourseQuizResults from '@/components/shared/quiz/course-quiz-results'
 
 // Add this interface for the API response
 

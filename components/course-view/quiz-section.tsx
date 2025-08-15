@@ -32,7 +32,7 @@ import type {
 // Import sub-components
 import CourseQuizInstructions from './course-quiz-instructions'
 import CourseQuizQuestion from './course-quiz-question'
-import CourseQuizResults from './course-quiz-results'
+import CourseQuizResults from '../shared/quiz/course-quiz-results'
 
 interface QuizSectionProps {
   quiz: CourseQuiz | null
@@ -110,8 +110,6 @@ export function QuizSection({
           },
         }
       )
-
-      console.log('Existing submission check:', existingData)
 
       if (existingData) {
         setExistingSubmission(existingData)
