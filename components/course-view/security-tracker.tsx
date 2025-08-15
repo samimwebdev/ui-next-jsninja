@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
 import { strapiFetch } from '@/lib/strapi'
-import { getAuthToken } from '@/lib/auth'
+// import { getAuthToken } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -37,9 +37,10 @@ interface SecurityError {
 
 interface SecurityTrackerProps {
   courseSlug: string
+  token: string | null
 }
 
-export function SecurityTracker({ courseSlug }: SecurityTrackerProps) {
+export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
   const [securityStatus, setSecurityStatus] = useState<
     'checking' | 'allowed' | 'redirecting'
   >('checking')
@@ -49,8 +50,7 @@ export function SecurityTracker({ courseSlug }: SecurityTrackerProps) {
 
   const sendSecurityDataAndCheck = async (fingerprintId: string) => {
     try {
-      const token = await getAuthToken()
-      console.log('Auth token:', token)
+      console.log('Sending security data to server:', token)
 
       // Get browser data
       const browserData = {

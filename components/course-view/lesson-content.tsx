@@ -9,7 +9,7 @@ import type {
   ExistingQuizSubmission,
 } from '@/types/course-quiz-types'
 import { strapiFetch } from '@/lib/strapi'
-import { getAuthToken } from '@/lib/auth'
+// import { getAuthToken } from '@/lib/auth'
 
 interface LessonContentProps {
   currentContent: CurrentContent
@@ -18,6 +18,7 @@ interface LessonContentProps {
   assignment?: Assignment
   courseSlug: string
   moduleDocumentId: string
+  token: string | null
 }
 
 // Interface for existing assignment submission
@@ -38,7 +39,8 @@ function createQuizSubmissionPromise(
   quiz: CourseQuiz | null,
   courseSlug: string,
   moduleDocumentId: string,
-  lessonId: string
+  lessonId: string,
+  token: string | null
 ): Promise<ExistingQuizSubmission | null> {
   if (!quiz?.documentId) {
     return Promise.resolve(null)
@@ -46,28 +48,27 @@ function createQuizSubmissionPromise(
 
   const apiUrl = `/api/course-view/${courseSlug}/${moduleDocumentId}/${lessonId}/${quiz.documentId}/assessment-quiz`
 
-  return getAuthToken().then((token) => {
-    if (!token) return null // If no token, no need to make the call
+  if (!token) return Promise.resolve(null) // If no token, no need to make the call
 
-    return strapiFetch<ExistingQuizSubmission | null>(apiUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).catch((error) => {
-      // This will catch 401/403 errors if the token is invalid
-      console.log('No existing quiz submission found:', error.message)
-      return null
-    })
+  return strapiFetch<ExistingQuizSubmission | null>(apiUrl, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).catch((error) => {
+    // This will catch 401/403 errors if the token is invalid
+    console.log('No existing quiz submission found:', error.message)
+    return null
   })
 }
 
 // Helper function to create assignment submission promise
 function createAssignmentSubmissionPromise(
   assignment: Assignment | undefined,
-  courseId: string
+  courseId: string,
+  token: string | null
 ): Promise<ExistingAssignmentSubmission | null> {
-  if (!assignment?.documentId) {
+  if (!assignment?.documentId || !token) {
     return Promise.resolve(null)
   }
 
@@ -76,25 +77,21 @@ function createAssignmentSubmissionPromise(
     assignmentId: assignment.documentId,
   }).toString()
 
-  return getAuthToken().then((token) => {
-    if (!token) return null // If no token, no need to make the call
-
-    return strapiFetch<{ data: ExistingAssignmentSubmission }>(
-      `/api/assignment-submissions?${query}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((response) => response.data)
-      .catch((error) => {
-        // This will catch 401/403 errors if the token is invalid
-        console.log('No existing assignment submission found:', error.message)
-        return null
-      })
-  })
+  return strapiFetch<{ data: ExistingAssignmentSubmission }>(
+    `/api/assignment-submissions?${query}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+    .then((response) => response.data)
+    .catch((error) => {
+      // This will catch 401/403 errors if the token is invalid
+      console.log('No existing assignment submission found:', error.message)
+      return null
+    })
 }
 
 export function LessonContent({
@@ -104,18 +101,21 @@ export function LessonContent({
   assignment,
   courseSlug,
   moduleDocumentId,
+  token,
 }: LessonContentProps) {
   // Create promises directly without hooks for SSR compatibility
   const existingQuizSubmissionPromise = createQuizSubmissionPromise(
     quiz,
     courseSlug,
     moduleDocumentId,
-    currentContent.lessonId || ''
+    currentContent.lessonId || '',
+    token
   )
 
   const existingAssignmentSubmissionPromise = createAssignmentSubmissionPromise(
     assignment,
-    currentContent.courseId || ''
+    currentContent.courseId || '',
+    token
   )
 
   return (

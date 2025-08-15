@@ -45,10 +45,10 @@ export async function getUser(): Promise<User | null> {
   }
 }
 
-export async function getAuthToken(): Promise<string | undefined> {
+export async function getAuthToken(): Promise<string | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE)
-  return token?.value || undefined
+  return token?.value || null
 }
 
 export async function getUserWithProfile(): Promise<UserWithProfile | null> {
