@@ -24,7 +24,7 @@ import { useRouter, usePathname } from 'next/navigation'
 
 interface SidebarProps {
   modules: Module[]
-  currentLessonId: number | null
+  currentLessonId: string | null
   currentModuleId: number | null
   onLessonSelect: (moduleId: number, lesson: Lesson) => void
 }
@@ -232,7 +232,7 @@ export function Sidebar({
                     className={cn(
                       'w-full justify-start gap-3 py-4 px-6 font-normal hover:bg-accent pl-14 relative transition-all duration-200 h-auto',
                       lesson.completed && 'text-emerald-500',
-                      currentLessonId === lesson.id &&
+                      currentLessonId === lesson.documentId &&
                         currentModuleId === module.id &&
                         'bg-primary/10 dark:bg-primary/20 border-l-4 border-primary font-medium shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-[""]'
                     )}

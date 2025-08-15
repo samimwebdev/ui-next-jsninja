@@ -25,7 +25,7 @@ import { toast } from 'sonner'
 // Import sub-components
 import QuizInstructions from '@/components/shared/quiz/quiz-instructions'
 import QuizQuestion from '@/components/shared/quiz/quiz-question'
-import QuizResults from '@/components/shared/quiz/quiz-result'
+import CourseQuizResults from '@/components/course-view/course-quiz-results'
 
 // Add this interface for the API response
 
@@ -126,7 +126,7 @@ export default function BootcampAssessment({
       // Prepare the submission data with option IDs
       const submissionData = {
         answers: questions.map((question, index) => ({
-          questionId: question.id,
+          questionId: question.documentId, // Handle both id and documentId
           selectedAnswers: answers[index] || [], // Now contains option IDs
         })),
       }
@@ -142,7 +142,6 @@ export default function BootcampAssessment({
           },
         }
       )
-      console.log('Submission results:', results)
 
       // Use server response instead of client calculation
       setSubmissionResults(results as QuizSubmissionResponse)
@@ -292,7 +291,7 @@ export default function BootcampAssessment({
                   variants={fadeIn}
                   className="p-6"
                 >
-                  <QuizResults
+                  <CourseQuizResults
                     isSubmitting={isSubmitting}
                     submissionError={submissionError}
                     submissionResults={submissionResults}

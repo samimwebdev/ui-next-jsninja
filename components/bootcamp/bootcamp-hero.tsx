@@ -41,7 +41,7 @@ export const BootcampHero = ({
   // Assessment Button
   const assessmentButton = buttons[1]
 
-  const enrollLabel = enrollButton?.btnLabel || '3000Tk | Enroll Now'
+  const enrollLabel = enrollButton?.btnLabel || 'Enroll Now'
 
   return (
     <div className="flex items-center justify-center">

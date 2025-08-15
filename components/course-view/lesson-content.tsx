@@ -1,35 +1,35 @@
 'use client'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type {
-  Assignment,
-  QuizQuestion,
-  Resource,
-} from '@/types/course-view-types'
+import type { Assignment, Resource } from '@/types/course-view-types'
 import { ResourceList } from './resource-list'
 import { QuizSection } from './quiz-section'
 import { AssignmentSection } from './assignment-section'
 import { CurrentContent } from '@/types/course-view-types'
+import type { CourseQuiz } from '@/types/course-quiz-types'
 
 interface LessonContentProps {
   currentContent: CurrentContent
   resources: Resource[]
-  quizQuestions: QuizQuestion[]
+  quiz: CourseQuiz | null // Updated type
   assignment?: Assignment
+  courseSlug: string // Add courseSlug prop
+  moduleDocumentId: string // Add moduleDocumentId prop
 }
 
 export function LessonContent({
   currentContent,
   resources,
-  quizQuestions,
+  quiz,
   assignment,
+  courseSlug,
+  moduleDocumentId,
 }: LessonContentProps) {
+  console.log(currentContent, 'currentContent in lesson content')
   return (
     <>
       {currentContent.type === 'video' ? (
         <div className="p-8">
           <h1 className="text-2xl font-bold mb-3">{currentContent.title}</h1>
-
-          {/* <p className="text-muted-foreground mb-8">{currentContent.content}</p> */}
 
           {/* Content Tabs */}
           <Tabs defaultValue="description" className="mt-6">
@@ -42,7 +42,7 @@ export function LessonContent({
 
             <TabsContent value="description" className="mt-4 space-y-4">
               <div className="prose dark:prose-invert max-w-none">
-                {currentContent.content.length < 1 ? (
+                {currentContent.content?.length < 1 ? (
                   <p className="whitespace-pre-line text-muted-foreground">
                     No description available for this video.
                   </p>
@@ -52,16 +52,6 @@ export function LessonContent({
                     dangerouslySetInnerHTML={{ __html: currentContent.content }}
                   />
                 )}
-
-                {/* <h3 className="text-lg font-semibold mt-6 mb-3">Features:</h3>
-            <p>{videoDescription}</p> */}
-                {/* <ul className="space-y-2 list-disc pl-6">
-              {videoDescription.features?.map((feature, index) => (
-                <li key={index} className="text-muted-foreground">
-                  {feature}
-                </li>
-              ))}
-            </ul> */}
               </div>
             </TabsContent>
 
@@ -76,20 +66,19 @@ export function LessonContent({
             </TabsContent>
 
             <TabsContent value="quiz" className="mt-4">
-              {quizQuestions.length > 0 ? (
-                <QuizSection quizQuestions={quizQuestions} />
-              ) : (
-                <div className="text-muted-foreground">
-                  No quiz available for this lesson.
-                </div>
-              )}
+              <QuizSection
+                quiz={quiz}
+                courseSlug={courseSlug}
+                lessonDocumentId={currentContent.lessonId || ''}
+                moduleDocumentId={moduleDocumentId}
+              />
             </TabsContent>
 
             <TabsContent value="assignment" className="mt-4">
               {assignment ? (
                 <AssignmentSection
                   assignment={assignment}
-                  courseId={currentContent.courseId} // This should now work correctly
+                  courseId={currentContent.courseId}
                   assignmentId={assignment.documentId}
                 />
               ) : (

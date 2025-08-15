@@ -162,7 +162,7 @@ export default function CourseViewLayoutWrapper({
         setCurrentContent({
           courseId: courseData.documentId,
           moduleId: firstModule.id,
-          lessonId: firstLesson.id,
+          lessonId: firstLesson.documentId,
           title: firstLesson.title,
           duration: `${Math.floor(+firstLesson.duration / 60)}:${(
             +firstLesson.duration % 60
@@ -200,7 +200,7 @@ export default function CourseViewLayoutWrapper({
       const newContent = {
         courseId: courseData.documentId,
         moduleId,
-        lessonId: lesson.id,
+        lessonId: lesson.documentId,
         title: selectedLesson.title,
         duration: `${Math.floor(+selectedLesson.duration / 60)}:${(
           +selectedLesson.duration % 60

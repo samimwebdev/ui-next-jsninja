@@ -148,6 +148,8 @@ export interface Assignment {
 
 export interface Quiz {
   id: number
+  documentId: string
+  instructions: string
   title: string
   description?: string
   questions: QuizQuestion[]
@@ -157,12 +159,20 @@ export interface Quiz {
 
 export interface QuizQuestion {
   id: number
-  question: string
-  type: 'multiple-choice' | 'true-false' | 'short-answer'
-  options?: string[]
-  correctAnswer: string | number
+  documentId: string
+  title: string
+  questionType: 'multipleChoice' | 'trueFalse' | 'singleChoice'
+  options: Array<{
+    id: string
+    text: string
+  }>
+  correctAnswer?: string | number
   explanation?: string
   points: number
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  timeLimit: number
+  tags: string
+  text: string
 }
 
 export interface Discount {
@@ -181,7 +191,7 @@ export interface SocialLink {
 export interface CurrentContent {
   courseId: string
   moduleId: number // Changed from string to number to match your data
-  lessonId: number // Changed from string to number to match your data
+  lessonId: string // Changed from string to number to match your data
   title: string
   type: 'video' | 'text'
   duration: string | number // Changed to string for formatted duration

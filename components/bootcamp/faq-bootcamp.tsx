@@ -5,7 +5,6 @@ import { FAQLayoutContentSection } from '@/types/bootcamp-page-types'
 const FAQBootcamp: React.FC<{ data: FAQLayoutContentSection }> = ({ data }) => {
   // Transform bootcamp FAQ data to match the course FAQ component structure
   const faqItems = data?.faq?.questionAnswer || []
-  console.log(data, 'data in FAQBootcamp')
 
   return (
     <div className="flex items-center justify-center px-6 py-12">

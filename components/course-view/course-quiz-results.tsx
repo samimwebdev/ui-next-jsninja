@@ -11,6 +11,7 @@ import {
   CourseQuizSubmissionResponse,
 } from '@/types/course-quiz-types'
 import { Award, AlertCircle, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { getOptionTextsByIds, getQuizStatusMessage } from '@/lib/utils'
 
 interface CourseQuizResultsProps {
   isSubmitting: boolean
@@ -29,23 +30,6 @@ export default function CourseQuizResults({
   getSelectedOptionTexts,
   onCloseQuiz,
 }: CourseQuizResultsProps) {
-  // Helper function to get option text by IDs for correct answers
-  const getCorrectAnswerTexts = (
-    question: CourseQuizQuestion,
-    correctOptionIds: string[]
-  ) => {
-    if (!correctOptionIds || correctOptionIds.length === 0) return []
-
-    const correctTexts = correctOptionIds
-      .map((optionId) => {
-        const option = question.options?.find((opt) => opt.id === optionId)
-        return option?.text
-      })
-      .filter(Boolean) as string[]
-
-    return correctTexts
-  }
-
   return (
     <>
       <CardHeader className="pb-4">
@@ -92,11 +76,10 @@ export default function CourseQuizResults({
                   className="w-full h-4 rounded-full"
                 />
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {submissionResults.passed
-                    ? 'Congratulations! You passed the quiz!'
-                    : submissionResults.percentage >= 50
-                    ? 'Good effort! Keep learning to improve your score.'
-                    : "Keep learning! There's room for improvement."}
+                  {getQuizStatusMessage(
+                    submissionResults.passed,
+                    submissionResults.percentage
+                  )}
                 </p>
               </div>
             </div>
@@ -114,14 +97,14 @@ export default function CourseQuizResults({
                   (a) => a.questionId === question.documentId
                 )
 
-                // Get correct answers
+                // Get correct answers using utility function
                 const correctAnswerTexts = serverResult?.correctAnswers
-                  ? getCorrectAnswerTexts(question, serverResult.correctAnswers)
+                  ? getOptionTextsByIds(question, serverResult.correctAnswers)
                   : []
 
                 return (
                   <div
-                    key={question.id}
+                    key={question.documentId}
                     className={`p-5 rounded-lg border-2 ${
                       serverResult?.correct
                         ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20'
@@ -246,7 +229,7 @@ export default function CourseQuizResults({
                         <span>
                           Total Points:{' '}
                           <span className="font-medium text-foreground">
-                            {question.points ?? 1}
+                            {question.points}
                           </span>
                         </span>
                       </div>

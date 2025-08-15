@@ -8,7 +8,7 @@ import { useRouter, useParams } from 'next/navigation'
 interface LessonNavigationProps {
   modules: Module[]
   currentModuleId: number | null
-  currentLessonId: number | null
+  currentLessonId: string | null
   onLessonSelect: (moduleId: number, lesson: Lesson) => void
   slug: string
 }
@@ -35,7 +35,8 @@ export function LessonNavigation({
     // Find current lesson index
     const currentIndex = allLessons.findIndex(
       (item) =>
-        item.lesson.id === currentLessonId && item.moduleId === currentModuleId
+        item.lesson.documentId === currentLessonId &&
+        item.moduleId === currentModuleId
     )
 
     return {
@@ -107,4 +108,3 @@ export function LessonNavigation({
     </div>
   )
 }
-

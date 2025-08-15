@@ -75,7 +75,7 @@ export default function LecturePage({
       if (targetLesson) {
         // Only update if it's different from current content
         if (
-          currentContent?.lessonId !== targetLesson.id ||
+          currentContent?.lessonId !== targetLesson.documentId ||
           currentContent?.moduleId !== targetModule.id
         ) {
           handleContentSelect(targetModule.id, targetLesson)
@@ -105,6 +105,11 @@ export default function LecturePage({
     currentContent?.lessonId,
     currentContent?.moduleId,
   ])
+
+  // Get current module for document ID
+  const currentModule = modules.find(
+    (module) => module.id === currentContent?.moduleId
+  )
 
   if (!resolvedParams) {
     return (
@@ -183,8 +188,10 @@ export default function LecturePage({
       <LessonContent
         currentContent={currentContent}
         resources={currentContent?.resources || []}
-        quizQuestions={currentContent?.quiz?.questions || []}
+        courseSlug={resolvedParams.slug}
+        quiz={currentContent?.quiz || null}
         assignment={currentContent?.assignment}
+        moduleDocumentId={currentModule?.documentId || ''}
       />
 
       {/* Navigation Buttons */}

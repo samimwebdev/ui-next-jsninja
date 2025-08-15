@@ -1,4 +1,8 @@
 import { User } from '@/types/shared-types'
+import type {
+  CourseQuizQuestion,
+  ExistingQuizSubmission,
+} from '@/types/course-quiz-types'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -156,4 +160,43 @@ export function getProfileImageUrl(user: User): string | undefined {
   }
 
   return undefined
+}
+
+export const calculateQuizPercentage = (
+  score: number,
+  answers: ExistingQuizSubmission['answers'],
+  questions: CourseQuizQuestion[]
+): number => {
+  if (score <= 0) return 0
+
+  const totalPoints = answers.reduce((sum, answer) => {
+    const question = questions.find((q) => q.documentId === answer.questionId)
+    return sum + (question?.points || 1)
+  }, 0)
+
+  return totalPoints > 0 ? (score / totalPoints) * 100 : 0
+}
+
+export const getOptionTextById = (
+  question: CourseQuizQuestion,
+  optionId: string
+): string => {
+  const option = question.options?.find((opt) => opt.id === optionId)
+  return option?.text || optionId
+}
+
+export const getOptionTextsByIds = (
+  question: CourseQuizQuestion,
+  optionIds: string[]
+): string[] => {
+  return optionIds.map((id) => getOptionTextById(question, id)).filter(Boolean)
+}
+
+export const getQuizStatusMessage = (
+  passed: boolean,
+  percentage: number
+): string => {
+  if (passed) return "Excellent! You've mastered this topic!"
+  if (percentage >= 50) return 'Good job! Keep practicing to improve further.'
+  return 'Keep learning! Review the material and try again.'
 }

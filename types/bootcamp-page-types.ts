@@ -28,7 +28,7 @@ export interface AssessmentQuestion {
   points: number
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   text: string
-  questionType: 'multipleChoice' | 'singleChoice' | 'trueFalse' | 'essay'
+  questionType: 'multipleChoice' | 'singleChoice' | 'trueFalse'
   tags: string
   timeLimit: number
   options: AssessmentOption[]
@@ -58,7 +58,7 @@ export interface QuizSubmissionResponse {
   percentage: number
   passed: boolean
   answers: Array<{
-    questionId: number
+    questionId: string
     userAnswer: string[]
     correct: boolean
     correctAnswers: string[]
