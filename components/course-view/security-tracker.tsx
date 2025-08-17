@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
 import { strapiFetch } from '@/lib/strapi'
-// import { getAuthToken } from '@/lib/auth'
+
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 

@@ -6,7 +6,6 @@ import {
   UserProgressService,
   type LessonProgressPayload,
 } from '@/lib/user-progress'
-import { getAuthToken } from '@/lib/auth'
 
 interface UseTextProgressOptions {
   courseDocumentId: string
@@ -61,7 +60,6 @@ export function useTextProgress({
     if (completionSent.current || isLessonComplete) return
 
     try {
-      const token = await getAuthToken()
       const currentTimeSpent = Math.floor(
         (new Date().getTime() - startTime.current.getTime()) / 1000
       )
@@ -89,8 +87,7 @@ export function useTextProgress({
         courseDocumentId,
         moduleDocumentId,
         lessonDocumentId,
-        payload,
-        token
+        payload
       )
 
       console.log('✅ Text lesson completion sent successfully')
@@ -116,7 +113,6 @@ export function useTextProgress({
         return
 
       try {
-        const token = await getAuthToken()
         const lastPosition = calculateLastPosition(currentTimeSpent)
 
         const payload: LessonProgressPayload = {
@@ -131,8 +127,7 @@ export function useTextProgress({
           courseDocumentId,
           moduleDocumentId,
           lessonDocumentId,
-          payload,
-          token
+          payload
         )
 
         console.log('📊 Text progress update sent')

@@ -1,3 +1,4 @@
+'use server'
 import { strapiFetch } from '@/lib/strapi'
 import { getAuthToken } from '@/lib/auth'
 

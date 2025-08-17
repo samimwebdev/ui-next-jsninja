@@ -7,7 +7,6 @@ import {
   UserProgressService,
   type LessonProgressPayload,
 } from '@/lib/user-progress'
-import { getAuthToken } from '@/lib/auth'
 
 interface UseVideoProgressOptions {
   lectureId: string
@@ -63,7 +62,6 @@ export function useVideoProgress(
       if (isLessonComplete) return
 
       try {
-        const token = await getAuthToken()
         const now = new Date()
         const timeSpentInSession = Math.floor(
           (now.getTime() - sessionStartTime.current.getTime()) / 1000
@@ -104,8 +102,7 @@ export function useVideoProgress(
           courseDocumentId,
           moduleDocumentId,
           lessonDocumentId,
-          payload,
-          token
+          payload
         )
 
         if (lessonStatus === 'completed') {
