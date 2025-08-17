@@ -115,7 +115,7 @@ async function CourseViewLayout({
   return (
     <div>
       {/* Only include SecurityTracker for POST tracking, not for blocking */}
-      <SecurityTracker courseSlug={slug} token={token} />
+      <SecurityTracker courseSlug={slug} />
 
       <div className="min-h-screen bg-background text-foreground max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] lg:gap-6">

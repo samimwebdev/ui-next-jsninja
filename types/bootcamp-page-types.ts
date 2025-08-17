@@ -297,7 +297,7 @@ export interface BootcampPageData {
           title: string
           order: number
           duration: number
-          type: 'Video' | 'Text' | 'Quiz' | 'Assignment'
+          type: 'video' | 'text'
           content?: string | null
           videoUrl?: string
           isFree: boolean
@@ -317,10 +317,6 @@ export interface BootcampPageData {
   }
   assessmentQuiz: AssessmentQuiz
   contentBlock: BootcampContentSection[]
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
 }
 
 // Component type mapping for type safety

@@ -47,8 +47,11 @@ export function useVideoProgress(
   const initializationAttempts = useRef<number>(0)
   const isInitialized = useRef<boolean>(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const sessionStartTime = useRef<Date>(new Date())
-  const totalTimeSpent = useRef<number>(0)
+  // const sessionStartTime = useRef<Date>(new Date())
+  // const totalTimeSpent = useRef<number>(0)
+  const isPlaying = useRef<boolean>(false)
+  const totalWatchTime = useRef<number>(0)
+  const lastPlayTime = useRef<number | null>(null)
 
   // Wrap sendProgressToStrapi in useCallback
   const sendProgressToStrapi = useCallback(
@@ -62,12 +65,19 @@ export function useVideoProgress(
       if (isLessonComplete) return
 
       try {
-        const now = new Date()
-        const timeSpentInSession = Math.floor(
-          (now.getTime() - sessionStartTime.current.getTime()) / 1000
-        )
-        totalTimeSpent.current += timeSpentInSession
-        sessionStartTime.current = now
+        // const now = new Date()
+        // const timeSpentInSession = Math.floor(
+        //   (now.getTime() - sessionStartTime.current.getTime()) / 1000
+        // )
+        // totalTimeSpent.current += timeSpentInSession
+        // sessionStartTime.current = now
+
+        if (isPlaying.current && lastPlayTime.current !== null) {
+          const now = Date.now()
+          const delta = (now - lastPlayTime.current) / 1000 // seconds
+          totalWatchTime.current += delta
+          lastPlayTime.current = now
+        }
 
         const progressPercent = (time / duration) * 100
 
@@ -90,9 +100,9 @@ export function useVideoProgress(
           completedModuleLessons + 1 >= totalModuleLessons
 
         const payload: LessonProgressPayload = {
-          startedAt: sessionStartTime.current.toISOString(),
+          startedAt: new Date().toISOString(),
           lastPosition: Math.floor(time),
-          timeSpent: totalTimeSpent.current,
+          timeSpent: Math.floor(totalWatchTime.current),
           lessonStatus,
           isModuleCompleted: willCompleteModule,
         }
@@ -141,6 +151,8 @@ export function useVideoProgress(
           playerRef.current.off('ready')
           playerRef.current.off('error')
           playerRef.current.off('ended')
+          playerRef.current.off('play')
+          playerRef.current.off('pause')
         }
       } catch (error) {
         console.error('Error cleaning up player events:', error)
@@ -148,11 +160,16 @@ export function useVideoProgress(
 
       playerRef.current = null
       isInitialized.current = false
+      isPlaying.current = false
+      lastPlayTime.current = 0
     }
 
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
+    }
+    if (iframeRef.current) {
+      iframeRef.current.onload = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -179,6 +196,9 @@ export function useVideoProgress(
           player.on('ready', () => {
             if (!playerRef.current || isLessonComplete) return
 
+            isPlaying.current = true
+            lastPlayTime.current = null
+
             player.getDuration((d) => {
               videoDuration.current = d
               console.log('Video duration:', d)
@@ -204,10 +224,24 @@ export function useVideoProgress(
               sendProgressToStrapi(seconds, videoDuration.current)
             }
           })
+          player.on('play', () => {
+            isPlaying.current = true
+            lastPlayTime.current = Date.now()
+          })
 
+          player.on('pause', () => {
+            if (lastPlayTime.current !== null) {
+              const now = Date.now()
+              totalWatchTime.current += (now - lastPlayTime.current) / 1000
+            }
+            isPlaying.current = false
+            lastPlayTime.current = null
+          })
           // FIX: Update the ended event handler to ensure final update with full duration
           player.on('ended', () => {
             console.log('Video ended')
+            isPlaying.current = false
+            lastPlayTime.current = null
             if (
               !videoEnded.current &&
               !finalProgressSent.current &&
@@ -281,8 +315,9 @@ export function useVideoProgress(
     finalProgressSent.current = false
     lastReportedTime.current = 0
     videoDuration.current = 0
-    sessionStartTime.current = new Date()
-    totalTimeSpent.current = 0
+    totalWatchTime.current = 0
+    isPlaying.current = false
+    lastPlayTime.current = null
 
     if (!iframeRef?.current) {
       const checkIframe = setInterval(() => {
@@ -361,6 +396,7 @@ export function useVideoProgress(
       window.removeEventListener('beforeunload', handleBeforeUnload)
       cleanupPlayer()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     courseDocumentId,
     moduleDocumentId,

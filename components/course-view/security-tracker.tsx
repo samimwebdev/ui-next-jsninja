@@ -2,45 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react'
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
-import { strapiFetch } from '@/lib/strapi'
-
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-
-interface SecurityData {
-  accessType: string
-  ipAddress: string
-  locationData: {
-    country: string
-    countryCode: string
-    region: string
-    city: string
-    latitude: number
-    longitude: number
-    timezone: string
-    isp: string
-  }
-  fingerprintId: string
-  isTracked: boolean
-}
-
-interface SecurityResponse {
-  error: boolean
-  data: SecurityData | null
-  response?: string
-}
-
-interface SecurityError {
-  data: null
-  response: string
-}
+import {
+  trackCourseViewSecurity,
+  type SecurityTrackingResult,
+} from '@/app/course-view/[slug]/actions'
 
 interface SecurityTrackerProps {
   courseSlug: string
-  token: string | null
 }
 
-export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
+export function SecurityTracker({ courseSlug }: SecurityTrackerProps) {
   const [securityStatus, setSecurityStatus] = useState<
     'checking' | 'allowed' | 'redirecting'
   >('checking')
@@ -50,7 +23,7 @@ export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
 
   const sendSecurityDataAndCheck = async (fingerprintId: string) => {
     try {
-      console.log('Sending security data to server:', token)
+      console.log('Client: Collecting browser data and sending to server')
 
       // Get browser data
       const browserData = {
@@ -62,31 +35,21 @@ export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
         plugins: Array.from(navigator.plugins).map((plugin) => plugin.name),
       }
 
-      const trackingResponse = await strapiFetch<
-        SecurityResponse | SecurityError
-      >(`/api/course-view/${courseSlug}/security`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          fingerprintId,
-          // Remove testOverrideIP in production
-          testOverrideIP: '45.248.151.40',
-          browserData,
-        }),
-        returnErrorResponse: true, // Return structured error responses
-      })
+      // Call server action instead of direct API call
+      const result: SecurityTrackingResult = await trackCourseViewSecurity(
+        courseSlug,
+        fingerprintId,
+        browserData,
+        // Only for development testing
+        process.env.NODE_ENV === 'development' ? '45.248.151.40' : undefined
+      )
 
       hasTrackedSession.current = true
 
-      // Check the response from POST request
-      if ('error' in trackingResponse && trackingResponse.error) {
-        // User is blocked - POST request returned error
-        // Show error toast and redirect to dashboard
+      if (result.error && result.shouldRedirect) {
+        // User is blocked
         toast.error('Access Restricted', {
-          description: trackingResponse.response,
+          description: result.message || 'Access to this course is restricted',
           duration: 3000,
         })
 
@@ -98,16 +61,32 @@ export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
         }, 1000)
 
         return false
-      } else if ('data' in trackingResponse && trackingResponse.data) {
-        // User is allowed - POST request was successful
+      } else if (result.success) {
+        // User is allowed
+        if (result.message?.includes('warning')) {
+          toast.warning('Security Check Warning', {
+            description: result.message,
+            duration: 4000,
+          })
+        }
+
         setSecurityStatus('allowed')
         return true
       }
-    } catch (error) {
-      console.error('Failed to send security data:', error)
 
-      // If POST fails due to network/server issues, allow access
-      // Don't send GET request if POST failed
+      // Handle unexpected cases
+      toast.warning('Security Status Unknown', {
+        description:
+          'Unable to determine security status. Proceeding with caution.',
+        duration: 4000,
+      })
+
+      setSecurityStatus('allowed')
+      return true
+    } catch (error) {
+      console.error('Client: Failed to send security data:', error)
+
+      // If server action fails, show warning but allow access
       toast.warning('Security Check Failed', {
         description:
           'Unable to verify security status. You can continue for now.',
@@ -124,15 +103,20 @@ export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
     hasInitialized.current = true
 
     try {
+      console.log('Client: Initializing security tracking')
+
       // Initialize FingerprintJS
       const fp = await FingerprintJS.load()
       const result = await fp.get()
       const fingerprintId = `fp_${result.visitorId}`
 
-      // Send tracking data first, then check security status
+      console.log('Client: Generated fingerprint ID:', fingerprintId)
+
+      // Send tracking data and check security status
       await sendSecurityDataAndCheck(fingerprintId)
     } catch (error) {
-      console.error('Failed to initialize security tracking:', error)
+      console.error('Client: Failed to initialize security tracking:', error)
+
       // Don't block user if fingerprinting fails
       toast.warning('Security Initialization Failed', {
         description:
@@ -156,6 +140,7 @@ export function SecurityTracker({ courseSlug, token }: SecurityTrackerProps) {
         !hasTrackedSession.current
       ) {
         // User returned to tab, reinitialize if not already tracked in this session
+        console.log('Client: Tab became visible, reinitializing security')
         initializeSecurity()
       }
     }

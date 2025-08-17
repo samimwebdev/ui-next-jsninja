@@ -58,7 +58,7 @@ export async function initializeCourseProgress(
   const token = await getAuthToken()
 
   if (!token) {
-    throw new Error('user is not authenticated')
+    throw new Error('you are not authenticated')
   }
 
   const response = await strapiFetch<UserProgressResponse>(
@@ -81,7 +81,7 @@ export async function updateLessonProgress(
   const token = await getAuthToken()
 
   if (!token) {
-    throw new Error('user is not authenticated')
+    throw new Error('you are  not authenticated')
   }
 
   await strapiFetch(

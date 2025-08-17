@@ -18,16 +18,14 @@ import {
   ButtonType,
   QuizSubmissionResponse,
 } from '@/types/bootcamp-page-types'
-import { strapiFetch } from '@/lib/strapi'
-import { getAuthToken, isAuthenticated } from '@/lib/auth'
+import { isAuthenticated } from '@/lib/auth'
 import { toast } from 'sonner'
+import { submitBootcampAssessment } from '@/lib/actions/submit-bootcamp-assessment'
 
 // Import sub-components
 import QuizInstructions from '@/components/shared/quiz/quiz-instructions'
 import QuizQuestion from '@/components/shared/quiz/quiz-question'
 import CourseQuizResults from '@/components/shared/quiz/course-quiz-results'
-
-// Add this interface for the API response
 
 export default function BootcampAssessment({
   btn,
@@ -117,12 +115,14 @@ export default function BootcampAssessment({
   //   setSubmissionError(null)
   // }
 
-  // Wrap submitQuiz in useCallback to make it stable
+  // FIX: Updated submitQuiz to use server action
   const submitQuiz = useCallback(async () => {
     setIsSubmitting(true)
     setSubmissionError(null)
 
     try {
+      console.log('Client: Submitting quiz to server action')
+
       // Prepare the submission data with option IDs
       const submissionData = {
         answers: questions.map((question, index) => ({
@@ -131,24 +131,27 @@ export default function BootcampAssessment({
         })),
       }
 
-      const results = await strapiFetch(
-        `/api/bootcamps/${bootcampSlug}/assessment-quiz`,
-        {
-          method: 'POST',
-          body: JSON.stringify(submissionData),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${await getAuthToken()}`,
-          },
-        }
+      // FIX: Use server action instead of direct API call
+      const result = await submitBootcampAssessment(
+        bootcampSlug,
+        submissionData
       )
 
-      // Use server response instead of client calculation
-      setSubmissionResults(results as QuizSubmissionResponse)
-      setShowResults(true)
-      setIsQuizStarted(false)
+      if (result.success && result.data) {
+        // Use server response
+        setSubmissionResults(result.data)
+        setShowResults(true)
+        setIsQuizStarted(false)
+        console.log('Client: Quiz submitted successfully')
+      } else {
+        // Handle server action error
+        setSubmissionError(result.error || 'Failed to submit quiz')
+        setShowResults(true)
+        setIsQuizStarted(false)
+        console.error('Client: Quiz submission failed:', result.error)
+      }
     } catch (error) {
-      console.error('Error submitting quiz:', error)
+      console.error('Client: Error submitting quiz:', error)
       setSubmissionError(
         error instanceof Error ? error.message : 'Failed to submit quiz'
       )

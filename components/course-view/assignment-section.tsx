@@ -50,20 +50,17 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-// Dynamically import Monaco Editor to reduce initial bundle size
-const Editor = dynamic(() => import('@monaco-editor/react'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-[400px] bg-muted rounded-lg border">
-      <div className="flex flex-col items-center gap-2">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <div className="text-sm text-muted-foreground">
-          Loading code editor...
-        </div>
-      </div>
-    </div>
-  ),
-})
+// Format the expiry date
+const formatExpiryDate = (dateString: string): string => {
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+}
 
 // Language options for the code editor
 const languageOptions = [
@@ -88,6 +85,21 @@ const languageOptions = [
   { value: 'r', label: 'R' },
   { value: 'matlab', label: 'MATLAB' },
 ]
+
+// Dynamically import Monaco Editor to reduce initial bundle size
+const Editor = dynamic(() => import('@monaco-editor/react'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-[400px] bg-muted rounded-lg border">
+      <div className="flex flex-col items-center gap-2">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="text-sm text-muted-foreground">
+          Loading code editor...
+        </div>
+      </div>
+    </div>
+  ),
+})
 
 interface AssignmentSectionProps {
   assignment?: Assignment
@@ -115,19 +127,8 @@ export function AssignmentSection({
     courseId,
   })
 
-  // Format the expiry date
-  const formatExpiryDate = (dateString: string): string => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date)
-  }
-
   // Component state
+  // const [submissionTab, setSubmissionTab] = React.useState<SubmissionType[]>([])
   const [showSubmissionForm, setShowSubmissionForm] = React.useState(false)
   const [codeLanguage, setCodeLanguage] = React.useState('javascript')
 
@@ -135,6 +136,8 @@ export function AssignmentSection({
     ?.toLowerCase()
     .split(',')
     .map((type) => type.trim()) || []) as SubmissionType[]
+
+  console.log(submissionTypes)
 
   const [githubRepo, setGithubRepo] = React.useState('')
   const [live, setLive] = React.useState('')
@@ -706,7 +709,11 @@ export function AssignmentSection({
               <div className="rounded-lg border">
                 {/* Only show tabs if there are multiple submission types */}
                 {submissionTypes.length > 1 ? (
-                  <Tabs defaultValue={submissionTypes[0]}>
+                  <Tabs
+                    defaultValue={
+                      submissionTypes[0] === 'live' ? 'repo' : 'code'
+                    }
+                  >
                     <div className="border-b bg-muted/50 px-3">
                       <TabsList className="w-full justify-start rounded-none border-b-0 bg-transparent p-0">
                         {submissionTypes.includes('repo') && (
