@@ -38,7 +38,6 @@ interface QuizSectionProps {
   courseSlug: string
   lessonDocumentId: string
   moduleDocumentId: string
-  token: string | null
 }
 
 export function QuizSection({
@@ -46,11 +45,10 @@ export function QuizSection({
   courseSlug,
   lessonDocumentId,
   moduleDocumentId,
-  token,
 }: QuizSectionProps) {
   const router = useRouter()
 
-  // Use React Query hook for data management
+  // Use React Query hook - no token needed
   const {
     existingSubmission,
     isLoading,
@@ -63,7 +61,6 @@ export function QuizSection({
     courseSlug,
     moduleDocumentId,
     lessonDocumentId,
-    token,
   })
 
   console.log({ existingSubmission })

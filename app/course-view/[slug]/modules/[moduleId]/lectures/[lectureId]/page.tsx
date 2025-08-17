@@ -10,7 +10,6 @@ import { useCourse } from '@/components/context/course-view-provider'
 import { CopyrightIcon, PersonStanding, Video } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { getAuthToken } from '@/lib/auth'
 
 export default function LecturePage({
   params,
@@ -25,8 +24,6 @@ export default function LecturePage({
     modules,
     handleContentSelect,
   } = useCourse()
-
-  const [authToken, setAuthToken] = React.useState<string | null>(null)
 
   const router = useRouter()
   const [resolvedParams, setResolvedParams] = React.useState<{
@@ -43,19 +40,6 @@ export default function LecturePage({
     }
     resolveParams()
   }, [params])
-
-  useEffect(() => {
-    const fetchAuthToken = async () => {
-      // Simulate getting auth token
-      const token = await getAuthToken()
-      return token
-    }
-
-    fetchAuthToken().then((token) => {
-      setAuthToken(token)
-      console.log('Fetched auth token:', token)
-    })
-  }, [])
 
   // Set current content based on moduleId and lectureId from URL
   useEffect(() => {
@@ -200,7 +184,7 @@ export default function LecturePage({
         />
       )}
 
-      {/* Lesson Content */}
+      {/* Lesson Content - No token prop needed */}
       <LessonContent
         currentContent={currentContent}
         resources={currentContent?.resources || []}
@@ -208,7 +192,6 @@ export default function LecturePage({
         quiz={currentContent?.quiz || null}
         assignment={currentContent?.assignment}
         moduleDocumentId={currentModule?.documentId || ''}
-        token={authToken}
       />
 
       {/* Navigation Buttons */}

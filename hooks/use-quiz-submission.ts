@@ -1,16 +1,39 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { strapiFetch } from '@/lib/strapi'
 import { toast } from 'sonner'
-import type {
-  ExistingQuizSubmission,
-  CourseQuizSubmissionResponse,
-} from '@/types/course-quiz-types'
+import {
+  getQuizSubmission,
+  submitQuiz,
+  type QuizSubmissionData,
+} from '@/app/course-view/[slug]/actions'
 
-interface SubmissionData {
+interface QuizSubmissionResponse {
+  score: number
+  totalScore: number
+  percentage: number
+  passed: boolean
   answers: {
-    questionId: string
-    selectedAnswers: string[]
+    questionId: string | number
+    correct: boolean
+    correctAnswers: string[]
+    points: number
+    userAnswer?: string[] | undefined
+    selectedAnswers?: string[] | undefined
+    explanation?: string | undefined
   }[]
+}
+
+// Define the mutation options type
+interface SubmitQuizOptions {
+  onSuccess?: (data: QuizSubmissionResponse) => void
+  onError?: (error: Error) => void
+}
+
+interface UseQuizSubmissionParams {
+  quizId: string | null
+  courseSlug: string
+  moduleDocumentId: string
+  lessonDocumentId: string
+  enabled?: boolean
 }
 
 export function useQuizSubmission({
@@ -18,80 +41,43 @@ export function useQuizSubmission({
   courseSlug,
   moduleDocumentId,
   lessonDocumentId,
-  token,
   enabled = true,
-}: {
-  quizId: string | null
-  courseSlug: string
-  moduleDocumentId: string
-  lessonDocumentId: string
-  token: string | null
-  enabled?: boolean
-}) {
+}: UseQuizSubmissionParams) {
   const queryClient = useQueryClient()
 
-  console.log({ token }, 'token inside useQuizSubmission')
-
-  // Query for existing submission
+  // Query for existing submission using server action
   const query = useQuery({
-    queryKey: ['quiz-submission', lessonDocumentId, quizId, moduleDocumentId],
-    queryFn: async (): Promise<ExistingQuizSubmission | null> => {
-      if (!quizId || !token) return null
-
-      const apiUrl = `/api/course-view/${courseSlug}/${moduleDocumentId}/${lessonDocumentId}/${quizId}/assessment-quiz`
-
-      try {
-        return await strapiFetch<ExistingQuizSubmission>(apiUrl, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      } catch (error) {
-        console.log('No existing quiz submission found', error)
-        return null
-      }
+    queryKey: ['quiz-submission', quizId],
+    queryFn: async () => {
+      if (!quizId) return null
+      return await getQuizSubmission(
+        courseSlug,
+        moduleDocumentId,
+        lessonDocumentId,
+        quizId
+      )
     },
-    enabled: enabled && !!quizId && !!token,
+    enabled: enabled && !!quizId,
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   })
 
-  // Mutation for submitting quiz
+  // Mutation for submitting quiz using server action
   const submitMutation = useMutation({
-    mutationFn: async (
-      submissionData: SubmissionData
-    ): Promise<CourseQuizSubmissionResponse> => {
-      if (!token || !quizId) throw new Error('Missing required data')
-
-      const apiUrl = `/api/course-view/${courseSlug}/${moduleDocumentId}/${lessonDocumentId}/${quizId}/assessment-quiz`
-
-      return await strapiFetch<CourseQuizSubmissionResponse>(apiUrl, {
-        method: 'POST',
-        body: JSON.stringify(submissionData),
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      })
+    mutationFn: async (submissionData: QuizSubmissionData) => {
+      if (!quizId) throw new Error('Missing quiz ID')
+      return await submitQuiz(
+        courseSlug,
+        moduleDocumentId,
+        lessonDocumentId,
+        quizId,
+        submissionData
+      )
     },
     onSuccess: (data) => {
       // Invalidate and update the cache
-      queryClient.invalidateQueries({
-        queryKey: [
-          'quiz-submission',
-          lessonDocumentId,
-          quizId,
-          moduleDocumentId,
-        ],
-      })
-
-      // Set the data immediately for instant UI update
-      queryClient.setQueryData(
-        ['quiz-submission', lessonDocumentId, quizId, moduleDocumentId],
-        data
-      )
-
+      queryClient.invalidateQueries({ queryKey: ['quiz-submission', quizId] })
+      queryClient.setQueryData(['quiz-submission', quizId], data)
       toast.success('Quiz submitted successfully!')
     },
     onError: (error) => {
@@ -100,12 +86,27 @@ export function useQuizSubmission({
     },
   })
 
+  // Create a wrapper function that accepts options
+  const submitQuizMutation = (
+    submissionData: QuizSubmissionData,
+    options?: SubmitQuizOptions
+  ) => {
+    submitMutation.mutate(submissionData, {
+      onSuccess: (data) => {
+        options?.onSuccess?.(data)
+      },
+      onError: (error) => {
+        options?.onError?.(error)
+      },
+    })
+  }
+
   return {
     existingSubmission: query.data,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
-    submitQuiz: submitMutation.mutate,
+    submitQuiz: submitQuizMutation,
     isSubmitting: submitMutation.isPending,
     submitError: submitMutation.error,
   }

@@ -93,7 +93,6 @@ interface AssignmentSectionProps {
   assignment?: Assignment
   courseId: string
   assignmentId: string
-  token: string | null
 }
 
 // Define submission types
@@ -103,7 +102,6 @@ export function AssignmentSection({
   assignment,
   courseId,
   assignmentId,
-  token,
 }: AssignmentSectionProps) {
   // Use React Query hook for data management
   const {
@@ -115,7 +113,6 @@ export function AssignmentSection({
   } = useAssignmentSubmission({
     assignmentId: assignment?.documentId || null,
     courseId,
-    token,
   })
 
   // Format the expiry date

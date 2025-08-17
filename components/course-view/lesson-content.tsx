@@ -15,7 +15,6 @@ interface LessonContentProps {
   assignment?: Assignment
   courseSlug: string
   moduleDocumentId: string
-  token: string | null
 }
 
 export function LessonContent({
@@ -25,7 +24,6 @@ export function LessonContent({
   assignment,
   courseSlug,
   moduleDocumentId,
-  token,
 }: LessonContentProps) {
   return (
     <>
@@ -72,7 +70,6 @@ export function LessonContent({
                 courseSlug={courseSlug}
                 lessonDocumentId={currentContent.lessonId || ''}
                 moduleDocumentId={moduleDocumentId}
-                token={token}
               />
             </TabsContent>
 
@@ -82,7 +79,6 @@ export function LessonContent({
                   assignment={assignment}
                   courseId={currentContent.courseId}
                   assignmentId={assignment.documentId}
-                  token={token}
                 />
               ) : (
                 <div className="text-muted-foreground">
