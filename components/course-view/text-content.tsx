@@ -26,13 +26,13 @@ export function TextContent({ currentContent }: TextContentProps) {
   // Find current module and lesson
   const currentModule = modules.find((m) => m.id === currentContent.moduleId)
   const currentLesson = currentModule?.lessons.find(
-    (l) => l.id === currentContent.lessonId
+    (l) => l.documentId === currentContent.lessonId
   )
 
   // Count completed lessons in current module (excluding current lesson)
   const completedLessonsInModule =
     currentModule?.lessons.filter(
-      (l) => l.completed && l.id !== currentContent.lessonId
+      (l) => l.completed && l.documentId !== currentContent.lessonId
     ).length || 0
 
   // Calculate content length for reading progress

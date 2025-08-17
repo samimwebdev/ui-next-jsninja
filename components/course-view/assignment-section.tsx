@@ -1,7 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { use } from 'react'
+import {
+  useAssignmentSubmission,
+  type AssignmentSubmissionRequest,
+} from '@/hooks/use-assignment-submission'
 import type { Assignment } from '@/types/course-view-types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,9 +39,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import dynamic from 'next/dynamic'
-import { strapiFetch } from '@/lib/strapi'
-import { toast } from 'sonner'
-import { getAuthToken } from '@/lib/auth'
+
 import {
   Dialog,
   DialogContent,
@@ -64,174 +65,142 @@ const Editor = dynamic(() => import('@monaco-editor/react'), {
   ),
 })
 
-// Add interfaces for API types
-interface AssignmentSubmissionRequest {
-  courseId: string
-  assignmentId: string
-  repoLink?: string
-  liveLink?: string
-  code?: string
-}
-
-interface AssignmentSubmissionResponse {
-  data: {
-    id: number
-    documentId: string
-    feedback: string | null
-    submissionStatus: 'submitted' | 'pending' | 'graded'
-    createdAt: string
-    updatedAt: string
-    publishedAt: string
-    submittedDate: string
-    resultScore: number | null
-    repoLink: string | null
-    liveLink: string | null
-    code: string | null
-  }
-}
-
-// Add this interface for the existing submission from promise
-interface ExistingAssignmentSubmission {
-  id: number
-  documentId: string
-  feedback: string | null
-  submissionStatus: 'submitted' | 'pending' | 'graded'
-  submittedDate: string
-  resultScore: number | null
-  repoLink: string | null
-  liveLink: string | null
-  code: string | null
-}
+// Language options for the code editor
+const languageOptions = [
+  { value: 'javascript', label: 'JavaScript' },
+  { value: 'typescript', label: 'TypeScript' },
+  { value: 'python', label: 'Python' },
+  { value: 'java', label: 'Java' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'csharp', label: 'C#' },
+  { value: 'html', label: 'HTML' },
+  { value: 'css', label: 'CSS' },
+  { value: 'json', label: 'JSON' },
+  { value: 'xml', label: 'XML' },
+  { value: 'sql', label: 'SQL' },
+  { value: 'php', label: 'PHP' },
+  { value: 'ruby', label: 'Ruby' },
+  { value: 'go', label: 'Go' },
+  { value: 'rust', label: 'Rust' },
+  { value: 'swift', label: 'Swift' },
+  { value: 'kotlin', label: 'Kotlin' },
+  { value: 'scala', label: 'Scala' },
+  { value: 'r', label: 'R' },
+  { value: 'matlab', label: 'MATLAB' },
+]
 
 interface AssignmentSectionProps {
   assignment?: Assignment
   courseId: string
   assignmentId: string
-  existingSubmissionPromise: Promise<ExistingAssignmentSubmission | null>
+  token: string | null
 }
 
-// Format the expiry date
-const formatExpiryDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date)
-}
+// Define submission types
+type SubmissionType = 'code' | 'live' | 'repo'
 
 export function AssignmentSection({
   assignment,
   courseId,
   assignmentId,
-  existingSubmissionPromise,
+  token,
 }: AssignmentSectionProps) {
-  console.log(assignment, 'assignment in AssignmentSection')
+  // Use React Query hook for data management
+  const {
+    existingSubmission,
+    isLoading,
+    isError,
+    submitAssignment,
+    isSubmitting,
+  } = useAssignmentSubmission({
+    assignmentId: assignment?.documentId || null,
+    courseId,
+    token,
+  })
 
-  // Use the promise to get existing submission data
-  const existingSubmission = use(existingSubmissionPromise)
+  // Format the expiry date
+  const formatExpiryDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date)
+  }
 
+  // Component state
   const [showSubmissionForm, setShowSubmissionForm] = React.useState(false)
   const [codeLanguage, setCodeLanguage] = React.useState('javascript')
 
   const submissionTypes = (assignment?.submissionType
-    .toLowerCase()
+    ?.toLowerCase()
     .split(',')
-    .map((type) => type.trim()) || []) as Array<'code' | 'live' | 'repo'>
+    .map((type) => type.trim()) || []) as SubmissionType[]
 
-  const [githubRepo, setGithubRepo] = React.useState(
-    submissionTypes.includes('repo') ? '' : ''
-  )
-  const [live, setLive] = React.useState(
-    submissionTypes.includes('live') ? '' : ''
-  )
-  const [code, setCode] = React.useState(
-    submissionTypes.includes('code') ? '' : ''
-  )
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
-
-  // Language options for code editor
-  const languageOptions = [
-    { value: 'javascript', label: 'JavaScript' },
-    { value: 'typescript', label: 'TypeScript' },
-    { value: 'python', label: 'Python' },
-    { value: 'html', label: 'HTML' },
-    { value: 'css', label: 'CSS' },
-  ]
+  const [githubRepo, setGithubRepo] = React.useState('')
+  const [live, setLive] = React.useState('')
+  const [code, setCode] = React.useState('')
 
   // Check if assignment is expired
-  const isExpired = new Date(assignment?.dueDate || '') < new Date()
+  const isExpired = assignment?.dueDate
+    ? new Date(assignment.dueDate) < new Date()
+    : false
 
-  // Handle submission with API call
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handle submission using React Query mutation
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsSubmitting(true)
 
-    try {
-      // Prepare submission data
-      const submissionData: AssignmentSubmissionRequest = {
-        courseId,
-        assignmentId,
-        repoLink:
-          submissionTypes.includes('repo') && githubRepo ? githubRepo : '',
-        liveLink: submissionTypes.includes('live') && live ? live : '',
-        code: submissionTypes.includes('code') && code ? code : '',
-      }
-
-      // Make the API call
-      const response = await strapiFetch<AssignmentSubmissionResponse>(
-        '/api/assignment-submissions',
-        {
-          method: 'POST',
-          body: JSON.stringify({ data: submissionData }),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${await getAuthToken()}`,
-          },
-        }
-      )
-
-      // Show success toast
-      toast?.success('Assignment submitted successfully!', {
-        description: `Submitted on ${new Date(
-          response.data.submittedDate
-        ).toLocaleDateString()}`,
-      })
-
-      setShowSubmissionForm(false)
-      // Trigger a page refresh to update the submission data
-      window.location.reload()
-    } catch (error) {
-      console.error('Submission failed:', error)
-
-      // Handle different types of errors
-      let errorMessage = 'Failed to submit assignment. Please try again.'
-
-      if (error instanceof Error) {
-        if (error.message.includes('401')) {
-          errorMessage = 'You are not authorized. Please log in again.'
-        } else if (error.message.includes('403')) {
-          errorMessage = 'You do not have permission to submit this assignment.'
-        } else if (error.message.includes('404')) {
-          errorMessage = 'Assignment or course not found.'
-        } else if (error.message.includes('422')) {
-          errorMessage = 'Invalid submission data. Please check your inputs.'
-        } else {
-          errorMessage = error.message
-        }
-      }
-
-      toast.error('Submission Failed', {
-        description: errorMessage,
-      })
-    } finally {
-      setIsSubmitting(false)
+    const submissionData: AssignmentSubmissionRequest = {
+      courseId,
+      assignmentId,
+      repoLink:
+        submissionTypes.includes('repo') && githubRepo ? githubRepo : '',
+      liveLink: submissionTypes.includes('live') && live ? live : '',
+      code: submissionTypes.includes('code') && code ? code : '',
     }
+
+    submitAssignment(submissionData, {
+      onSuccess: () => {
+        setShowSubmissionForm(false)
+        // Reset form
+        setGithubRepo('')
+        setLive('')
+        setCode('')
+      },
+    })
   }
 
-  // Show existing submission with original markup (if exists)
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center p-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium mb-2">Loading Assignment...</h3>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center p-6">
+          <h3 className="text-lg font-medium mb-2 text-destructive">
+            Error Loading Assignment
+          </h3>
+          <p className="text-muted-foreground">
+            Please try refreshing the page.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // If there's an existing submission, show the results
   if (existingSubmission) {
     // Create submissionResult object to match original markup expectations
     const submissionResult = {
@@ -475,9 +444,10 @@ export function AssignmentSection({
                                 Submitted:
                               </span>
                               <p className="text-sm">
-                                {new Date(
-                                  submissionResult?.submittedAt
-                                ).toLocaleDateString()}
+                                {submissionResult?.submittedAt &&
+                                  new Date(
+                                    submissionResult.submittedAt
+                                  ).toLocaleDateString()}
                               </p>
                             </div>
                             <div>
@@ -633,19 +603,6 @@ export function AssignmentSection({
                 </pre>
               </div>
             )}
-
-            {/* Show a refresh button if not graded yet */}
-            {/* {!isGraded && (
-              <div className="text-center">
-                <Button
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Refreshing...' : 'Check Grading Status'}
-                </Button>
-              </div>
-            )} */}
           </CardContent>
         </Card>
       </div>
@@ -693,7 +650,7 @@ export function AssignmentSection({
               <div className="flex items-center text-sm text-muted-foreground">
                 <CalendarIcon className="h-4 w-4 mr-2" />
                 {assignment?.dueDate
-                  ? formatExpiryDate(assignment?.dueDate)
+                  ? formatExpiryDate(assignment.dueDate)
                   : 'No due date set'}
               </div>
             </div>

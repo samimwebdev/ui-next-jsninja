@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, use } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQuizSubmission } from '@/hooks/use-quiz-submission'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -13,8 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { motion, AnimatePresence } from 'framer-motion'
 import { NotebookPen, CheckCircle, XCircle, Clock } from 'lucide-react'
-import { strapiFetch } from '@/lib/strapi'
-import { getAuthToken, isAuthenticated } from '@/lib/auth'
+import { isAuthenticated } from '@/lib/auth'
 import { toast } from 'sonner'
 import {
   calculateQuizPercentage,
@@ -26,7 +26,6 @@ import {
 import type {
   CourseQuiz,
   CourseQuizSubmissionResponse,
-  ExistingQuizSubmission,
 } from '@/types/course-quiz-types'
 
 // Import sub-components
@@ -34,55 +33,12 @@ import CourseQuizInstructions from './course-quiz-instructions'
 import CourseQuizQuestion from './course-quiz-question'
 import CourseQuizResults from '../shared/quiz/course-quiz-results'
 
-// const QuizResultLoadingSkeleton = () => {
-//   return (
-//     <div className="space-y-4">
-//       <div className="p-6 rounded-lg border">
-//         <div className="flex flex-col items-center gap-4">
-//           {/* Icon and Percentage Skeleton */}
-//           <div className="flex items-center gap-3 mb-2">
-//             <Skeleton className="h-8 w-8 rounded-full" />
-//             <Skeleton className="h-12 w-20" />
-//           </div>
-
-//           {/* Title and Description Skeleton */}
-//           <div className="text-center space-y-2">
-//             <Skeleton className="h-5 w-48 mx-auto" />
-//             <Skeleton className="h-4 w-64 mx-auto" />
-//             <Skeleton className="h-4 w-32 mx-auto" />
-//           </div>
-
-//           {/* Progress Bar Skeleton */}
-//           <div className="w-full max-w-xs bg-muted rounded-lg p-4 mt-2">
-//             <div className="space-y-2">
-//               <div className="flex justify-between">
-//                 <Skeleton className="h-3 w-12" />
-//                 <Skeleton className="h-3 w-8" />
-//               </div>
-//               <Skeleton className="h-2 w-full rounded-full" />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Info Box Skeleton */}
-//       <div className="p-4 rounded-lg border">
-//         <Skeleton className="h-4 w-32 mx-auto mb-2" />
-//         <Skeleton className="h-3 w-48 mx-auto" />
-//       </div>
-
-//       {/* Button Skeleton */}
-//       <Skeleton className="h-10 w-full rounded-md" />
-//     </div>
-//   )
-// }
-
 interface QuizSectionProps {
   quiz: CourseQuiz | null
   courseSlug: string
   lessonDocumentId: string
   moduleDocumentId: string
-  existingSubmissionPromise: Promise<ExistingQuizSubmission | null>
+  token: string | null
 }
 
 export function QuizSection({
@@ -90,14 +46,27 @@ export function QuizSection({
   courseSlug,
   lessonDocumentId,
   moduleDocumentId,
-  existingSubmissionPromise,
+  token,
 }: QuizSectionProps) {
   const router = useRouter()
 
-  // Use the promise to get existing submission data
-  const existingSubmission = use(existingSubmissionPromise)
-  console.log({ existingSubmission })
+  // Use React Query hook for data management
+  const {
+    existingSubmission,
+    isLoading,
+    isError,
+    submitQuiz,
+    isSubmitting,
+    submitError,
+  } = useQuizSubmission({
+    quizId: quiz?.documentId || null,
+    courseSlug,
+    moduleDocumentId,
+    lessonDocumentId,
+    token,
+  })
 
+  console.log({ existingSubmission })
   // Use dynamic data or fallback
   const quizData = quiz || {
     id: 0,
@@ -115,7 +84,6 @@ export function QuizSection({
 
   const [showInstructions, setShowInstructions] = useState(true)
   const [currentQuestion, setCurrentQuestion] = useState(0)
-  // Store option IDs instead of text
   const [answers, setAnswers] = useState<string[][]>(
     Array(questions.length).fill([])
   )
@@ -123,10 +91,8 @@ export function QuizSection({
   const [timeLeft, setTimeLeft] = useState(questions[0]?.timeLimit || 60)
   const [isQuizStarted, setIsQuizStarted] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [submissionResults, setSubmissionResults] =
     useState<CourseQuizSubmissionResponse | null>(null)
-  const [submissionError, setSubmissionError] = useState<string | null>(null)
 
   // Convert existing submission to result format if it exists
   useEffect(() => {
@@ -161,7 +127,7 @@ export function QuizSection({
     }
   }, [existingSubmission, questions])
 
-  // Helper function to get selected option texts for display using utility
+  // Helper function to get selected option texts for display
   const getSelectedOptionTexts = (questionIndex: number) => {
     const selectedIds = answers[questionIndex] || []
     const question = questions[questionIndex]
@@ -174,65 +140,42 @@ export function QuizSection({
   const handleDialogOpen = async (open: boolean) => {
     const userIsAuthenticated = await isAuthenticated()
     if (open && !userIsAuthenticated) {
-      // Store current page URL for redirect after login
       const currentUrl = window.location.pathname
-
       toast.error(
         'You must be logged in to take the quiz. Redirecting to login...'
       )
-      // Redirect to login instead of opening dialog
       router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`)
       return
     } else if (open && userIsAuthenticated) {
-      // Check if quiz already submitted
       if (existingSubmission) {
         toast.info(
           'You have already submitted this quiz. Viewing your results.'
         )
         return
       }
-      // If user is authenticated and no existing submission, open the dialog
       setIsDialogOpen(true)
     } else {
-      // If dialog is closed, reset quiz state only if no results
       setIsDialogOpen(false)
-      if (!submissionResults && !existingSubmission) {
-        resetQuizState()
-      }
     }
   }
 
-  // Handle viewing detailed results - works for both new and existing submissions
+  // Handle viewing detailed results
   const handleViewDetailedResults = () => {
-    // Set states to show results in dialog
     setShowInstructions(false)
     setShowResults(true)
     setIsQuizStarted(false)
     setIsDialogOpen(true)
   }
 
-  // Reset quiz state
-  const resetQuizState = () => {
-    setShowInstructions(true)
-    setShowResults(false)
-    setIsQuizStarted(false)
-    setCurrentQuestion(0)
-    setAnswers(Array(questions.length).fill([]))
-    setTimeLeft(questions[0]?.timeLimit || 60)
-    setSubmissionResults(null)
-    setSubmissionError(null)
-  }
-
-  // Handle closing quiz - different behavior based on context
+  // Handle closing quiz
   const handleCloseQuiz = () => {
     setIsDialogOpen(false)
-    // Reset dialog states but keep submission results
     setShowInstructions(true)
     setShowResults(false)
     setIsQuizStarted(false)
   }
 
-  // Function to get user's previous answers for display in results using utility
+  // Function to get user's previous answers for display in results
   const getPreviousAnswerTexts = (questionIndex: number) => {
     const question = questions[questionIndex]
     if (!question || !existingSubmission) return []
@@ -248,7 +191,7 @@ export function QuizSection({
     )
   }
 
-  // Calculate percentage for existing submissions using utility
+  // Calculate percentage for existing submissions
   const getExistingSubmissionPercentage = () => {
     if (!existingSubmission) return 0
     return calculateQuizPercentage(
@@ -267,71 +210,38 @@ export function QuizSection({
     }, 0)
   }
 
-  // Wrap submitQuiz in useCallback to make it stable
-  const submitQuiz = useCallback(async () => {
-    setIsSubmitting(true)
-    setSubmissionError(null)
-
-    try {
-      // Prepare the submission data with option IDs
-      const submissionData = {
-        answers: questions.map((question, index) => ({
-          questionId: question.documentId,
-          selectedAnswers: answers[index] || [], // Now contains option IDs
-        })),
-      }
-
-      console.log(submissionData, 'Submission data to send')
-
-      // Fixed API URL to match the pattern you specified
-      const apiUrl = `/api/course-view/${courseSlug}/${moduleDocumentId}/${lessonDocumentId}/${quizData.documentId}/assessment-quiz`
-
-      console.log('Submitting to URL:', apiUrl)
-
-      const results = await strapiFetch(apiUrl, {
-        method: 'POST',
-        body: JSON.stringify(submissionData),
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${await getAuthToken()}`,
-        },
-      })
-      console.log('Quiz submission results:', results)
-
-      // Use server response instead of client calculation
-      setSubmissionResults(results as CourseQuizSubmissionResponse)
-      setShowResults(true)
-      setIsQuizStarted(false)
-    } catch (error) {
-      console.error('Error submitting quiz:', error)
-      setSubmissionError(
-        error instanceof Error ? error.message : 'Failed to submit quiz'
-      )
-      // Still show results page but with error state
-      setShowResults(true)
-      setIsQuizStarted(false)
-    } finally {
-      setIsSubmitting(false)
+  // Handle quiz submission using React Query mutation
+  const handleSubmitQuiz = useCallback(() => {
+    const submissionData = {
+      answers: questions.map((question, index) => ({
+        questionId: question.documentId,
+        selectedAnswers: answers[index] || [],
+      })),
     }
-  }, [
-    questions,
-    answers,
-    courseSlug,
-    lessonDocumentId,
-    moduleDocumentId,
-    quizData.documentId,
-  ])
+
+    submitQuiz(submissionData, {
+      onSuccess: (results) => {
+        setSubmissionResults(results as CourseQuizSubmissionResponse)
+        setShowResults(true)
+        setIsQuizStarted(false)
+      },
+      onError: () => {
+        setShowResults(true)
+        setIsQuizStarted(false)
+      },
+    })
+  }, [questions, answers, submitQuiz])
 
   const handleNextQuestion = useCallback(() => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
       setTimeLeft(questions[currentQuestion + 1]?.timeLimit || 60)
     } else {
-      // Submit quiz when all questions are answered
-      submitQuiz()
+      handleSubmitQuiz()
     }
-  }, [currentQuestion, questions, submitQuiz])
+  }, [currentQuestion, questions, handleSubmitQuiz])
 
+  // Timer effect
   useEffect(() => {
     let timer: NodeJS.Timeout
     if (isQuizStarted && !showResults && timeLeft > 0) {
@@ -361,7 +271,6 @@ export function QuizSection({
     setTimeLeft(questions[0]?.timeLimit || 60)
   }
 
-  // Updated handleAnswer to work with option IDs
   const handleAnswer = (optionId: string) => {
     const newAnswers = [...answers]
     const currentAnswers = newAnswers[currentQuestion]
@@ -396,11 +305,41 @@ export function QuizSection({
     exit: { opacity: 0, transition: { duration: 0.3 } },
   }
 
-  // Prevent continuous flashing by using a stable key for AnimatePresence
   const getStableKey = () => {
     if (showInstructions) return 'instructions'
     if (showResults) return 'results'
     return `question-${currentQuestion}`
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center p-6">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h3 className="text-lg font-medium mb-2">Loading Quiz...</h3>
+          <p className="text-muted-foreground">
+            Checking for existing submissions...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center p-6">
+          <h3 className="text-lg font-medium mb-2 text-destructive">
+            Error Loading Quiz
+          </h3>
+          <p className="text-muted-foreground">
+            Please try refreshing the page.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   // Don't render if no quiz data
@@ -525,7 +464,7 @@ export function QuizSection({
                   >
                     <CourseQuizResults
                       isSubmitting={false}
-                      submissionError={submissionError}
+                      submissionError={submitError?.message || null}
                       submissionResults={submissionResults}
                       questions={questions}
                       getSelectedOptionTexts={
@@ -596,7 +535,7 @@ export function QuizSection({
                       >
                         <CourseQuizResults
                           isSubmitting={isSubmitting}
-                          submissionError={submissionError}
+                          submissionError={submitError?.message || null}
                           submissionResults={submissionResults}
                           questions={questions}
                           getSelectedOptionTexts={getSelectedOptionTexts}

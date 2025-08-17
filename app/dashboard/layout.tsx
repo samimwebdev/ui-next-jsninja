@@ -1,7 +1,7 @@
 import type React from 'react'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
-import { FlashMessageHandler } from '@/components/common/flash-message-handler'
+import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
 
 const sidebarNavItems = [
   {

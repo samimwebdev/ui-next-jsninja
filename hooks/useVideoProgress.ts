@@ -98,6 +98,7 @@ export function useVideoProgress(
           lessonStatus,
           isModuleCompleted: willCompleteModule,
         }
+        console.log({ lessonDocumentId })
 
         await UserProgressService.updateLessonProgress(
           courseDocumentId,

@@ -72,7 +72,7 @@ export default function CourseViewLayoutWrapper({
           const token = await getAuthToken()
           const progress = await UserProgressService.initializeCourseProgress(
             courseData.documentId,
-            token
+            token ? token : undefined
           )
           setUserProgress(progress)
         } catch (error) {

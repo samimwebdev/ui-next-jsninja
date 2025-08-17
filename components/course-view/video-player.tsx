@@ -90,8 +90,9 @@ export const VideoPlayer = ({
   // Find current module and lesson for progress tracking
   const currentModule = modules.find((m) => m.id === currentContent.moduleId)
   const currentLesson = currentModule?.lessons.find(
-    (l) => l.id === currentContent.lessonId
+    (l) => l.documentId === currentContent.lessonId
   )
+  console.log({ currentModule, currentLesson, currentContent })
 
   // Check if lesson is already completed
   const isLessonAlreadyCompleted = currentLesson?.completed || false
@@ -99,7 +100,7 @@ export const VideoPlayer = ({
   // Count completed lessons in current module (excluding current lesson)
   const completedLessonsInModule =
     currentModule?.lessons.filter(
-      (l) => l.completed && l.id !== currentContent.lessonId
+      (l) => l.completed && l.documentId !== currentContent.lessonId
     ).length || 0
 
   const videoContent = useMemo((): VideoContent => {

@@ -11,6 +11,9 @@ import { VideoProvider } from '@/components/context/video-provider'
 import { strapiFetch } from '@/lib/strapi'
 import { Menu, SEOData, StrapiImage } from '@/types/shared-types'
 
+import ReactQueryProvider from '@/components/context/react-query-provider'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -142,19 +145,22 @@ export default async function RootLayout({
         className={`${inter.className} antialiased`}
         suppressHydrationWarning
       >
-        <AuthProvider user={currentUser}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Navigation menuItems={headerMenu?.items || []} logo={logo} />
-            <Toaster position="top-right" richColors />
-            <VideoProvider>{children}</VideoProvider>
-            <Footer menuItems={footerMenu?.items || []} logo={logo} />
-          </ThemeProvider>
-        </AuthProvider>
+        <ReactQueryProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+          <AuthProvider user={currentUser}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Navigation menuItems={headerMenu?.items || []} logo={logo} />
+              <Toaster position="top-right" richColors />
+              <VideoProvider>{children}</VideoProvider>
+              <Footer menuItems={footerMenu?.items || []} logo={logo} />
+            </ThemeProvider>
+          </AuthProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   )

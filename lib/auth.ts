@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { strapiFetch } from './strapi'
 import QueryString from 'qs'
 import { User, UserWithProfile } from '@/types/shared-types'
+import { cache } from 'react'
 
 const COOKIE = 'strapi_jwt'
 
@@ -45,11 +46,11 @@ export async function getUser(): Promise<User | null> {
   }
 }
 
-export async function getAuthToken(): Promise<string | null> {
+export const getAuthToken = cache(async (): Promise<string | null> => {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE)
   return token?.value || null
-}
+})
 
 export async function getUserWithProfile(): Promise<UserWithProfile | null> {
   try {
