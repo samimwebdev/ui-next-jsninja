@@ -1,4 +1,7 @@
+'use server'
+
 import { strapiFetch } from '@/lib/strapi'
+import { getAuthToken } from './auth'
 
 export interface LessonProgressPayload {
   startedAt: string
@@ -49,39 +52,47 @@ export interface UserProgressResponse {
   }>
 }
 
-export class UserProgressService {
-  static async initializeCourseProgress(
-    courseDocumentId: string,
-    token?: string
-  ): Promise<UserProgressResponse> {
-    const response = await strapiFetch<UserProgressResponse>(
-      `/api/user-progress/${courseDocumentId}`,
-      {
-        method: 'GET',
-        token,
-      }
-    )
+export async function initializeCourseProgress(
+  courseDocumentId: string
+): Promise<UserProgressResponse> {
+  const token = await getAuthToken()
 
-    return response
+  if (!token) {
+    throw new Error('user is not authenticated')
   }
 
-  static async updateLessonProgress(
-    courseDocumentId: string,
-    moduleDocumentId: string,
-    lessonDocumentId: string,
-    payload: LessonProgressPayload,
-    token?: string
-  ): Promise<void> {
-    await strapiFetch(
-      `/api/user-progress/${courseDocumentId}/${moduleDocumentId}/${lessonDocumentId}`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      }
-    )
+  const response = await strapiFetch<UserProgressResponse>(
+    `/api/user-progress/${courseDocumentId}`,
+    {
+      method: 'GET',
+      token,
+    }
+  )
+
+  return response
+}
+
+export async function updateLessonProgress(
+  courseDocumentId: string,
+  moduleDocumentId: string,
+  lessonDocumentId: string,
+  payload: LessonProgressPayload
+): Promise<void> {
+  const token = await getAuthToken()
+
+  if (!token) {
+    throw new Error('user is not authenticated')
   }
+
+  await strapiFetch(
+    `/api/user-progress/${courseDocumentId}/${moduleDocumentId}/${lessonDocumentId}`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    }
+  )
 }

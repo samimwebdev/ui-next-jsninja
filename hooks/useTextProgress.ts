@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import {
-  UserProgressService,
+  updateLessonProgress,
   type LessonProgressPayload,
 } from '@/lib/user-progress'
 
@@ -83,7 +83,7 @@ export function useTextProgress({
         isModuleCompleted: willCompleteModule,
       }
 
-      await UserProgressService.updateLessonProgress(
+      await updateLessonProgress(
         courseDocumentId,
         moduleDocumentId,
         lessonDocumentId,
@@ -123,7 +123,7 @@ export function useTextProgress({
           isModuleCompleted: false,
         }
 
-        await UserProgressService.updateLessonProgress(
+        await updateLessonProgress(
           courseDocumentId,
           moduleDocumentId,
           lessonDocumentId,

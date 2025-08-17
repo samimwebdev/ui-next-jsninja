@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react' // Add useCallback import
 import { usePathname } from 'next/navigation'
 import { Player } from 'player.js'
 import {
-  UserProgressService,
+  updateLessonProgress,
   type LessonProgressPayload,
 } from '@/lib/user-progress'
 
@@ -98,7 +98,7 @@ export function useVideoProgress(
         }
         console.log({ lessonDocumentId })
 
-        await UserProgressService.updateLessonProgress(
+        await updateLessonProgress(
           courseDocumentId,
           moduleDocumentId,
           lessonDocumentId,

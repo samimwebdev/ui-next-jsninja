@@ -16,8 +16,10 @@ import type {
   Module,
 } from '@/types/course-view-types'
 import { Sidebar } from '@/components/course-view/sidebar'
-import { UserProgressResponse, UserProgressService } from '@/lib/user-progress'
-import { getAuthToken } from '@/lib/auth'
+import {
+  initializeCourseProgress,
+  UserProgressResponse,
+} from '@/lib/user-progress'
 
 interface CourseViewContextType {
   courseData: CourseViewData | null
@@ -69,11 +71,7 @@ export default function CourseViewLayoutWrapper({
     if (courseData?.documentId && !userProgress) {
       const initializeProgress = async () => {
         try {
-          const token = await getAuthToken()
-          const progress = await UserProgressService.initializeCourseProgress(
-            courseData.documentId,
-            token ? token : undefined
-          )
+          const progress = await initializeCourseProgress(courseData.documentId)
           setUserProgress(progress)
         } catch (error) {
           console.error('Failed to initialize course progress:', error)
