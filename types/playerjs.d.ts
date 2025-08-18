@@ -36,6 +36,7 @@ declare module 'player.js' {
     getCurrentTime(callback: (time: number) => void): void
     getPaused(callback: (paused: boolean) => void): void
     getVolume(callback: (volume: number) => void): void
+    setCurrentTime(seconds: number, callback: (error?: ErrorData) => void): void
 
     // Setters
     play(): void

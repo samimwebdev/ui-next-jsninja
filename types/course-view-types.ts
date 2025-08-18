@@ -191,6 +191,7 @@ export interface SocialLink {
 export interface CurrentContent {
   courseId: string
   moduleId: number // Changed from string to number to match your data
+  moduleDocumentId: string
   lessonId: string // Changed from string to number to match your data
   title: string
   type: 'video' | 'text'
@@ -202,6 +203,7 @@ export interface CurrentContent {
   assignment?: Assignment // Optional assignment for the lesson
   quiz?: Quiz // Optional quiz for the lesson
   videoLink?: VideoLink // Optional video link for the lesson
+  lastPosition: number // Position in the video or text content
 }
 
 export interface ComponentLesson {
@@ -248,6 +250,7 @@ export interface Lesson {
   duration: string // Formatted duration like "5:30"
   type: string
   completed: boolean
+  lastPosition: number
   isFree: boolean
   order: number
   icon: StrapiIcon | null

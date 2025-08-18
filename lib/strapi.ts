@@ -21,6 +21,7 @@ export async function strapiFetch<T>(
     token,
     next,
     returnErrorResponse = false,
+    allowNotFound = false,
     ...rest
   } = options
 
@@ -41,17 +42,17 @@ export async function strapiFetch<T>(
       console.log('Error data:', errorData)
 
       // // For 404 responses with allowNotFound=true, return the error structure
-      // if (res.status === 404 && allowNotFound) {
-      //   return {
-      //     data: null,
-      //     error: {
-      //       status: 404,
-      //       name: 'NotFoundError',
-      //       message: errorData?.error?.message || 'Resource not found',
-      //       details: errorData?.error?.details || {},
-      //     },
-      //   } as T
-      // }
+      if (res.status === 404 && allowNotFound) {
+        return {
+          data: null,
+          error: {
+            status: 404,
+            name: 'NotFoundError',
+            message: errorData?.error?.message || 'Resource not found',
+            details: errorData?.error?.details || {},
+          },
+        } as T
+      }
 
       // For security endpoints, return error responses instead of throwing
       if (returnErrorResponse) {

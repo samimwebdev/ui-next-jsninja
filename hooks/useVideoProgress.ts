@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react' // Add useCallback import
+import { useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { Player } from 'player.js'
 import {
@@ -19,6 +19,7 @@ interface UseVideoProgressOptions {
   completedModuleLessons?: number
   onLessonCompleted?: (lessonDocumentId: string) => void
   isLessonComplete?: boolean
+  lastPosition?: number // Last watched position in seconds
 }
 
 export function useVideoProgress(
@@ -33,6 +34,7 @@ export function useVideoProgress(
     completedModuleLessons = 0,
     onLessonCompleted,
     isLessonComplete = false,
+    lastPosition = 0,
   }: UseVideoProgressOptions
 ) {
   const pathname = usePathname()
@@ -47,13 +49,82 @@ export function useVideoProgress(
   const initializationAttempts = useRef<number>(0)
   const isInitialized = useRef<boolean>(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  // const sessionStartTime = useRef<Date>(new Date())
-  // const totalTimeSpent = useRef<number>(0)
   const isPlaying = useRef<boolean>(false)
   const totalWatchTime = useRef<number>(0)
   const lastPlayTime = useRef<number | null>(null)
 
-  // Wrap sendProgressToStrapi in useCallback
+  // FIX: Track current lesson to detect changes - move this to the top
+  const currentLessonRef = useRef<string>(lessonDocumentId)
+  const hasSeekToLastPosition = useRef<boolean>(false)
+  const seekAttempted = useRef<boolean>(false)
+
+  // FIX: Reset seek state IMMEDIATELY when lesson or position changes
+  useEffect(() => {
+    const lessonChanged = currentLessonRef.current !== lessonDocumentId
+
+    if (lessonChanged) {
+      console.log(
+        `🔄 Lesson changed from ${currentLessonRef.current} to ${lessonDocumentId}`
+      )
+      currentLessonRef.current = lessonDocumentId
+    }
+
+    // FIX: Reset seek state for new lesson OR new position
+    if (lessonChanged || lastPosition > 0) {
+      console.log(
+        `🔄 Resetting seek state - lesson changed: ${lessonChanged}, lastPosition: ${lastPosition}`
+      )
+      hasSeekToLastPosition.current = false
+      seekAttempted.current = false // ← This is the key fix!
+    }
+  }, [lessonDocumentId, lastPosition]) // Run when either changes
+
+  // FIX: Simplified seek function without redundant checks
+  const seekToLastPosition = useCallback(() => {
+    console.log('🔍 Seek attempt:', {
+      lessonId: lessonDocumentId,
+      lastPosition,
+      hasPlayer: !!playerRef.current,
+      isInitialized: isInitialized.current,
+      hasSeekToLastPosition: hasSeekToLastPosition.current,
+      seekAttempted: seekAttempted.current,
+      isLessonComplete,
+    })
+
+    if (
+      !playerRef.current ||
+      !isInitialized.current ||
+      hasSeekToLastPosition.current || // Only check if already successfully seeked
+      !lastPosition ||
+      lastPosition <= 0 ||
+      isLessonComplete
+    ) {
+      console.log('🚫 Skipping seek - conditions not met')
+      return
+    }
+
+    // FIX: Don't check seekAttempted here - just try to seek
+    console.log(
+      `🎯 Seeking to last position: ${lastPosition} seconds for lesson: ${lessonDocumentId}`
+    )
+
+    try {
+      playerRef.current.setCurrentTime(lastPosition, (error) => {
+        if (error) {
+          console.error('❌ Error seeking to last position:', error)
+        } else {
+          console.log(
+            `✅ Successfully seeked to ${lastPosition} seconds for lesson: ${lessonDocumentId}`
+          )
+          hasSeekToLastPosition.current = true // Only set on success
+          lastReportedTime.current = lastPosition
+        }
+      })
+    } catch (error) {
+      console.error('❌ Failed to seek to last position:', error)
+    }
+  }, [lastPosition, isLessonComplete, lessonDocumentId])
+
   const sendProgressToStrapi = useCallback(
     async (
       time: number,
@@ -61,20 +132,12 @@ export function useVideoProgress(
       isFinal = false,
       isVideoEnd = false
     ) => {
-      // Skip if lesson is already completed
       if (isLessonComplete) return
 
       try {
-        // const now = new Date()
-        // const timeSpentInSession = Math.floor(
-        //   (now.getTime() - sessionStartTime.current.getTime()) / 1000
-        // )
-        // totalTimeSpent.current += timeSpentInSession
-        // sessionStartTime.current = now
-
         if (isPlaying.current && lastPlayTime.current !== null) {
           const now = Date.now()
-          const delta = (now - lastPlayTime.current) / 1000 // seconds
+          const delta = (now - lastPlayTime.current) / 1000
           totalWatchTime.current += delta
           lastPlayTime.current = now
         }
@@ -106,7 +169,6 @@ export function useVideoProgress(
           lessonStatus,
           isModuleCompleted: willCompleteModule,
         }
-        console.log({ lessonDocumentId })
 
         await updateLessonProgress(
           courseDocumentId,
@@ -175,7 +237,6 @@ export function useVideoProgress(
   }, [])
 
   const initializePlayer = useCallback(() => {
-    // Skip initialization if lesson is already completed
     if (
       !iframeRef?.current ||
       playerRef.current ||
@@ -196,12 +257,30 @@ export function useVideoProgress(
           player.on('ready', () => {
             if (!playerRef.current || isLessonComplete) return
 
-            isPlaying.current = true
-            lastPlayTime.current = null
-
             player.getDuration((d) => {
               videoDuration.current = d
-              console.log('Video duration:', d)
+              console.log(
+                `📏 Video duration: ${d} seconds for lesson: ${lessonDocumentId}`
+              )
+              console.log(`📍 Will seek to position: ${lastPosition} seconds`)
+
+              // FIX: Always try to seek if we have a valid position
+              if (lastPosition > 0 && lastPosition < d) {
+                console.log(
+                  `📍 Valid position found: ${lastPosition}s, seeking...`
+                )
+                setTimeout(() => {
+                  seekToLastPosition()
+                }, 1500)
+              } else if (lastPosition >= d) {
+                console.log(
+                  `⚠️ Position ${lastPosition}s exceeds duration ${d}s, starting from beginning`
+                )
+              } else {
+                console.log(
+                  `🆕 No previous position (${lastPosition}), starting from beginning`
+                )
+              }
             })
           })
 
@@ -224,12 +303,15 @@ export function useVideoProgress(
               sendProgressToStrapi(seconds, videoDuration.current)
             }
           })
+
           player.on('play', () => {
+            console.log('▶️ Video play event')
             isPlaying.current = true
             lastPlayTime.current = Date.now()
           })
 
           player.on('pause', () => {
+            console.log('⏸️ Video pause event')
             if (lastPlayTime.current !== null) {
               const now = Date.now()
               totalWatchTime.current += (now - lastPlayTime.current) / 1000
@@ -237,9 +319,9 @@ export function useVideoProgress(
             isPlaying.current = false
             lastPlayTime.current = null
           })
-          // FIX: Update the ended event handler to ensure final update with full duration
+
           player.on('ended', () => {
-            console.log('Video ended')
+            console.log('🏁 Video ended')
             isPlaying.current = false
             lastPlayTime.current = null
             if (
@@ -249,22 +331,21 @@ export function useVideoProgress(
               videoDuration.current > 0
             ) {
               videoEnded.current = true
-              // Send final progress with full video duration to ensure watched duration = video duration
               console.log(
                 '📹 Sending final video completion with full duration:',
                 videoDuration.current
               )
               sendProgressToStrapi(
-                videoDuration.current, // Use full duration as watched time
                 videoDuration.current,
-                true, // isFinal = true
-                true // isVideoEnd = true
+                videoDuration.current,
+                true,
+                true
               )
             }
           })
 
           player.on('error', (error) => {
-            console.error('Player error:', error)
+            console.error('🚨 Player error:', error)
           })
         } catch (error) {
           console.error('Failed to initialize player:', error)
@@ -291,12 +372,12 @@ export function useVideoProgress(
     } catch (error) {
       console.error('Failed to set up player initialization:', error)
     }
+    // exhaustive deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLessonComplete, completionThreshold, sendProgressToStrapi])
+  }, [isLessonComplete, seekToLastPosition, lessonDocumentId, lastPosition])
 
-  // Main effect for player initialization and progress tracking
+  // FIX: Main effect - simplified state reset
   useEffect(() => {
-    // Skip all tracking if lesson is already completed
     if (isLessonComplete) {
       console.log(
         '🎥 Video lesson already completed - skipping progress tracking'
@@ -304,9 +385,9 @@ export function useVideoProgress(
       return
     }
 
-    console.log('🚀 Starting video progress tracking for incomplete lesson')
+    console.log(`📍 Starting with last position: ${lastPosition} seconds`)
 
-    // Reset state
+    // Reset ALL progress tracking state
     initializationAttempts.current = 0
     isComplete.current = false
     completionSent.current = false
@@ -318,6 +399,8 @@ export function useVideoProgress(
     totalWatchTime.current = 0
     isPlaying.current = false
     lastPlayTime.current = null
+
+    // FIX: Seek state is already reset in the earlier useEffect
 
     if (!iframeRef?.current) {
       const checkIframe = setInterval(() => {
@@ -396,6 +479,7 @@ export function useVideoProgress(
       window.removeEventListener('beforeunload', handleBeforeUnload)
       cleanupPlayer()
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     courseDocumentId,
@@ -407,9 +491,10 @@ export function useVideoProgress(
     completedModuleLessons,
     onLessonCompleted,
     isLessonComplete,
-    sendProgressToStrapi, // Add this dependency
-    initializePlayer, // Add this dependency
-    cleanupPlayer, // Add this dependency
+    lastPosition, // FIX: Add lastPosition as dependency
+    sendProgressToStrapi,
+    initializePlayer,
+    cleanupPlayer,
   ])
 
   // Handle route changes
@@ -431,5 +516,5 @@ export function useVideoProgress(
         }
       }
     }
-  }, [pathname, isLessonComplete, sendProgressToStrapi]) // Add sendProgressToStrapi dependency
+  }, [pathname, isLessonComplete, sendProgressToStrapi])
 }

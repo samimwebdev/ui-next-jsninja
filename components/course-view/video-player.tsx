@@ -92,7 +92,7 @@ export const VideoPlayer = ({
   const currentLesson = currentModule?.lessons.find(
     (l) => l.documentId === currentContent.lessonId
   )
-  console.log({ currentModule, currentLesson, currentContent })
+  console.log({ currentLesson })
 
   // Check if lesson is already completed
   const isLessonAlreadyCompleted = currentLesson?.completed || false
@@ -160,6 +160,7 @@ export const VideoPlayer = ({
     completedModuleLessons: completedLessonsInModule,
     onLessonCompleted: handleVideoCompletion,
     isLessonComplete: isLessonAlreadyCompleted,
+    lastPosition: currentLesson?.lastPosition || 0,
   })
 
   // Update local completion state when lesson completion changes from external source

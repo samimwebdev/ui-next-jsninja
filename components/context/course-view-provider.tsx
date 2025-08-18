@@ -20,6 +20,7 @@ import {
   initializeCourseProgress,
   UserProgressResponse,
 } from '@/lib/user-progress'
+import { trackExistingWatchedLesson } from '@/lib/actions/track-existing-watched-lesson'
 
 interface CourseViewContextType {
   courseData: CourseViewData | null
@@ -29,7 +30,7 @@ interface CourseViewContextType {
   handleContentSelect: (moduleId: number, lesson: Lesson) => void
   modules: Module[]
   userProgress: UserProgressResponse | null
-  markLessonCompleted: (lessonDocumentId: string) => void // Add optimistic update function
+  markLessonCompleted: (lessonDocumentId: string) => void
 }
 
 const CourseViewContext = createContext<CourseViewContextType | undefined>(
@@ -61,7 +62,10 @@ export default function CourseViewLayoutWrapper({
   const [userProgress, setUserProgress] = useState<UserProgressResponse | null>(
     null
   )
-  // Add state for optimistic updates
+
+  // FIX: Remove caching - just track loading state
+  const [loadingPosition, setLoadingPosition] = useState<boolean>(false)
+
   const [optimisticCompletedLessons, setOptimisticCompletedLessons] = useState<
     Set<string>
   >(new Set())
@@ -89,12 +93,50 @@ export default function CourseViewLayoutWrapper({
     )
   }, [])
 
-  // Transform Strapi data to component format - Don't depend on userProgress being available
+  // FIX: Simplified fetch position function (no caching)
+  const fetchLessonPosition = useCallback(
+    async (
+      courseId: string,
+      moduleDocumentId: string,
+      lessonId: string
+    ): Promise<number> => {
+      if (!userProgress) {
+        console.log('❌ No user progress available')
+        return 0
+      }
+
+      try {
+        console.log(`🔍 Fetching fresh position for lesson ${lessonId}`)
+
+        const foundLessonLastPosition = await trackExistingWatchedLesson(
+          userProgress?.user?.documentId,
+          courseId,
+          moduleDocumentId,
+          lessonId
+        )
+
+        const position = foundLessonLastPosition || 0
+        console.log(`📍 Fetched position for lesson ${lessonId}:`, position)
+
+        return position
+      } catch (error) {
+        console.error(
+          `❌ Error fetching position for lesson ${lessonId}:`,
+          error
+        )
+        return 0
+      }
+    },
+    [userProgress]
+  )
+
+  // Transform Strapi data to component format
   const modules = useMemo(() => {
     if (!courseData) return []
 
-    // Get completed lessons from userProgress if available, otherwise empty array
     const completedLessons = userProgress?.completedLessons || []
+
+    console.log({ userProgress }, { currentContent })
 
     // Combine server data with optimistic updates
     const allCompletedLessonIds = new Set([
@@ -106,6 +148,12 @@ export default function CourseViewLayoutWrapper({
       // Map lessons first to get completion status
       const lessons = module.lessons.map((lesson): Lesson => {
         const isCompleted = allCompletedLessonIds.has(lesson.documentId)
+
+        // FIX: Only show lastPosition for the current lesson from currentContent
+        const lastPosition =
+          currentContent?.lessonId === lesson.documentId
+            ? currentContent.lastPosition || 0
+            : 0
 
         return {
           id: lesson.id,
@@ -127,6 +175,7 @@ export default function CourseViewLayoutWrapper({
           assignment: lesson.assignment,
           quiz: lesson.quiz,
           videoLink: lesson.videoLink,
+          lastPosition,
         }
       })
 
@@ -148,78 +197,155 @@ export default function CourseViewLayoutWrapper({
         lessons,
       }
     })
-  }, [courseData, userProgress, optimisticCompletedLessons]) // Add optimisticCompletedLessons to dependencies
+  }, [
+    courseData,
+    userProgress,
+    optimisticCompletedLessons,
+    currentContent, // Only depend on currentContent, not cached positions
+  ])
 
-  // Set initial current content - use useEffect instead of useState
+  // Set initial current content - fetch position for first lesson
   useEffect(() => {
-    if (courseData && !currentContent) {
+    if (courseData && !currentContent && userProgress) {
       const firstModule = courseData.curriculum.modules[0]
-      const firstLesson = firstModule?.lessons[0] // This is a StrapiLesson
+      const firstLesson = firstModule?.lessons[0]
 
       if (firstLesson) {
-        setCurrentContent({
-          courseId: courseData.documentId,
-          moduleId: firstModule.id,
-          lessonId: firstLesson.documentId,
-          title: firstLesson.title,
-          duration: `${Math.floor(+firstLesson.duration / 60)}:${(
-            +firstLesson.duration % 60
+        const initializeFirstLesson = async () => {
+          console.log('🚀 Initializing first lesson with fresh position')
+
+          // Fetch fresh position for first lesson
+          const initialPosition = await fetchLessonPosition(
+            courseData.documentId,
+            firstModule.documentId,
+            firstLesson.documentId
           )
-            .toString()
-            .padStart(2, '0')}`,
-          type: firstLesson.type.toLowerCase() as 'video' | 'text',
-          icon: firstLesson?.icon || null,
-          content: firstLesson?.content || '',
-          videoUrl: firstLesson?.videoUrl || '',
-          resources: firstLesson?.resources || [],
-          assignment: firstLesson?.assignment,
-          quiz: firstLesson?.quiz,
-          videoLink: firstLesson?.videoLink,
-        })
+
+          setCurrentContent({
+            courseId: courseData.documentId,
+            moduleId: firstModule.id,
+            moduleDocumentId: firstModule.documentId,
+            lessonId: firstLesson.documentId,
+            title: firstLesson.title,
+            duration: `${Math.floor(+firstLesson.duration / 60)}:${(
+              +firstLesson.duration % 60
+            )
+              .toString()
+              .padStart(2, '0')}`,
+            type: firstLesson.type.toLowerCase() as 'video' | 'text',
+            icon: firstLesson?.icon || null,
+            content: firstLesson?.content || '',
+            videoUrl: firstLesson?.videoUrl || '',
+            resources: firstLesson?.resources || [],
+            assignment: firstLesson?.assignment,
+            quiz: firstLesson?.quiz,
+            videoLink: firstLesson?.videoLink,
+            lastPosition: initialPosition, // Use fresh fetched position
+          })
+        }
+
+        initializeFirstLesson()
       }
     }
-  }, [courseData, currentContent])
+  }, [courseData, currentContent, userProgress, fetchLessonPosition])
 
-  // Update the handleContentSelect function
-  const handleContentSelect = (moduleId: number, lesson: Lesson) => {
-    if (!courseData) {
-      console.log('No course data available')
-      return
-    }
-
-    const selectedModule = courseData.curriculum.modules.find(
-      (m) => m.id === moduleId
-    )
-    const selectedLesson = selectedModule?.lessons.find(
-      (l) => l.id === lesson.id
-    )
-
-    if (selectedLesson) {
-      const newContent = {
-        courseId: courseData.documentId,
-        moduleId,
-        lessonId: lesson.documentId,
-        title: selectedLesson.title,
-        duration: `${Math.floor(+selectedLesson.duration / 60)}:${(
-          +selectedLesson.duration % 60
-        )
-          .toString()
-          .padStart(2, '0')}`,
-        icon: selectedLesson.icon || null,
-        type: selectedLesson.type.toLowerCase() as 'video' | 'text',
-        content: selectedLesson?.content || '',
-        videoUrl: selectedLesson?.videoUrl || '',
-        resources: selectedLesson?.resources || [],
-        assignment: selectedLesson?.assignment,
-        quiz: selectedLesson?.quiz,
-        videoLink: selectedLesson?.videoLink,
+  // FIX: Updated handleContentSelect to fetch fresh position
+  const handleContentSelect = useCallback(
+    async (moduleId: number, lesson: Lesson) => {
+      if (!courseData || !userProgress) {
+        console.log('❌ No course data or user progress available')
+        return
       }
 
-      setCurrentContent(newContent)
-    } else {
-      console.log('Selected lesson not found in course data')
-    }
-  }
+      const selectedModule = courseData.curriculum.modules.find(
+        (m) => m.id === moduleId
+      )
+      const selectedLesson = selectedModule?.lessons.find(
+        (l) => l.id === lesson.id
+      )
+
+      if (selectedLesson) {
+        console.log(`🎯 Selecting lesson: ${lesson.documentId}`)
+
+        // Set loading state
+        setLoadingPosition(true)
+
+        try {
+          // FIX: Fetch fresh position for the selected lesson
+          const freshPosition = await fetchLessonPosition(
+            courseData.documentId,
+            selectedModule?.documentId as string,
+            lesson.documentId
+          )
+
+          console.log(
+            `📍 Fetched fresh position: ${freshPosition} for lesson: ${lesson.documentId}`
+          )
+
+          // Set content with fresh position
+          const newContent = {
+            courseId: courseData.documentId,
+            moduleId,
+            moduleDocumentId: selectedModule?.documentId || '',
+            lessonId: lesson.documentId,
+            title: selectedLesson.title,
+            duration: `${Math.floor(+selectedLesson.duration / 60)}:${(
+              +selectedLesson.duration % 60
+            )
+              .toString()
+              .padStart(2, '0')}`,
+            icon: selectedLesson.icon || null,
+            type: selectedLesson.type.toLowerCase() as 'video' | 'text',
+            content: selectedLesson?.content || '',
+            videoUrl: selectedLesson?.videoUrl || '',
+            resources: selectedLesson?.resources || [],
+            assignment: selectedLesson?.assignment,
+            quiz: selectedLesson?.quiz,
+            videoLink: selectedLesson?.videoLink,
+            lastPosition: freshPosition, // FIX: Use fresh fetched position
+          }
+
+          setCurrentContent(newContent)
+          console.log(`✅ Content set with position: ${freshPosition}`)
+        } catch (error) {
+          console.error(
+            '❌ Error fetching position during content select:',
+            error
+          )
+
+          // Fallback: set content with position 0
+          const newContent = {
+            courseId: courseData.documentId,
+            moduleId,
+            moduleDocumentId: selectedModule?.documentId || '',
+            lessonId: lesson.documentId,
+            title: selectedLesson.title,
+            duration: `${Math.floor(+selectedLesson.duration / 60)}:${(
+              +selectedLesson.duration % 60
+            )
+              .toString()
+              .padStart(2, '0')}`,
+            icon: selectedLesson.icon || null,
+            type: selectedLesson.type.toLowerCase() as 'video' | 'text',
+            content: selectedLesson?.content || '',
+            videoUrl: selectedLesson?.videoUrl || '',
+            resources: selectedLesson?.resources || [],
+            assignment: selectedLesson?.assignment,
+            quiz: selectedLesson?.quiz,
+            videoLink: selectedLesson?.videoLink,
+            lastPosition: 0, // Fallback to 0
+          }
+
+          setCurrentContent(newContent)
+        } finally {
+          setLoadingPosition(false)
+        }
+      } else {
+        console.log('Selected lesson not found in course data')
+      }
+    },
+    [courseData, userProgress, fetchLessonPosition]
+  )
 
   // Loading state - only check for courseData
   if (!courseData && !error) {
@@ -276,7 +402,7 @@ export default function CourseViewLayoutWrapper({
       value={{
         courseData,
         currentContent,
-        isLoading: false,
+        isLoading: loadingPosition, // Show loading when fetching position
         error,
         handleContentSelect,
         modules,

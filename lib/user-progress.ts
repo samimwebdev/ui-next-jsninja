@@ -50,6 +50,12 @@ export interface UserProgressResponse {
       height: number
     }
   }>
+
+  user?: {
+    id: number
+    documentId: string
+    email: string
+  }
 }
 
 export async function initializeCourseProgress(
