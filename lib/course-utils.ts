@@ -35,3 +35,46 @@ export function getHighlightFeatures(courseData: CoursePageData): string[] {
     ]
   )
 }
+
+// Get badge variant by level
+export function getLevelBadgeVariant(
+  level: 'Beginner' | 'Intermediate' | 'Advanced'
+) {
+  switch (level) {
+    case 'Beginner':
+      return 'secondary' as const
+    case 'Intermediate':
+      return 'default' as const
+    case 'Advanced':
+      return 'destructive' as const
+    default:
+      return 'secondary' as const
+  }
+}
+
+// Format course URL
+export function formatCourseUrl(
+  slug: string,
+  isExpired: boolean,
+  lastAccessedLesson?: {
+    module: { id: number }
+    lesson: { documentId: string }
+  } | null
+): string {
+  if (isExpired) {
+    return '#'
+  }
+
+  if (lastAccessedLesson?.module && lastAccessedLesson?.lesson) {
+    return `/course-view/${slug}/modules/${lastAccessedLesson.module.id}/lectures/${lastAccessedLesson.lesson.documentId}`
+  }
+
+  return `/course-view/${slug}`
+}
+
+// Get next lesson title
+export function getNextLessonTitle(
+  lastAccessedLesson?: { lesson: { title: string } } | null
+): string {
+  return lastAccessedLesson?.lesson?.title || 'Start learning'
+}

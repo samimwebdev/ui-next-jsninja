@@ -14,7 +14,16 @@ export function FlashMessageHandler() {
     const warning = searchParams.get('warning')
     const info = searchParams.get('info')
 
+    console.log({ error })
+
     if (error) {
+      // FIX: Filter out NEXT_REDIRECT messages
+      if (error.includes('NEXT_REDIRECT') || error.includes('digest')) {
+        console.log('Ignoring NEXT_REDIRECT error message')
+        cleanUpUrl('error')
+        return
+      }
+
       toast.error('Access Error', {
         description: error,
         duration: 6000,

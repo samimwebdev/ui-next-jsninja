@@ -6,6 +6,7 @@ import CourseViewLayoutWrapper from '@/components/context/course-view-provider'
 import { SecurityTracker } from '@/components/course-view/security-tracker'
 import { getAuthToken } from '@/lib/auth'
 import { checkUserSecurity } from '@/lib/security-check'
+
 interface CourseDataResponse {
   data: CourseViewData
 }
@@ -20,6 +21,19 @@ interface CourseErrorResponse {
   }
 }
 
+// FIX: Type guard for Next.js redirect errors
+function isNextRedirectError(
+  error: unknown
+): error is Error & { digest: string } {
+  console.log({ error }, 'isNextRedirectError')
+  return (
+    error instanceof Error &&
+    'digest' in error &&
+    typeof error.digest === 'string' &&
+    error.digest.includes('NEXT_REDIRECT')
+  )
+}
+
 // Course Layout Component (SSR)
 async function CourseViewLayout({
   children,
@@ -30,52 +44,55 @@ async function CourseViewLayout({
 }) {
   const { slug } = await params
 
-  // First check user security status
-  const securityCheck = await checkUserSecurity(slug)
-
-  if (!securityCheck.allowed) {
-    console.log('Security check failed, redirecting:', securityCheck.message)
-    // Force redirect and stop execution
-    redirect(
-      `/dashboard?error=${encodeURIComponent(
-        securityCheck.message || 'Access denied'
-      )}`
-    )
-  }
-
-  const token = await getAuthToken()
-
-  if (!token) {
-    console.log('No auth token, redirecting to dashboard')
-    redirect(
-      '/dashboard?error=' + encodeURIComponent('Authentication required')
-    )
-  }
-
-  let courseData = null
-
   try {
+    // First check user security status
+    const securityCheck = await checkUserSecurity(slug)
+
+    if (!securityCheck.allowed) {
+      console.log('Security check failed, redirecting:', securityCheck.message)
+      redirect(
+        `/dashboard?error=${encodeURIComponent(
+          securityCheck.message || 'Access denied'
+        )}`
+      )
+    }
+
+    const token = await getAuthToken()
+
+    if (!token) {
+      console.log('No auth token, redirecting to dashboard')
+      redirect(
+        '/dashboard?error=' + encodeURIComponent('Authentication required')
+      )
+    }
+
+    let courseData = null
+
     const response = await strapiFetch<
       CourseDataResponse | CourseErrorResponse
     >(`/api/course-view/${slug}`, {
       method: 'GET',
       token: token,
-      returnErrorResponse: true, // Ensure we get structured error responses
+      returnErrorResponse: true,
     })
 
     // Check if response has error property using proper type checking
     if ('error' in response && response.error) {
       console.log('Course API returned error:', response.error)
 
-      // Now TypeScript knows response.error exists and has the right structure
-      if (response.error.status === 404 || response.error.status === 403) {
-        console.log('Course not found - redirecting')
+      // Handle specific error statuses
+      if (response.error.status === 404) {
+        redirect(`/dashboard?error=${encodeURIComponent('Course not found.')}`)
+      }
+
+      if (response.error.status === 403) {
         redirect(
           `/dashboard?error=${encodeURIComponent(
-            'Course not found or you do not have access to this course.'
+            'You do not have access to this course. Please check your enrollment status.'
           )}`
         )
       }
+
       // Other error statuses
       redirect(
         `/dashboard?error=${encodeURIComponent(
@@ -88,7 +105,6 @@ async function CourseViewLayout({
     if ('data' in response && response.data) {
       courseData = response.data
     } else {
-      // Unexpected response format
       console.error('Unexpected course response format:', response)
       redirect(
         `/dashboard?error=${encodeURIComponent(
@@ -96,10 +112,31 @@ async function CourseViewLayout({
         )}`
       )
     }
+
+    return (
+      <div>
+        <SecurityTracker courseSlug={slug} />
+
+        <div className="min-h-screen bg-background text-foreground max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] lg:gap-6">
+            <CourseViewLayoutWrapper courseData={courseData} error={null}>
+              {children}
+            </CourseViewLayoutWrapper>
+          </div>
+        </div>
+      </div>
+    )
   } catch (err) {
+    // FIX: Use type guard for better TypeScript support
+    if (isNextRedirectError(err)) {
+      // This is a Next.js redirect, let it through
+      console.log('Detected Next.js redirect, re-throwing:', err.digest)
+      throw err
+    }
+
     console.error('Failed to fetch course data:', err)
 
-    // Extract error message
+    // Extract error message for actual errors
     let errorMessage = 'Failed to load course data'
 
     if (err instanceof Error) {
@@ -108,24 +145,8 @@ async function CourseViewLayout({
 
     console.log('Course data fetch failed, redirecting:', errorMessage)
 
-    // Redirect to dashboard with error message
     redirect(`/dashboard?error=${encodeURIComponent(errorMessage)}`)
   }
-
-  return (
-    <div>
-      {/* Only include SecurityTracker for POST tracking, not for blocking */}
-      <SecurityTracker courseSlug={slug} />
-
-      <div className="min-h-screen bg-background text-foreground max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] lg:gap-6">
-          <CourseViewLayoutWrapper courseData={courseData} error={null}>
-            {children}
-          </CourseViewLayoutWrapper>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export default CourseViewLayout
