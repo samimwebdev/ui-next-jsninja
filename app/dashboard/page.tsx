@@ -1,4 +1,3 @@
-// filepath: c:\Users\User\Desktop\frontend-ninja\app\dashboard\page.tsx
 import { redirect } from 'next/navigation'
 
 export default function DashboardPage() {

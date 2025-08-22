@@ -16,7 +16,7 @@ const enrolledCourses = [
     totalLessons: 24,
     completedLessons: 16,
     href: '/course-view/react-masterclass',
-    instructor: 'John Doe',
+    goal: 'Master React with hands-on projects',
     lastAccessed: '2024-02-25',
     duration: '12 weeks',
     enrolledStudents: 1500,
@@ -29,7 +29,7 @@ const enrolledCourses = [
     totalLessons: 20,
     completedLessons: 6,
     href: '/course-view/nodejs-advanced',
-    instructor: 'Jane Smith',
+    goal: 'Master Javascript Fundamentals',
     lastAccessed: '2024-02-24',
     duration: '10 weeks',
     enrolledStudents: 1200,
@@ -42,7 +42,7 @@ const enrolledCourses = [
     totalLessons: 15,
     completedLessons: 7,
     href: '/course-view/typescript-fundamentals',
-    instructor: 'Mike Johnson',
+    goal: 'Write a Type Safe Code with typescript',
     lastAccessed: '2024-02-23',
     duration: '8 weeks',
     enrolledStudents: 900,
@@ -61,7 +61,7 @@ const bootcamps = [
     duration: '12 weeks',
     startDate: '2024-01-15',
     endDate: '2024-04-15',
-    instructor: 'Alex Johnson',
+    goal: 'Learn MERN Stack',
     enrolledStudents: 50,
     nextModule: 'Backend Development with Node.js',
   },
@@ -75,7 +75,7 @@ const bootcamps = [
     duration: '16 weeks',
     startDate: '2024-02-01',
     endDate: '2024-05-30',
-    instructor: 'Sarah Lee',
+    goal: 'Learn Aws with easy to follow to tutorials',
     enrolledStudents: 40,
     nextModule: 'Serverless Architecture',
   },
@@ -105,7 +105,7 @@ export default function CoursesPage() {
                   <CardHeader>
                     <CardTitle>{course.title}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Instructor: {course.instructor}
+                      Goal: {course.goal}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -157,7 +157,7 @@ export default function CoursesPage() {
                   <CardHeader>
                     <CardTitle>{bootcamp.title}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Instructor: {bootcamp.instructor}
+                      Goal: {bootcamp.goal}
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -186,9 +186,7 @@ export default function CoursesPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>
-                          {bootcamp.startDate} - {bootcamp.endDate}
-                        </span>
+                        <span>startDate: {bootcamp.startDate}</span>
                       </div>
                     </div>
                     <div>
