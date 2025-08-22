@@ -101,3 +101,49 @@ export interface Order {
 export interface OrdersResponse {
   data: Order[]
 }
+
+export interface LocationData {
+  country: string
+  countryCode: string
+  region: string
+  city: string
+  latitude: number
+  longitude: number
+  timezone: string
+  isp: string
+}
+
+export interface BrowserData {
+  userAgent: string
+  language: string
+  platform: string
+  screenResolution: string
+  timezone: string
+  plugins: string[]
+}
+
+export interface LoginHistoryItem {
+  id: number
+  location: LocationData
+  ipAddress: string
+  accessDate: string
+  accessType:
+    | 'first_access'
+    | 'same_ip_different_browser'
+    | 'different_ip_same_browser'
+  browserData: BrowserData
+  requiresApproval: boolean
+  isApproved: boolean
+  fingerprintId: string
+}
+
+export interface LoginHistoryData {
+  publishedAt: string
+  locale: string | null
+  isBlocked: boolean
+  loginHistory: LoginHistoryItem[]
+}
+
+export interface LoginHistoryResponse {
+  data: LoginHistoryData
+}

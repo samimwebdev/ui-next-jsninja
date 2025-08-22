@@ -102,16 +102,12 @@ export interface CoursePageData {
   documentId: string
   courseName: string
   overviewFeatures: OverviewFeature[]
-  highlightFeature: HighlightFeature[]
+  highlightFeature: HighlightFeature
   baseContent: CourseBase & {
     courseBundles: CourseBundle[]
     curriculum: Curriculum
     contentSection: CourseContentSection[]
   }
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
 }
 
 // Component type mapping for type safety
