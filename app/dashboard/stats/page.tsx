@@ -219,8 +219,8 @@ export default function StatsPage() {
     )
   }
 
-  // Show empty state only if no courses AND not loading
-  if (!courses.length && !coursesLoading) {
+  // FIX: Only show empty state if courses have loaded AND there are no courses
+  if (coursesData && !courses.length) {
     return (
       <div className="space-y-6">
         <div>
@@ -252,11 +252,12 @@ export default function StatsPage() {
     ? getTotalTimeSpent(stats.totalLessonsWatchingTimeSpent)
     : '0m'
 
-  // Determine if we should show loading state
+  // FIX: Better loading condition - show loading while courses OR stats are loading
   const shouldShowLoading =
     coursesLoading ||
     statsLoading ||
-    (selectedCourseId && !statsData && !statsError)
+    (selectedCourseId && !statsData && !statsError) ||
+    !coursesData // FIX: Also show loading if coursesData is not yet loaded
 
   return (
     <div className="space-y-8">
@@ -270,8 +271,8 @@ export default function StatsPage() {
           </p>
         </div>
 
-        {/*  Show skeleton while courses are loading */}
-        {coursesLoading ? (
+        {/* Show skeleton while courses are loading */}
+        {coursesLoading || !coursesData ? (
           <Skeleton className="h-10 w-[280px]" />
         ) : (
           <Select value={selectedCourseId} onValueChange={setSelectedCourseId}>
@@ -289,7 +290,7 @@ export default function StatsPage() {
         )}
       </div>
 
-      {/* FIX: Better loading condition */}
+      {/* Show loading state until we have both courses data and stats data */}
       {shouldShowLoading ? (
         <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

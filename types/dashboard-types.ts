@@ -225,3 +225,41 @@ export interface CourseStatsData {
 export interface CourseStatsResponse {
   data: CourseStatsData
 }
+
+export interface LeaderboardEntry {
+  userId: string
+  fullName: string
+  email: string
+  course: string
+  totalScore: number
+  totalAssignmentScore: number
+  progress: number | null
+  rank: number
+  isCurrentUser: boolean
+}
+
+export interface UserScoreboard {
+  userId: string
+  fullName: string
+  email: string
+  course: string
+  totalScore: number
+  totalAssignmentScore: number
+  progress: number | null
+  rank: number
+  isInTop10: boolean
+}
+
+export interface LeaderboardData {
+  leaderboard: LeaderboardEntry[]
+  userScoreboard: UserScoreboard
+}
+
+export interface LeaderboardResponse {
+  data: LeaderboardData | null
+  error?: {
+    status: number
+    name: string
+    message: string
+  }
+}
