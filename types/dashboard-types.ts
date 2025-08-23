@@ -147,3 +147,81 @@ export interface LoginHistoryData {
 export interface LoginHistoryResponse {
   data: LoginHistoryData
 }
+
+export interface StatsModule {
+  id: number
+  documentId: string
+  title: string
+  order: number
+  createdAt: string
+  updatedAt: string
+  publishedAt: string
+  locale: string | null
+  description: string
+  duration: number
+}
+
+export interface StatsLesson {
+  id: number
+  documentId: string
+  title: string
+  order: number
+  duration: number
+  type: 'video' | 'text'
+  content: string | null
+  videoUrl: string
+  completed: boolean
+  isFree: boolean
+  icon: StrapiIcon | null
+}
+
+export interface StatsAssignment {
+  documentId: string
+  title: string
+  submittedAt: string
+  deadline: string
+  status: 'graded' | 'pending' | 'submitted' | 'overdue'
+  score: number
+  totalScore: number
+}
+
+export interface StatsQuiz {
+  documentId: string
+  title: string
+  completedAt: string
+  score: number
+  totalScore: number
+  passed: boolean
+}
+
+export interface WeeklyStats {
+  totalTimeSpent: number
+  totalLessons: number
+  completedLessons: number
+  inProgressLessons: number
+  cumulativeTimeSpent: number
+}
+
+export interface WeeklyCourseProgress {
+  week: number
+  weekStart: string
+  weekEnd: string
+  weeklyStats: WeeklyStats
+}
+
+export interface CourseStatsData {
+  totalLessons: number
+  completedModules: StatsModule[]
+  totalModules: number
+  completedLessons: StatsLesson[]
+  progress: number
+  assignments: StatsAssignment[]
+  quizzes: StatsQuiz[]
+  dailyStrength: Record<string, 'no' | 'weak' | 'medium' | 'strong'>
+  weeklyCourseProgress: WeeklyCourseProgress[]
+  totalLessonsWatchingTimeSpent: number
+}
+
+export interface CourseStatsResponse {
+  data: CourseStatsData
+}

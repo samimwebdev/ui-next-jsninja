@@ -167,7 +167,6 @@ export default function LoginHistoryPage() {
     })
   }
 
-  // FIX: Handle dialog close
   const handleDialogClose = () => {
     setIsDialogOpen(false)
     setSelectedLogin(null)
