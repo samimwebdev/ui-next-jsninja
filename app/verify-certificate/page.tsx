@@ -31,7 +31,11 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { verifyCertificate } from '@/lib/actions/verify-certificate'
-import { calculateTotalScore, formatDate } from '@/lib/certificate-utils'
+import {
+  calculateTotalScore,
+  formatDate,
+  formatDuration,
+} from '@/lib/certificate-utils'
 
 function VerificationSkeleton() {
   return (
@@ -460,7 +464,7 @@ export default function VerifyCertificatePage() {
                           Duration
                         </p>
                         <p className="text-lg font-semibold">
-                          {certificate.duration}
+                          {formatDuration(certificate.duration)}
                         </p>
                       </div>
 
