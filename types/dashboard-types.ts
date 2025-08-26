@@ -263,3 +263,22 @@ export interface LeaderboardResponse {
     message: string
   }
 }
+
+export interface Certificate {
+  courseName: string
+  issuedOn: string
+  certificateId: string
+  recipientName?: string
+  duration: string
+  skillsAchieved: string
+  totalQuizMarks: number
+  totalAssignmentMarks: number
+  receivedQuizMarks: number
+  receivedAssignmentMarks: number
+  certificateUrl: string
+  isTopPerformer: boolean
+}
+
+export interface CertificatesResponse {
+  data: Certificate[]
+}

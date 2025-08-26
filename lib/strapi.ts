@@ -41,7 +41,7 @@ export async function strapiFetch<T>(
       const errorData = await res.json()
       console.log('Error data:', errorData)
 
-      // // For 404 responses with allowNotFound=true, return the error structure
+      //  For 404 responses with allowNotFound=true, return the error structure
       if (res.status === 404 && allowNotFound) {
         return {
           data: null,
