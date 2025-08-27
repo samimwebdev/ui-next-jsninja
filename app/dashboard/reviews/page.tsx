@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   MessageSquare,
   Loader2,
+  Lock,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -56,10 +57,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import {
   fetchReviews,
@@ -242,6 +249,14 @@ export default function ReviewsPage() {
   const enrolledCourses = reviewsData?.data.enrolledCourses || []
 
   const handleEdit = (review: (typeof reviews)[0]) => {
+    // Prevent editing if review is approved
+    if (review.reviewApproved) {
+      toast.error('Cannot Edit', {
+        description: 'This review has been approved and cannot be edited.',
+      })
+      return
+    }
+
     setEditingReviewId(review.documentId)
     form.reset({
       course: review.course.documentId,
@@ -253,6 +268,16 @@ export default function ReviewsPage() {
   }
 
   const handleDeleteClick = (reviewId: string) => {
+    const review = reviews.find((r) => r.documentId === reviewId)
+
+    // Prevent deletion if review is approved
+    if (review?.reviewApproved) {
+      toast.error('Cannot Delete', {
+        description: 'This review has been approved and cannot be deleted.',
+      })
+      return
+    }
+
     setDeleteReviewId(reviewId)
   }
 
@@ -338,7 +363,7 @@ export default function ReviewsPage() {
       </div>
 
       {/* Stats */}
-      {!isLoading && reviews.length > 0 && (
+      {/* {!isLoading && reviews.length > 0 && (
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
@@ -354,7 +379,7 @@ export default function ReviewsPage() {
             </span>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Fixed loading condition to prevent flash */}
       {isLoading || !reviewsData ? (
@@ -366,92 +391,133 @@ export default function ReviewsPage() {
       ) : reviews.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {reviews.map((review) => (
-            <Card key={review.documentId}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CardTitle className="text-base">
-                        {review.course.title}
-                      </CardTitle>
+        <TooltipProvider>
+          <div className="grid gap-4 md:grid-cols-2">
+            {reviews.map((review) => (
+              <Card key={review.documentId}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-base">
+                          {review.course.title}
+                        </CardTitle>
+                        {/* {review.reviewApproved ? (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
+                          >
+                            Approved
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800"
+                          >
+                            Pending
+                          </Badge>
+                        )} */}
+                      </div>
+                      <CardDescription>
+                        {formatReviewDate(review.createdAt)}
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* Edit Button with conditional tooltip */}
                       {review.reviewApproved ? (
-                        <Badge
-                          variant="outline"
-                          className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                        >
-                          Approved
-                        </Badge>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled
+                              className="opacity-50 cursor-not-allowed"
+                            >
+                              <Lock className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Review is approved and cannot be edited</p>
+                          </TooltipContent>
+                        </Tooltip>
                       ) : (
-                        <Badge
-                          variant="outline"
-                          className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800"
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(review)}
+                          disabled={deleteReviewMutation.isPending}
                         >
-                          Pending
-                        </Badge>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+
+                      {/* Delete Button with conditional tooltip */}
+                      {review.reviewApproved ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled
+                              className="opacity-50 cursor-not-allowed"
+                            >
+                              <Lock className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Review is approved and cannot be deleted</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(review.documentId)}
+                          disabled={deleteReviewMutation.isPending}
+                        >
+                          {deleteReviewMutation.isPending &&
+                          deleteReviewId === review.documentId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash className="h-4 w-4" />
+                          )}
+                        </Button>
                       )}
                     </div>
-                    <CardDescription>
-                      {formatReviewDate(review.createdAt)}
-                    </CardDescription>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(review)}
-                      disabled={deleteReviewMutation.isPending}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteClick(review.documentId)}
-                      disabled={deleteReviewMutation.isPending}
-                    >
-                      {deleteReviewMutation.isPending &&
-                      deleteReviewId === review.documentId ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash className="h-4 w-4" />
-                      )}
-                    </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-1 mb-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < review.rating
+                            ? 'fill-primary text-primary'
+                            : 'text-muted-foreground'
+                        }`}
+                      />
+                    ))}
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {review.rating}/5
+                    </span>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-1 mb-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < review.rating
-                          ? 'fill-primary text-primary'
-                          : 'text-muted-foreground'
-                      }`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-muted-foreground">
-                    {review.rating}/5
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {truncateText(stripHtmlTags(review.reviewDetails), 150)}
-                </p>
+                  <p className="text-sm text-muted-foreground">
+                    {truncateText(stripHtmlTags(review.reviewDetails), 150)}
+                  </p>
 
-                {/* Additional info */}
-                <div className="mt-3 pt-3 border-t border-muted/50">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>By {review.reviewerName}</span>
-                    {review.designation && <span>{review.designation}</span>}
+                  {/* Additional info */}
+                  <div className="mt-3 pt-3 border-t border-muted/50">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>By {review.reviewerName}</span>
+                      {review.designation && <span>{review.designation}</span>}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TooltipProvider>
       )}
 
       {/* Add/Edit Review Dialog */}
