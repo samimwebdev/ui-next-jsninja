@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { UserNav } from './user-nav'
-import { useUser } from '@/components/context/AuthProvider'
 import { logoutAction } from '@/app/(auth)/actions'
 import { MenuItem, StrapiImage } from '@/types/shared-types'
 import Image from 'next/image'
+import { useCurrentUser } from '@/hooks/use-current-user'
+import { NavigationSkeleton } from './navigation-skeleton'
 
 export const Navigation = ({
   menuItems,
@@ -20,16 +21,19 @@ export const Navigation = ({
   menuItems: MenuItem[]
   logo?: StrapiImage
 }) => {
-  const user = useUser()
-  const [isLoggedIn, setIsLoggedIn] = useState(false) // Set to true to show logged in state by default
+  const { data: currentUser, isLoading } = useCurrentUser()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true)
-    } else {
-      setIsLoggedIn(false)
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isLoading && mounted) {
+      setIsLoggedIn(!!currentUser)
     }
-  }, [user])
+  }, [currentUser, isLoading, mounted])
 
   const logout = async () => {
     try {
@@ -39,6 +43,12 @@ export const Navigation = ({
       console.log(err, 'Logout failed')
     }
   }
+
+  // Show skeleton only during initial mount or when actually loading
+  if (!mounted || (isLoading && !currentUser)) {
+    return <NavigationSkeleton menuItems={menuItems} logo={logo} variant="loading" />
+  }
+
   return (
     <div className="bg-muted">
       <nav className="h-16 bg-background border-b">
@@ -62,26 +72,26 @@ export const Navigation = ({
           </div>
           <div className="flex items-center gap-3">
             {isLoggedIn ? (
-              <>
+              <div className="flex items-center gap-3">
                 <NotificationPanel />
-                <UserNav user={user} onLogout={() => logout()} />
-              </>
+                <UserNav user={currentUser || null} onLogout={() => logout()} />
+              </div>
             ) : (
-              <>
-                <Button variant="outline" className="hidden sm:inline-flex">
+              <div className="flex items-center gap-3">
+                <Button variant="outline" className="hidden sm:inline-flex h-10">
                   <Link href="/login">Sign In</Link>
                 </Button>
-                <Button>
+                <Button className="h-10">
                   <Link href="/register">Sign Up</Link>
                 </Button>
-              </>
+              </div>
             )}
             <ThemeSwitcher />
             {/* Mobile Menu */}
             <div className="md:hidden">
               <NavigationSheet
                 isLoggedIn={isLoggedIn}
-                user={isLoggedIn ? user : null}
+                user={isLoggedIn ? currentUser : null}
                 onLogout={() => logout()}
                 menuItems={menuItems}
               />

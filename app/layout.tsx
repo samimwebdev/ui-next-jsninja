@@ -116,6 +116,8 @@ export default async function RootLayout({
 }>) {
   const currentUser = await getUser()
 
+  console.log({ currentUser })
+
   // Fetch menus
   const { data: menus } = await strapiFetch<{ data: Menu[] }>(
     '/api/tree-menus/menu',

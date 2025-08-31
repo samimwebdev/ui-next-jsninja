@@ -36,7 +36,7 @@ export const CurriculumClient: React.FC<{
   }
 
   const handleLessonClick = (lesson: Lesson) => {
-    if (lesson.isFree && lesson.videoUrl && lesson.type === 'Video') {
+    if (lesson.isFree && lesson.videoUrl && lesson.type === 'video') {
       if (!user) {
         const currentPath = window.location.pathname
         toast.error('Please log in to watch free lectures', {
@@ -67,13 +67,13 @@ export const CurriculumClient: React.FC<{
                   key={lesson.id}
                   onClick={() => handleLessonClick(lesson)}
                   className={`flex items-center justify-between p-4 transition-colors ${
-                    lesson.isFree && lesson.videoUrl && lesson.type === 'Video'
+                    lesson.isFree && lesson.videoUrl && lesson.type === 'video'
                       ? 'cursor-pointer hover:bg-muted/50 hover:bg-blue-50/50'
                       : 'cursor-default opacity-75'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    {lesson.type === 'Video' ? (
+                    {lesson.type === 'video' ? (
                       <PlayCircle
                         className={`h-5 w-5 ${
                           lesson.isFree ? 'text-blue-500' : 'text-gray-400'

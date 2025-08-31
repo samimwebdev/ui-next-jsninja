@@ -26,7 +26,15 @@ export async function clearAuthCookie() {
 export async function getUser(): Promise<User | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE)?.value
-  if (!token) return null
+
+  // console.log('=== getUser Debug ===')
+  // console.log('Token exists:', !!token)
+  // console.log('Token value:', token ? 'Present' : 'Missing')
+
+  if (!token) {
+    console.log('No token found in cookies')
+    return null
+  }
 
   const query = QueryString.stringify({
     populate: {
@@ -39,7 +47,9 @@ export async function getUser(): Promise<User | null> {
   })
 
   try {
-    return await strapiFetch(`/api/users/me?${query}`, { token })
+    return await strapiFetch(`/api/users/me?${query}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
   } catch {
     // await clearAuthCookie()
     return null

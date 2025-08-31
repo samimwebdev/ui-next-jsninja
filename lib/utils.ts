@@ -141,9 +141,9 @@ export function getProfileImageUrl(user: User): string | undefined {
   }
 
   // Then, check if there's a Strapi uploaded image
-  if (user?.profile?.image?.formats?.medium?.url) {
+  if (user?.profile?.image?.formats?.small?.url) {
     // If it's a relative URL, prepend Strapi base URL
-    const imageUrl = user.profile.image.formats.medium.url
+    const imageUrl = user.profile.image.formats.small.url
     if (imageUrl.startsWith('/')) {
       return `${process.env.NEXT_PUBLIC_STRAPI_URL}${imageUrl}`
     }
