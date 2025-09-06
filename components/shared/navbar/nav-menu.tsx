@@ -15,6 +15,7 @@ import { NavigationMenuProps } from '@radix-ui/react-navigation-menu'
 import { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import { usePathname } from 'next/navigation'
 
 // Component to safely render SVG strings from API
 const SVGIcon = ({ svgString }: { svgString: string }) => {
@@ -37,56 +38,76 @@ const SVGIcon = ({ svgString }: { svgString: string }) => {
 export const NavMenu = ({
   menuItems = [],
   ...props
-}: NavigationMenuProps & { menuItems?: MenuItem[] }) => (
-  <NavigationMenu {...props}>
-    <NavigationMenuList className="gap-0 space-x-0 text-sm">
-      <>
-        {menuItems.map((item) => {
-          // If the menu item has children, render a dropdown
-          if (item.children && item.children.length > 0) {
+}: NavigationMenuProps & { menuItems?: MenuItem[] }) => {
+  const pathname = usePathname()
+
+  return (
+    <NavigationMenu {...props}>
+      <NavigationMenuList className="gap-1 space-x-0 text-sm">
+        <>
+          {menuItems.map((item) => {
+            // Check if current path matches this menu item or any of its children
+            const isActive =
+              pathname === item.url ||
+              (item.children &&
+                item.children.some((child) => pathname === child.url))
+
+            // If the menu item has children, render a dropdown
+            if (item.children && item.children.length > 0) {
+              return (
+                <NavigationMenuItem key={item.id}>
+                  <NavigationMenuTrigger
+                    className={cn(
+                      'text-[15px] font-normal transition-colors',
+                      isActive && 'bg-accent text-accent-foreground'
+                    )}
+                  >
+                    {item.title}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent className="bg-background dark:bg-card border border-border">
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      {item.children.map((child) => (
+                        <DynamicListItem
+                          key={child.id}
+                          title={child.title}
+                          href={child.url}
+                          target={child.target}
+                          icon={child.icon}
+                        >
+                          {child?.shortDescription}
+                        </DynamicListItem>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              )
+            }
+
+            // If the menu item has no children, render a simple link
+            const isCurrentPage = pathname === item.url
+
             return (
               <NavigationMenuItem key={item.id}>
-                <NavigationMenuTrigger className="text-[15px] font-normal transition-colors">
-                  {item.title}
-                </NavigationMenuTrigger>
-                <NavigationMenuContent className="bg-background dark:bg-card border border-border">
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    {item.children.map((child) => (
-                      <DynamicListItem
-                        key={child.id}
-                        title={child.title}
-                        href={child.url}
-                        target={child.target}
-                        icon={child.icon}
-                      >
-                        {child?.shortDescription}
-                      </DynamicListItem>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    'text-[15px] font-normal transition-colors',
+                    isCurrentPage && 'bg-accent text-accent-foreground'
+                  )}
+                  asChild
+                >
+                  <Link href={item.url} target={item.target || '_self'}>
+                    {item.title}
+                  </Link>
+                </Button>
               </NavigationMenuItem>
             )
-          }
-
-          // If the menu item has no children, render a simple link
-          return (
-            <NavigationMenuItem key={item.id}>
-              <Button
-                variant="ghost"
-                className="text-[15px] font-normal transition-colors"
-                asChild
-              >
-                <Link href={item.url} target={item.target || '_self'}>
-                  {item.title}
-                </Link>
-              </Button>
-            </NavigationMenuItem>
-          )
-        })}
-      </>
-    </NavigationMenuList>
-  </NavigationMenu>
-)
+          })}
+        </>
+      </NavigationMenuList>
+    </NavigationMenu>
+  )
+}
 
 interface DynamicListItemProps {
   title: string
@@ -101,6 +122,9 @@ const DynamicListItem = React.forwardRef<
   React.ElementRef<typeof Link>,
   DynamicListItemProps
 >(({ className, title, children, href, target, icon, ...props }, ref) => {
+  const pathname = usePathname()
+  const isActive = pathname === href
+
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -113,6 +137,8 @@ const DynamicListItem = React.forwardRef<
             'focus:bg-ninja-gold/10 focus:text-slate-800 focus:border-ninja-gold/20',
             'dark:focus:bg-ninja-gold/15 dark:focus:text-ninja-gold dark:focus:border-ninja-gold/30',
             'border border-transparent text-slate-700 dark:text-foreground',
+            isActive &&
+              'bg-ninja-gold/15 text-ninja-gold border-ninja-gold/30 dark:bg-ninja-gold/20',
             className
           )}
           href={href}
@@ -144,6 +170,9 @@ const ListItem = React.forwardRef<
   React.ElementRef<typeof Link>,
   React.ComponentPropsWithoutRef<typeof Link> & { icon: LucideIcon }
 >(({ className, title, children, ...props }, ref) => {
+  const pathname = usePathname()
+  const isActive = pathname === props.href
+
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -156,6 +185,8 @@ const ListItem = React.forwardRef<
             'focus:bg-ninja-gold/10 focus:text-slate-800',
             'dark:focus:bg-ninja-gold/15 dark:focus:text-ninja-gold',
             'text-slate-700 dark:text-foreground',
+            isActive &&
+              'bg-ninja-gold/15 text-ninja-gold dark:bg-ninja-gold/20',
             className
           )}
           {...props}

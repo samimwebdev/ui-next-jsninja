@@ -231,8 +231,9 @@ export interface CourseBase {
   totalStudents: number
   averageRating: number
   totalLessons: number
-  shortDescription?: string
-  longDescription?: string
+  totalModules: number | null
+  shortDescription: string
+  longDescription: string
   duration: number | string
   startingFrom?: string
   courseType: CourseType
