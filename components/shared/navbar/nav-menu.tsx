@@ -28,7 +28,7 @@ const SVGIcon = ({ svgString }: { svgString: string }) => {
 
   return (
     <div
-      className="mb-4 w-6 h-6"
+      className="mb-4 w-6 h-6 [&>svg]:w-full [&>svg]:h-full [&>svg]:text-slate-700 dark:[&>svg]:text-ninja-gold [&>svg]:fill-current [&>svg]:stroke-current"
       dangerouslySetInnerHTML={{ __html: fixedSvgString }}
     />
   )
@@ -46,10 +46,10 @@ export const NavMenu = ({
           if (item.children && item.children.length > 0) {
             return (
               <NavigationMenuItem key={item.id}>
-                <NavigationMenuTrigger className="text-[15px] font-normal">
+                <NavigationMenuTrigger className="text-[15px] font-normal transition-colors">
                   {item.title}
                 </NavigationMenuTrigger>
-                <NavigationMenuContent>
+                <NavigationMenuContent className="bg-background dark:bg-card border border-border">
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                     {item.children.map((child) => (
                       <DynamicListItem
@@ -73,7 +73,7 @@ export const NavMenu = ({
             <NavigationMenuItem key={item.id}>
               <Button
                 variant="ghost"
-                className="text-[15px] font-normal"
+                className="text-[15px] font-normal transition-colors"
                 asChild
               >
                 <Link href={item.url} target={item.target || '_self'}>
@@ -107,21 +107,28 @@ const DynamicListItem = React.forwardRef<
         <Link
           ref={ref}
           className={cn(
-            'flex flex-col items-center justify-center select-none space-y-2 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            'flex flex-col items-center justify-center select-none space-y-2 rounded-md p-4 leading-none no-underline outline-none transition-all duration-200',
+            'hover:bg-ninja-gold/10 hover:text-ninja-gold hover:border-ninja-gold/30',
+            'dark:hover:bg-ninja-gold/15 dark:hover:text-ninja-gold dark:hover:border-ninja-gold/30',
+            'focus:bg-ninja-gold/10 focus:text-slate-800 focus:border-ninja-gold/20',
+            'dark:focus:bg-ninja-gold/15 dark:focus:text-ninja-gold dark:focus:border-ninja-gold/30',
+            'border border-transparent text-slate-700 dark:text-foreground',
             className
           )}
           href={href}
           target={target || '_self'}
           {...props}
         >
-          {icon
-            ? SVGIcon({ svgString: icon }) // Render SVG icon if provided
-            : null}
-          <div className="text-sm font-semibold leading-none text-center">
+          {icon ? (
+            <div className="mb-2">
+              <SVGIcon svgString={icon} />
+            </div>
+          ) : null}
+          <div className="text-sm font-semibold leading-none text-center transition-colors">
             {title}
           </div>
           {children && (
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground text-center">
+            <p className="line-clamp-2 text-xs leading-snug text-slate-600 dark:text-muted-foreground text-center transition-colors">
               {children}
             </p>
           )}
@@ -132,6 +139,7 @@ const DynamicListItem = React.forwardRef<
 })
 
 DynamicListItem.displayName = 'DynamicListItem'
+
 const ListItem = React.forwardRef<
   React.ElementRef<typeof Link>,
   React.ComponentPropsWithoutRef<typeof Link> & { icon: LucideIcon }
@@ -142,14 +150,21 @@ const ListItem = React.forwardRef<
         <Link
           ref={ref}
           className={cn(
-            'block select-none space-y-2 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            'block select-none space-y-2 rounded-md p-3 leading-none no-underline outline-none transition-colors',
+            'hover:bg-ninja-gold/10 hover:text-slate-800',
+            'dark:hover:bg-ninja-gold/15 dark:hover:text-ninja-gold',
+            'focus:bg-ninja-gold/10 focus:text-slate-800',
+            'dark:focus:bg-ninja-gold/15 dark:focus:text-ninja-gold',
+            'text-slate-700 dark:text-foreground',
             className
           )}
           {...props}
         >
-          <props.icon className="mb-4 h-6 w-6" />
-          <div className="text-sm font-semibold leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+          <props.icon className="mb-4 h-6 w-6 text-slate-700 dark:text-ninja-gold transition-colors" />
+          <div className="text-sm font-semibold leading-none text-slate-700 dark:text-foreground transition-colors">
+            {title}
+          </div>
+          <p className="line-clamp-2 text-sm leading-snug text-slate-600 dark:text-muted-foreground transition-colors">
             {children}
           </p>
         </Link>
@@ -157,4 +172,5 @@ const ListItem = React.forwardRef<
     </li>
   )
 })
+
 ListItem.displayName = 'ListItem'

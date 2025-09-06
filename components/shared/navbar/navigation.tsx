@@ -46,7 +46,9 @@ export const Navigation = ({
 
   // Show skeleton only during initial mount or when actually loading
   if (!mounted || (isLoading && !currentUser)) {
-    return <NavigationSkeleton menuItems={menuItems} logo={logo} variant="loading" />
+    return (
+      <NavigationSkeleton menuItems={menuItems} logo={logo} variant="loading" />
+    )
   }
 
   return (
@@ -78,7 +80,10 @@ export const Navigation = ({
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Button variant="outline" className="hidden sm:inline-flex h-10">
+                <Button
+                  variant="outline"
+                  className="hidden sm:inline-flex h-10"
+                >
                   <Link href="/login">Sign In</Link>
                 </Button>
                 <Button className="h-10">
@@ -91,6 +96,7 @@ export const Navigation = ({
             <div className="md:hidden">
               <NavigationSheet
                 isLoggedIn={isLoggedIn}
+                logo={logo}
                 user={isLoggedIn ? currentUser : null}
                 onLogout={() => logout()}
                 menuItems={menuItems}

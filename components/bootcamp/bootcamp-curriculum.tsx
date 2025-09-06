@@ -22,6 +22,9 @@ export const BootcampCurriculum: React.FC<{ data: Curriculum }> = ({
           {description}
         </p>
         {/* Client component for accordion and interactivity */}
+        <h2 className="text-3xl font-bold tracking-tight text-ninja-gold">
+          {title}
+        </h2>
         <CurriculumClient modules={modules} />
       </div>
     </section>

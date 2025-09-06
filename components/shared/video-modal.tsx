@@ -45,6 +45,7 @@ export default function VideoModal({
     if (url.includes('iframe') || url.includes('embed')) {
       return 'iframe'
     }
+
     return 'direct'
   }
 
@@ -91,14 +92,24 @@ export default function VideoModal({
     }
 
     return (
-      <iframe
-        src={embedUrl}
-        className="w-full h-full"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        title="Video Player"
-      />
+      <div style={{ position: 'relative', aspectRatio: '24/13' }}>
+        <iframe
+          src={embedUrl}
+          className="w-full h-full"
+          style={{
+            border: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            height: '100%',
+            width: '100%',
+          }}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="Video Player"
+        />
+      </div>
     )
   }
 
@@ -125,3 +136,15 @@ export default function VideoModal({
     </div>
   )
 }
+
+// https://play.gumlet.io/embed/68936c007afab80a3ee00e03?background=false&autoplay=false&loop=false&disableControls=false
+
+// ;<div style="position:relative;aspect-ratio:24/13;">
+//   <iframe
+//     loading="lazy"
+//     title="Gumlet video player"
+//     src="https://play.gumlet.io/embed/68936c007afab80a3ee00e03?background=false&autoplay=false&loop=false&disableControls=false"
+//     style="border:none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
+//     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;"
+//   ></iframe>
+// </div>

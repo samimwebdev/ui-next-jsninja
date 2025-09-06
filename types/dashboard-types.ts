@@ -78,7 +78,13 @@ export interface OrderCourse {
   documentId: string
   title: string
   slug: string
-  courseType: 'course' | 'bootcamp'
+  courseType: 'course' | 'bootcamp' | 'workshop'
+}
+
+export interface OrderCourseBundle {
+  id: number
+  documentId: string
+  title: string
 }
 
 export interface Order {
@@ -92,10 +98,11 @@ export interface Order {
   locale: string | null
   amount: number
   transactionId: string
-  courseType: 'course' | 'bootcamp'
+  courseType: 'course' | 'bootcamp' | 'workshop' | 'course-bundle'
   paymentMethod: string
   orderStatus: 'Paid' | 'Pending' | 'Failed' | 'Cancelled' | 'Refunded'
-  course: OrderCourse
+  course?: OrderCourse
+  courseBundle?: OrderCourseBundle
 }
 
 export interface OrdersResponse {

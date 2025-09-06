@@ -112,6 +112,13 @@ export default async function BootcampPage({
     (section) => section.__component === 'review-layout.review-layout'
   )
 
+  const courseInfo = {
+    title: bootcampData.baseContent?.title,
+    price: bootcampData.baseContent?.price,
+    courseType: bootcampData.baseContent?.courseType,
+    slug: bootcampData.baseContent?.slug,
+  }
+
   return (
     <>
       {heroData && (
@@ -196,7 +203,7 @@ export default async function BootcampPage({
 
       {callToActionData && (
         <AnimatedSection animation="scrollFadeIn" delay={0.2}>
-          <CallToAction data={callToActionData} />
+          <CallToAction data={callToActionData} courseInfo={courseInfo} />
         </AnimatedSection>
       )}
     </>

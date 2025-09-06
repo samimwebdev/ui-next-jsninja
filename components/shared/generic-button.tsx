@@ -3,15 +3,18 @@
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { CourseType } from '@/types/checkout-types'
 
 interface EnrollButtonProps {
   courseSlug: string
+  courseType: CourseType
   label?: string
   className?: string
 }
 
 export default function GenericButton({
   courseSlug,
+  courseType,
   label = 'Enroll Now',
   className = '',
 }: EnrollButtonProps) {
@@ -21,7 +24,7 @@ export default function GenericButton({
   const handleClick = async () => {
     setIsLoading(true)
     try {
-      router.push(`/checkout?courseId=${courseSlug}`)
+      router.push(`/checkout?courseSlug=${courseSlug}&courseType=${courseType}`)
     } finally {
       setIsLoading(false)
     }

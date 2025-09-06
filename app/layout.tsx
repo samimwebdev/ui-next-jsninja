@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Hind_Siliguri } from 'next/font/google'
 import { ThemeProvider } from '@/components/context/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
@@ -14,9 +14,11 @@ import { Menu, SEOData, StrapiImage } from '@/types/shared-types'
 import ReactQueryProvider from '@/components/context/react-query-provider'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
-const inter = Inter({
-  subsets: ['latin'],
+const hindSiliguri = Hind_Siliguri({
+  subsets: ['latin', 'bengali'],
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
+  variable: '--font-hind-siliguri',
 })
 
 export interface StrapiSettingData {
@@ -109,14 +111,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const headerMenuId = process.env.HEADER_MENU_ID || 'o7mp8egjwy3o0dympkh8sxhi'
 const footerMenuId = process.env.FOOTER_MENU_ID || 'f8utr9p5klcsyouxovemwail'
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   const currentUser = await getUser()
-
-  console.log({ currentUser })
 
   // Fetch menus
   const { data: menus } = await strapiFetch<{ data: Menu[] }>(
@@ -144,7 +145,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} antialiased`}
+        className={`${hindSiliguri.className} ${hindSiliguri.variable} antialiased`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

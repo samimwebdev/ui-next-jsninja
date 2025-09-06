@@ -9,11 +9,13 @@ import { Menu } from 'lucide-react'
 import Link from 'next/link'
 import { Logo } from './logo'
 // import { NavMenu } from './nav-menu'
-import { User } from '@/components/context/AuthProvider'
-import { MenuItem } from '@/app/layout'
+
+import { MenuItem, StrapiImage, User } from '@/types/shared-types'
+import Image from 'next/image'
 
 interface NavigationSheetProps {
   isLoggedIn?: boolean
+  logo?: StrapiImage
   user?: User | null
   onLogout?: () => void
   menuItems?: MenuItem[] // <-- Add this prop
@@ -23,13 +25,14 @@ export const NavigationSheet = ({
   isLoggedIn,
   user,
   onLogout,
+  logo,
   menuItems = [],
 }: NavigationSheetProps) => {
   // Helper to render SVG icon from string
   const SVGIcon = ({ svgString }: { svgString: string }) =>
     svgString ? (
       <span
-        className="h-5 w-5 mr-2 text-muted-foreground inline-block"
+        className="h-5 w-5 mr-2 text-muted-foreground inline-block [&>svg]:w-full [&>svg]:h-full [&>svg]:text-slate-700 dark:[&>svg]:text-ninja-gold [&>svg]:fill-current [&>svg]:stroke-current"
         dangerouslySetInnerHTML={{ __html: svgString }}
       />
     ) : null
@@ -59,7 +62,17 @@ export const NavigationSheet = ({
       <SheetContent>
         <SheetTitle className="sr-only">Main Navigation</SheetTitle>
         <Link href="/">
-          <Logo />
+          {logo?.url ? (
+            <Image
+              width={200}
+              height={50}
+              src={logo.url}
+              alt={logo.alternativeText || 'Logo'}
+              className="h-8 w-auto"
+            />
+          ) : (
+            <Logo />
+          )}
         </Link>
 
         {/* <NavMenu

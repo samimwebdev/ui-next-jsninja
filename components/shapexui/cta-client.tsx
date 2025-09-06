@@ -1,17 +1,36 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { CallToActionContentSection } from '@/types/bootcamp-page-types'
 import DynamicIcon from '../shared/DynamicIcon'
 import { getCleanText } from '@/lib/utils'
+import { CourseInfoType } from './cta'
+import { useRouter } from 'next/navigation'
 
 interface CTAClientWrapperProps {
   data: CallToActionContentSection
+  courseInfo: CourseInfoType
 }
 
-export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({ data }) => {
+export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({
+  data,
+  courseInfo,
+}) => {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleClick = async () => {
+    setIsLoading(true)
+    try {
+      router.push(
+        `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <>
       <motion.div
@@ -77,10 +96,12 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({ data }) => {
             <Button
               size="lg"
               className="w-full sm:w-auto px-12 py-7 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition duration-300 shadow-lg shadow-primary/25 relative overflow-hidden group rounded-full font-bold"
+              onClick={handleClick}
+              disabled={isLoading}
             >
               <span className="absolute inset-0 w-full h-full bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
               <span className="relative flex items-center justify-center gap-2">
-                {data.btn?.btnLabel}
+                {isLoading ? 'Loading...' : data.btn?.btnLabel}
                 {data.btn?.btnIcon && (
                   <DynamicIcon
                     icon={data.btn.btnIcon}

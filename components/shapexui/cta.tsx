@@ -2,9 +2,17 @@ import React from 'react'
 import { CallToActionContentSection } from '@/types/bootcamp-page-types'
 import { CTAClientWrapper } from './cta-client'
 
-const CallToAction: React.FC<{ data: CallToActionContentSection }> = ({
-  data,
-}) => {
+export interface CourseInfoType {
+  title: string
+  price: number
+  courseType: string
+  slug: string
+}
+
+const CallToAction: React.FC<{
+  data: CallToActionContentSection
+  courseInfo: CourseInfoType
+}> = ({ data, courseInfo }) => {
   return (
     <section className="py-20 relative overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Subtle geometric background pattern */}
@@ -27,7 +35,7 @@ const CallToAction: React.FC<{ data: CallToActionContentSection }> = ({
 
       <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Pass all data to client wrapper to maintain exact animations */}
-        <CTAClientWrapper data={data} />
+        <CTAClientWrapper data={data} courseInfo={courseInfo} />
       </div>
     </section>
   )

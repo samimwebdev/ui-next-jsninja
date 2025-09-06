@@ -94,7 +94,7 @@ function OrderStatusBadge({ status }: { status: Order['orderStatus'] }) {
 function CourseTypeBadge({
   courseType,
 }: {
-  courseType: 'course' | 'bootcamp'
+  courseType: 'course' | 'bootcamp' | 'workshop' | 'course-bundle'
 }) {
   return (
     <Badge variant={courseType === 'bootcamp' ? 'secondary' : 'outline'}>
@@ -184,7 +184,9 @@ export default function OrdersPage() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">{order.course.title}</div>
+                      <div className="font-medium">
+                        {order?.course?.title || order?.courseBundle?.title}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>{formatDate(order.date)}</TableCell>
@@ -223,10 +225,11 @@ export default function OrdersPage() {
                                   Course
                                 </h4>
                                 <p className="font-medium">
-                                  {selectedOrder.course.title}
+                                  {selectedOrder?.course?.title ||
+                                    selectedOrder?.courseBundle?.title}
                                 </p>
                                 <CourseTypeBadge
-                                  courseType={selectedOrder.course.courseType}
+                                  courseType={selectedOrder?.courseType}
                                 />
                               </div>
                               <div>

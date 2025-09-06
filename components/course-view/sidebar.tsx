@@ -153,7 +153,7 @@ export function Sidebar({
   }
 
   return (
-    <div className="border-l bg-card">
+    <div className="border-l">
       {/* Search */}
       <div className="p-2 border-b">
         <div className="relative">
@@ -197,8 +197,7 @@ export function Sidebar({
             >
               <CollapsibleTrigger
                 className={cn(
-                  'flex w-full items-start justify-between py-5 px-6 hover:bg-accent transition-colors',
-                  currentModuleId === module.id && 'bg-accent/50'
+                  'flex w-full items-start justify-between py-5 px-6  transition-colors'
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -224,14 +223,15 @@ export function Sidebar({
                   <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent className="bg-accent/50">
+              <CollapsibleContent>
                 {module.lessons.map((lesson) => (
                   <Button
                     key={lesson.id}
                     variant="ghost"
                     className={cn(
-                      'w-full justify-start gap-3 py-4 px-6 font-normal hover:bg-accent pl-14 relative transition-all duration-200 h-auto',
-                      lesson.completed && 'text-emerald-500',
+                      'w-full justify-start gap-3 py-4 px-6 font-normal pl-14 relative transition-all duration-200 h-auto hover:bg-accent/10 hover:text-primary',
+                      lesson.completed &&
+                        'text-emerald-500 hover:text-emerald-500',
                       currentLessonId === lesson.documentId &&
                         currentModuleId === module.id &&
                         'bg-primary/10 dark:bg-primary/20 border-l-4 border-primary font-medium shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-[""]'

@@ -29,7 +29,9 @@ export const CourseCurriculum: React.FC<{
   // SSR: Render static structure and pass data to client
   return (
     <section id="curriculum" className="my-12">
-      <h2 className="text-3xl font-bold tracking-tight mb-6">{title}</h2>
+      <h2 className="text-3xl font-bold tracking-tight text-ninja-gold">
+        {title}
+      </h2>
       <CurriculumClient modules={modules} />
     </section>
   )

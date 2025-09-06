@@ -16,10 +16,18 @@ import {
 } from '@/types/course-page-types'
 import { formatDuration } from '@/lib/utils'
 import { formatPrice } from '@/lib/course-utils'
+import { CourseType } from '@/types/checkout-types'
 
 export const CourseBundle: React.FC<{
   data: CourseBundleContentSection | undefined
-}> = ({ data }) => {
+  courseInfo: {
+    title: string
+    price: number
+    features: string[]
+    courseType: CourseType
+    slug: string
+  }
+}> = ({ data, courseInfo }) => {
   const bundle = data?.courseBundle
   const title = data?.title || 'Course Bundle to take a look'
   const description =
@@ -185,7 +193,9 @@ export const CourseBundle: React.FC<{
                     </span>
                   </div>
                 </div>
-                <Link href={`/checkout?bundle=${bundle.documentId}`}>
+                <Link
+                  href={`/checkout?courseSlug=${courseInfo.slug}&courseType=course-bundle`}
+                >
                   <Button
                     size="lg"
                     className="w-full gap-2 bg-primary hover:bg-primary/90 transition-colors mt-4"

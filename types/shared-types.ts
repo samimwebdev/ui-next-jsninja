@@ -1,3 +1,5 @@
+import { CourseType } from './checkout-types'
+
 // Shared Image types
 export interface StrapiImage {
   id: number
@@ -233,7 +235,7 @@ export interface CourseBase {
   longDescription?: string
   duration: number | string
   startingFrom?: string
-  courseType?: 'course' | 'bootcamp' | 'workshop'
+  courseType: CourseType
   categories: Category[]
   featureImage?: StrapiImage
   seo?: SEOData

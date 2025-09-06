@@ -184,7 +184,7 @@ export function usePusherNotifications({
       createdAt: data.timestamp,
       type: data.type,
       priority: data.priority,
-      actionUrl: data.actionUrl,
+      actionUrl: data?.actionUrl,
       data: data.data,
       isRead: false,
       userId: userDocumentId!,
@@ -233,7 +233,7 @@ export function usePusherNotifications({
       description: content,
       action: data.actionUrl
         ? {
-            label: eventType.includes('assignment') ? 'Review' : 'View',
+            label: eventType.includes('assignment') ? 'Assignment' : 'View',
             onClick: () => {
               window.location.href = data.actionUrl
             },
@@ -263,6 +263,14 @@ export function usePusherNotifications({
         'course-enrollment',
         (data: PusherNotificationEvent) => {
           handleNotification('course-enrollment', data, 'success')
+        }
+      )
+
+      // Handle Bundle enrollment notifications
+      channelRef.current.bind(
+        'bundle-enrollment',
+        (data: PusherNotificationEvent) => {
+          handleNotification('bundle-enrollment', data, 'success')
         }
       )
 
@@ -314,9 +322,9 @@ export function usePusherNotifications({
 
       // Handle Course review delete notifications
       channelRef.current.bind(
-        'course-review-delete',
+        'review-delete',
         (data: PusherNotificationEvent) => {
-          handleNotification('course-review-delete', data, 'info')
+          handleNotification('review-delete', data, 'info')
         }
       )
       // Handle progress notifications

@@ -1,11 +1,13 @@
 import { CircleCheckBig } from 'lucide-react'
 import { formatPrice } from '@/lib/course-utils'
 import GenericButton from '../shared/generic-button'
+import { CourseType } from '@/types/checkout-types'
 
 interface CourseSidebarProps {
   courseInfo: {
     title: string
     price: number
+    courseType: CourseType
     features: string[]
     slug: string
   }
@@ -32,6 +34,7 @@ export function CoursePriceSidebar({ courseInfo, slug }: CourseSidebarProps) {
 
         <GenericButton
           courseSlug={slug}
+          courseType={courseInfo.courseType}
           label="Enroll Now"
           className="w-full"
         />

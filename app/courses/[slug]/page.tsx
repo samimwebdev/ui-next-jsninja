@@ -118,6 +118,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     title: courseData.baseContent?.title || courseData.courseName,
     price: courseData.baseContent?.price || 0,
     features: getHighlightFeatures(courseData),
+    courseType: courseData.baseContent?.courseType,
     slug: slug,
   }
 
@@ -193,7 +194,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 {/* Course Bundle Section */}
                 {courseBundleData && (
                   <AnimatedSection animation="fadeInUp" delay={0.9}>
-                    <CourseBundle data={courseBundleData} />
+                    <CourseBundle
+                      data={courseBundleData}
+                      courseInfo={courseInfo}
+                    />
                   </AnimatedSection>
                 )}
               </div>

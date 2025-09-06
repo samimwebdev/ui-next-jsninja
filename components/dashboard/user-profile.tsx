@@ -2,10 +2,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import { getUserWithProfile } from '@/lib/auth'
 import { getProfileImageUrl } from '@/lib/utils'
+import DashboardUserTopProfileClient from './dashboard-user-top-profile-client'
 
 export async function UserProfile() {
   const user = await getUserWithProfile()
-
   const profileImageUrl = getProfileImageUrl(user)
 
   // Fallbacks
@@ -27,8 +27,9 @@ export async function UserProfile() {
       : 'U'
 
   // TODO: Replace with real data from Strapi if available
-  const coursesEnrolled = 5
-  const certificatesEarned = 3
+
+  // const coursesEnrolled = data?.data?.courses.length || 0
+  // const certificatesEarned = data?.data?.bootcamps.length || 0
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow-sm">
@@ -42,14 +43,7 @@ export async function UserProfile() {
             <div className="space-y-1">
               <h2 className="text-3xl font-bold">{fullName}</h2>
               <p className="text-muted-foreground">{bio}</p>
-              <div className="flex gap-4 mt-2">
-                <span className="text-sm text-muted-foreground">
-                  {coursesEnrolled} Courses Enrolled
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  {certificatesEarned} Certificates Earned
-                </span>
-              </div>
+              <DashboardUserTopProfileClient />
             </div>
           </CardContent>
         </Card>
