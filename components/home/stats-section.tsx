@@ -78,15 +78,18 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ data }) => {
     return () => clearInterval(timer)
   }, [isInView, data.statsCounter])
 
-  const formatCount = (count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K`
-    }
-    return count.toString()
-  }
+  // const formatCount = (count: number) => {
+  //   if (count >= 1000) {
+  //     return `${(count / 1000).toFixed(1)}K`
+  //   }
+  //   return count.toString()
+  // }
 
   return (
-    <div ref={sectionRef} className="w-full space-y-8 py-12 px-2">
+    <div
+      ref={sectionRef}
+      className="w-full max-w-screen-xl space-y-8 py-12 px-8 mx-auto"
+    >
       <Card className="mx-auto max-w-screen-xl p-8 rounded-3xl">
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">

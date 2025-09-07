@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import React from 'react'
 import { BlogSectionData } from '@/types/home-page-types'
-import { calculateReadingTime, formatDuration, getExcerpt } from '@/lib/utils'
+import { calculateReadingTime, getExcerpt } from '@/lib/utils'
 
 const HomeBlogList: React.FC<{ data: BlogSectionData }> = ({
   data: blogSectionData,
@@ -36,7 +36,7 @@ const HomeBlogList: React.FC<{ data: BlogSectionData }> = ({
 
   return (
     <div
-      className="max-w-screen-xl mx-auto py-16 px-6 xl:px-0"
+      className="max-w-screen-xl mx-auto py-16 px-6 xl:px-6"
       ref={sectionRef}
     >
       <motion.div
@@ -97,9 +97,8 @@ const HomeBlogList: React.FC<{ data: BlogSectionData }> = ({
                     {`${blog.categories[0]?.name || 'General'}`}
                   </Badge>
                   <span className="font-medium text-xs text-muted-foreground">
-                    {calculateReadingTime(blog.details) ||
-                      formatDuration(blog.timeToRead)}{' '}
-                    min read
+                    {calculateReadingTime(blog.details) || blog.timeToRead} min
+                    read
                   </span>
                 </motion.div>
 

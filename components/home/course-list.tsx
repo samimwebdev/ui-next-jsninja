@@ -21,11 +21,11 @@ import { formatDuration } from '@/lib/utils'
 const CourseCard = ({ course }: { course: Course }) => {
   return (
     <motion.div
-      className="w-full md:w-1/3 lg:w-1/3 flex-shrink-0 px-4  group cursor-pointer"
+      className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4  group cursor-pointer"
       whileHover={{ scale: 1.03 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
-      <Link href={`/courses/${course.id}`}>
+      <Link href={`/courses/${course.slug}`} className="h-full">
         <Card className="overflow-hidden h-full flex flex-col">
           <CardHeader className="p-0">
             <div className="relative h-48 w-full overflow-hidden">

@@ -8,10 +8,10 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+
 import { PlayCircle } from 'lucide-react'
 import { useState } from 'react'
-import Link from 'next/link'
+
 import { VideoSectionData } from '@/types/home-page-types'
 import { extractYouTubeId, getYouTubeThumbnail } from '@/lib/utils'
 
@@ -180,15 +180,15 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
             )}
 
             {/* Browse Videos Button */}
-            {videoSectionData.browseVideosBtn && (
+            {/* {videoSectionData.browseVideosBtn && (
               <div className="flex justify-center mt-8">
                 <Button asChild className="group">
-                  <Link href={videoSectionData.browseVideosBtn?.btnLink}>
+                  <Link href={videoSectionData.browseVideosBtn?.btnLink || '#'}>
                     {videoSectionData.browseVideosBtn?.btnLabel}
                   </Link>
                 </Button>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>

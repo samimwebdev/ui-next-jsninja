@@ -1,335 +1,120 @@
-'use client'
+import React, { Suspense } from 'react'
+import { notFound } from 'next/navigation'
+import { Metadata } from 'next'
+import { getBlogData, getRelatedBlogs } from '@/lib/blog'
+import { BlogDetailClient } from '@/components/blog/blog-detail-client'
+import { RelatedBlogsSection } from '@/components/blog/related-blogs-section'
+import { BlogDetailSkeleton } from '@/components/blog/blog-detail-skeleton'
+import { RelatedBlogsSkeleton } from '@/components/blog/related-blogs-skeleton'
+import { BlogPost } from '@/types/blog-types'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { Calendar, Tag, ArrowRight, Clock } from 'lucide-react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-
-type Blog = {
-  slug: string
-  Title: string
-  Intro: string
-  Image: string
-  created_at: string
-  Tags: string
-  Description: string
+interface BlogPageProps {
+  params: Promise<{
+    slug: string
+  }>
 }
-// Static data for the blogs
-const data: Blog[] = [
-  {
-    slug: 'mastering-react-hooks',
-    Title: 'Mastering React Hooks',
-    Intro:
-      'A comprehensive guide to using React Hooks effectively in your projects.',
-    Image:
-      'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
-    created_at: '2023-09-20',
-    Tags: 'React, JavaScript, Frontend',
-    Description:
-      '<p>React Hooks have revolutionized how we build components. This guide explores useState, useEffect, useContext, and custom hooks with practical examples.</p>',
-  },
-  {
-    slug: 'tailwind-css-best-practices',
-    Title: 'Tailwind CSS Best Practices',
-    Intro: 'Learn how to structure and optimize your Tailwind CSS projects.',
-    Image:
-      'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
-    created_at: '2023-08-15',
-    Tags: 'CSS, Tailwind, Frontend',
-    Description:
-      '<p>Discover the most effective ways to organize your Tailwind CSS projects, create reusable components, and optimize for production.</p>',
-  },
-  {
-    slug: 'nextjs-app-router-guide',
-    Title: 'Next.js App Router Guide',
-    Intro:
-      'Everything you need to know about the Next.js App Router and server components.',
-    Image:
-      'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
-    created_at: '2023-07-05',
-    Tags: 'Next.js, React, Web Development',
-    Description:
-      '<p>A deep dive into Next.js App Router, server components, and how they improve performance and developer experience.</p>',
-  },
-]
 
-const Page = () => {
-  const [isInView, setIsInView] = useState(false)
-  const sectionRef = useRef<HTMLDivElement>(null)
+// Generate metadata for SEO
+export async function generateMetadata({
+  params,
+}: BlogPageProps): Promise<Metadata> {
+  try {
+    const { slug } = await params
+    const blog = await getBlogData(slug)
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true)
-        }
+    const categoryNames =
+      blog.categories?.map((cat) => cat.name).join(', ') || ''
+    const authorName = blog.author
+      ? `${blog.author.firstName} ${blog.author.lastName}`
+      : 'Javascript Ninja'
+
+    return {
+      title: `${blog.title} | Javascript Ninja Blog`,
+      description: blog.details
+        ? blog.details.replace(/<[^>]*>/g, '').substring(0, 160) + '...'
+        : `Read about ${blog.title} on Javascript Ninja blog`,
+      keywords: categoryNames,
+      authors: [{ name: authorName }],
+      openGraph: {
+        title: blog.title,
+        description: blog.details
+          ? blog.details.replace(/<[^>]*>/g, '').substring(0, 160) + '...'
+          : `Read about ${blog.title} on Javascript Ninja blog`,
+        type: 'article',
+        publishedTime: blog.publishedDate,
+        modifiedTime: blog.updatedAt,
+        authors: [authorName],
+
+        tags: blog.tags?.split(',').map((tag) => tag.trim()),
+        images: blog.author?.image?.url
+          ? [
+              {
+                url: blog.author.image.url,
+                width: blog.author.image.width,
+                height: blog.author.image.height,
+                alt: blog.title,
+              },
+            ]
+          : [],
       },
-      { threshold: 0.1 }
-    )
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current)
+      twitter: {
+        card: 'summary_large_image',
+        title: blog.title,
+        description: blog.details
+          ? blog.details.replace(/<[^>]*>/g, '').substring(0, 160) + '...'
+          : `Read about ${blog.title} on Javascript Ninja blog`,
+        images: blog.author?.image?.url ? [blog.author.image.url] : [],
+      },
+      alternates: {
+        canonical: `/blogs/${slug}`,
+      },
     }
+  } catch (error) {
+    console.error('Error generating blog metadata:', error)
+    return {
+      title: 'Blog Not Found | Javascript Ninja',
+      description: 'The blog post you are looking for could not be found.',
+    }
+  }
+}
 
-    return () => observer.disconnect()
-  }, [])
+// Main page component with streaming
+export default async function BlogPage({ params }: BlogPageProps) {
+  const { slug } = await params
 
-  const Cards = () => {
-    return (
-      <div className="grid xs:grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {data.map((item: Blog, index: number) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ y: -5 }}
-          >
-            <Link href={`/blogs/${item.slug}`}>
-              <article className="group overflow-hidden rounded-2xl transition-all duration-300 transform hover:shadow-xl bg-card border border-border h-full">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <Image
-                    src={item?.Image}
-                    layout="fill"
-                    objectFit="cover"
-                    alt={item.Title}
-                    className="rounded-t-2xl object-cover transition duration-300 group-hover:opacity-75 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium flex items-center">
-                    <Calendar className="w-3 h-3 mr-1 text-yellow-500" />
-                    <time className="text-gray-300">
-                      {new Date(item?.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </time>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="text-xl font-bold text-foreground line-clamp-2 group-hover:text-yellow-500 transition duration-300">
-                    {item?.Title}
-                  </h3>
-                  <p className="mt-2 line-clamp-3 text-sm text-muted-foreground leading-relaxed">
-                    {item?.Intro}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {item?.Tags?.split(',').map(
-                      (tag: string, tagIndex: number) => (
-                        <span
-                          key={tagIndex}
-                          className="whitespace-nowrap rounded-full px-2 py-1 text-xs font-medium flex items-center gap-1 bg-primary/10 text-primary"
-                        >
-                          <Tag className="w-3 h-3" />
-                          {tag.trim()}
-                        </span>
-                      )
-                    )}
-                  </div>
-                  <div className="mt-4 flex items-center text-yellow-500 font-medium">
-                    <span className="text-sm group-hover:underline">
-                      Read more
-                    </span>
-                    <ArrowRight className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition duration-300" />
-                  </div>
-                </div>
-              </article>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-    )
+  // Fetch main blog data first (critical content)
+  let blog: BlogPost
+  try {
+    blog = await getBlogData(slug)
+  } catch (error) {
+    console.error('Failed to fetch blog data:', error)
+    notFound()
   }
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 xl:px-0" ref={sectionRef}>
-      {/* Breadcrumb */}
-      <motion.div
-        className="py-4"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/blogs">Blogs</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink>{data[0].Title}</BreadcrumbLink>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </motion.div>
+    <div className="max-w-screen-xl mx-auto px-4 xl:px-0">
+      {/* Main blog content - SSR */}
+      <Suspense fallback={<BlogDetailSkeleton />}>
+        <BlogDetailClient blog={blog} />
+      </Suspense>
 
-      {/* Hero Image with Overlay */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative rounded-xl overflow-hidden"
-      >
-        <div
-          className="bg-cover bg-center text-center overflow-hidden relative"
-          style={{
-            minHeight: '500px',
-            backgroundImage: `url('${data[0].Image}')`,
-          }}
-          title={data[0].Title}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/20"></div>
-        </div>
-      </motion.div>
-
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          className="mt-3 bg-card shadow-lg rounded-xl flex flex-col justify-between leading-normal"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <div className="bg-card-client relative top-0 -mt-32 p-5 sm:p-10 rounded-xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <h1 className="text-white font-bold text-3xl md:text-4xl mb-4 drop-shadow-md">
-                {data[0].Title}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-6 px-6 sm:px-8 py-5 bg-black/40 backdrop-blur-sm rounded-lg border border-white/10 shadow-lg">
-                <div className="flex items-center text-white text-sm font-medium">
-                  <Calendar className="w-4 h-4 mr-2 text-yellow-500" />
-                  {new Date(data[0].created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </div>
-
-                <div className="flex items-center text-white text-sm font-medium">
-                  <Clock className="w-4 h-4 mr-2 text-yellow-500" />
-                  <span>5 min read</span>
-                </div>
-
-                <div className="flex items-center text-white text-sm font-medium">
-                  <span>Written By:</span>
-                  <a
-                    href="javascript:void(0)"
-                    className="text-yellow-500 font-bold ml-1 hover:underline transition duration-300"
-                  >
-                    Frontend Ninja
-                  </a>
-                </div>
-              </div>
-              <motion.p
-                className="text-base leading-8 my-6 text-foreground/90 px-1"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                {data[0].Intro}
-              </motion.p>
-
-              <motion.div
-                className="text-foreground px-1"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
-                <h3 className="text-2xl font-bold my-5">
-                  #1. Understanding React Hooks
-                </h3>
-
-                <p className="text-base leading-8 my-5">
-                  React Hooks were introduced in React 16.8 as a way to use
-                  state and other React features without writing a class
-                  component. They allow you to hook into React state and
-                  lifecycle features from function components, making your code
-                  more readable and easier to maintain.
-                </p>
-
-                <blockquote className="border-l-4 border-yellow-500 text-base italic leading-8 my-6 p-6 bg-primary/5 rounded-r-md shadow-sm">
-                  Hooks are a new addition in React 16.8. They let you use state
-                  and other React features without writing a class. - React
-                  Documentation
-                </blockquote>
-
-                <p className="text-base leading-8 my-5">
-                  The most commonly used hooks are useState for managing
-                  component state, useEffect for handling side effects,
-                  useContext for consuming context, and useRef for creating
-                  mutable references. You can also create your own custom hooks
-                  to reuse stateful logic between components.
-                </p>
-
-                <h3 className="text-2xl font-bold my-5">
-                  #2. Practical Applications
-                </h3>
-
-                <p className="text-base leading-8 my-5">
-                  Hooks have transformed how we build React applications by
-                  enabling more functional programming patterns and reducing the
-                  need for complex class components. They make it easier to
-                  reuse stateful logic between components and organize code by
-                  related functionality rather than lifecycle methods.
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="flex flex-wrap gap-2 mt-8"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-              >
-                {data[0].Tags.split(',').map((tag, tagIndex) => (
-                  <span
-                    key={tagIndex}
-                    className="whitespace-nowrap rounded-full px-3 py-1 text-sm font-medium flex items-center gap-1 bg-primary/10 text-primary hover:bg-primary/20 transition-colors cursor-pointer"
-                  >
-                    <Tag className="w-3 h-3" />
-                    {tag.trim()}
-                  </span>
-                ))}
-              </motion.div>
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Recommended Blogs */}
-      <motion.div
-        className="py-16"
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.5, delay: 0.7 }}
-      >
-        <motion.h2
-          className="text-3xl font-bold text-center mb-10"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          Recommended Blogs
-        </motion.h2>
-        <Cards />
-      </motion.div>
+      {/* Related blogs - Streaming (non-critical content) */}
+      <Suspense fallback={<RelatedBlogsSkeleton />}>
+        <RelatedBlogsWrapper slug={slug} />
+      </Suspense>
     </div>
   )
 }
 
-export default Page
+// Related blogs wrapper for streaming
+async function RelatedBlogsWrapper({ slug }: { slug: string }) {
+  const relatedBlogs = await getRelatedBlogs(slug, 3)
+  return <RelatedBlogsSection blogs={relatedBlogs} />
+}
+
+// Generate static params for popular blogs (optional)
+export async function generateStaticParams() {
+  // You can fetch popular blog slugs here for SSG
+  // For now, we'll use ISR
+  return []
+}

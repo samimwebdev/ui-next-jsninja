@@ -138,6 +138,12 @@ export default async function Home() {
           </AnimatedSection>
         )}
 
+        {bootcampData && (
+          <AnimatedSection animation="fadeInUp" delay={0.1}>
+            <BootcampList data={bootcampData} />
+          </AnimatedSection>
+        )}
+
         {reviewData && (
           <AnimatedSection animation="revealSection" delay={0.2}>
             <TestimonialSection data={reviewData} />
@@ -147,12 +153,6 @@ export default async function Home() {
         {statsData && (
           <AnimatedSection animation="scrollFadeIn">
             <StatsSection data={statsData} />
-          </AnimatedSection>
-        )}
-
-        {bootcampData && (
-          <AnimatedSection animation="fadeInUp" delay={0.1}>
-            <BootcampList data={bootcampData} />
           </AnimatedSection>
         )}
 
