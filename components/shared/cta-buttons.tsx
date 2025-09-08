@@ -2,15 +2,15 @@
 
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, CirclePlay } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
 interface CTAButtonsProps {
   primaryLabel?: string
   secondaryLabel?: string
-  primaryButtonLink?: string
+  handleClick?: () => void
   onPreviewClick?: () => void
   className?: string
   variant?: 'default' | 'outline'
+  isPrimaryBtnDisabled?: boolean
   primaryButtonVariant?: 'default' | 'outline'
   secondaryButtonVariant?: 'default' | 'outline'
   isSecondaryBtn?: boolean
@@ -20,22 +20,15 @@ interface CTAButtonsProps {
 export function CTAButtons({
   primaryLabel = 'Enroll Now',
   secondaryLabel = 'Watch Preview',
-  primaryButtonLink,
+  handleClick,
   onPreviewClick,
+  isPrimaryBtnDisabled = false,
   className = '',
   primaryButtonVariant = 'default',
   secondaryButtonVariant = 'outline',
   isSecondaryBtn = false,
   size = 'lg',
 }: CTAButtonsProps) {
-  const router = useRouter()
-
-  const handleEnrollClick = () => {
-    if (primaryButtonLink) {
-      router.push(primaryButtonLink)
-    }
-  }
-
   const handlePreviewClick = () => {
     if (onPreviewClick) {
       onPreviewClick()
@@ -53,8 +46,9 @@ export function CTAButtons({
       <Button
         size={size}
         className="rounded-full text-base"
-        onClick={handleEnrollClick}
+        onClick={handleClick}
         variant={primaryButtonVariant}
+        disabled={isPrimaryBtnDisabled}
       >
         {primaryLabel} <ArrowUpRight className="!h-5 !w-5" />
       </Button>

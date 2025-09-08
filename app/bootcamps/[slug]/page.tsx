@@ -12,11 +12,12 @@ import BootcampSteps from '@/components/shapexui/steps'
 import { BootcampPricing } from '@/components/bootcamp/bootcamp-pricing'
 import { BootcampCurriculum } from '@/components/bootcamp/bootcamp-curriculum'
 import { AnimatedSection } from '@/components/shared/animated-section'
-import { BootcampPageData } from '@/types/bootcamp-page-types'
 import { getBootcampContentSection } from '@/lib/bootcamp-utils'
 import { getBootcampData } from '@/lib/bootcamp'
 import { BootcampAuthor } from '@/components/bootcamp/bootcamp-author'
 import { generateSEOMetadata } from '@/lib/seo'
+import { fetchEnrolledCourses } from '@/lib/actions/enrolled-courses'
+import { EnrolledCoursesResponse } from '@/types/dashboard-types'
 
 interface BootcampPageProps {
   params: Promise<{
@@ -57,9 +58,26 @@ export default async function BootcampPage({
 }) {
   // Await params before using its properties
   const { slug } = await params
+  const bootcampData = await getBootcampData(slug)
 
-  const bootcampData: BootcampPageData = await getBootcampData(slug)
+  // Safely fetch enrolled courses - returns null if user not logged in
+  let enrolledCourses: EnrolledCoursesResponse | null = null
+  try {
+    enrolledCourses = await fetchEnrolledCourses({ isPublicPage: true })
+  } catch (error) {
+    console.error('Error fetching enrolled courses:', error)
+    // Continue with enrolledCourses as null
+  }
 
+  // Safely extract courses - default to empty array if no data
+  const courses = enrolledCourses?.data
+    ? [...enrolledCourses.data.courses, ...enrolledCourses.data.bootcamps]
+    : []
+
+  // Check if the user is enrolled in this bootcamp
+  const isEnrolled = courses.some(
+    (course) => course.slug === slug && course.isExpired === false
+  )
   // Extract content sections from contentBlock
   const overviewData = getBootcampContentSection(
     bootcampData,
@@ -114,9 +132,11 @@ export default async function BootcampPage({
 
   const courseInfo = {
     title: bootcampData.baseContent?.title,
+    slug: bootcampData.baseContent?.slug,
     price: bootcampData.baseContent?.price,
     courseType: bootcampData.baseContent?.courseType,
-    slug: bootcampData.baseContent?.slug,
+    isRegistrationOpen: bootcampData.baseContent?.isRegistrationEnabled ?? true,
+    isEnrolled: isEnrolled, // Will be false if user not logged in
   }
 
   return (
@@ -125,7 +145,7 @@ export default async function BootcampPage({
         <BootcampHero
           data={heroData}
           assessmentData={assessmentData}
-          slug={slug}
+          courseInfo={courseInfo}
         />
       )}
 
@@ -167,7 +187,7 @@ export default async function BootcampPage({
 
       {pricingData && (
         <AnimatedSection animation="fadeInUp" delay={0.1}>
-          <BootcampPricing data={pricingData} />
+          <BootcampPricing data={pricingData} courseInfo={courseInfo} />
         </AnimatedSection>
       )}
 

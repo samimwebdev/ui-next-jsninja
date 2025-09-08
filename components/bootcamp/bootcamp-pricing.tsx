@@ -7,8 +7,17 @@ import { PricingClientWrapper } from './bootcamp-pricing-client'
 
 export const BootcampPricing: React.FC<{
   data: PricingPackageContentSection
-}> = ({ data }) => {
+  courseInfo: {
+    title: string
+    slug: string
+    price: number
+    courseType: string
+    isRegistrationOpen: boolean
+    isEnrolled: boolean
+  }
+}> = ({ data, courseInfo }) => {
   // Server-side HTML parsing using cheerio-like approach or regex
+
   const parseChecklist = (htmlString: string) => {
     // Simple regex approach for server-side parsing
     const matches = htmlString.match(
@@ -96,6 +105,7 @@ export const BootcampPricing: React.FC<{
                     isPreferred: pkg.isPreferred,
                     btn: pkg.btn,
                   }}
+                  courseInfo={courseInfo}
                 />
               </Card>
             )

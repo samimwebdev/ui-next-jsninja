@@ -6,10 +6,18 @@ import { strapiFetch } from '../strapi'
 import { cache } from 'react'
 
 export const fetchEnrolledCourses = cache(
-  async (): Promise<EnrolledCoursesResponse | null> => {
+  async ({
+    isPublicPage,
+  }: {
+    isPublicPage: boolean
+  }): Promise<EnrolledCoursesResponse | null> => {
     const token = await getAuthToken()
 
+    // If no token and it's a public page, return null instead of throwing
     if (!token) {
+      if (isPublicPage) {
+        return null
+      }
       throw new Error('Authentication required to fetch orders')
     }
 
@@ -27,8 +35,16 @@ export const fetchEnrolledCourses = cache(
 
       return data
     } catch (err) {
-      console.error('Error fetching user orders:', err)
-      throw err instanceof Error ? err : new Error('Failed to fetch orders')
+      console.error('Error fetching Enrolled Courses:', err)
+
+      // On public pages, return null on error instead of throwing
+      if (isPublicPage) {
+        return null
+      }
+
+      throw err instanceof Error
+        ? err
+        : new Error('Failed to fetch Enrolled Courses')
     }
   }
 )

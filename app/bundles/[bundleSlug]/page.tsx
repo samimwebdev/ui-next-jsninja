@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 interface CourseBundlePageProps {
   params: {
-    bundleSlug: string
+    bundleSlug: Promise<string>
   }
 }
 
@@ -48,7 +48,7 @@ export async function generateMetadata({
   params,
 }: CourseBundlePageProps): Promise<Metadata> {
   try {
-    const bundleData = await getCourseBundleData(params.bundleSlug)
+    const bundleData = await getCourseBundleData(await params.bundleSlug)
 
     return generateSEOMetadata(
       bundleData?.seo,
@@ -129,7 +129,7 @@ export default async function CourseBundlePage({
   let bundleData: CourseBundleApiResponse['data']
 
   try {
-    bundleData = await getCourseBundleData(params.bundleSlug)
+    bundleData = await getCourseBundleData(await params.bundleSlug)
 
     // Additional safety check
     if (!bundleData) {

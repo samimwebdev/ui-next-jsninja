@@ -1,12 +1,15 @@
 import React from 'react'
 import { CallToActionContentSection } from '@/types/bootcamp-page-types'
 import { CTAClientWrapper } from './cta-client'
+import { CourseType } from '@/types/checkout-types'
 
 export interface CourseInfoType {
   title: string
-  price: number
-  courseType: string
   slug: string
+  price: number
+  courseType: CourseType
+  isRegistrationOpen: boolean
+  isEnrolled: boolean
 }
 
 const CallToAction: React.FC<{
@@ -35,7 +38,11 @@ const CallToAction: React.FC<{
 
       <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl relative z-10">
         {/* Pass all data to client wrapper to maintain exact animations */}
-        <CTAClientWrapper data={data} courseInfo={courseInfo} />
+        <CTAClientWrapper
+          data={data}
+          courseInfo={courseInfo}
+          isRegistrationOpen={courseInfo.isRegistrationOpen}
+        />
       </div>
     </section>
   )

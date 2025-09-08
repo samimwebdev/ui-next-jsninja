@@ -109,6 +109,7 @@ export async function clearInvalidAuthCookie() {
 
 // Middleware helper
 export async function isAuthenticated(): Promise<boolean> {
+  'use server'
   const user = await getUser()
   return !!user && !user.blocked
 }

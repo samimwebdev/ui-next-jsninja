@@ -2,12 +2,21 @@ import { Badge } from '@/components/ui/badge'
 import { HeroContentSection } from '@/types/course-page-types'
 import { HeroCTA } from '../shared/hero-cta'
 import { VideoPlayer } from '../shared/video-player'
+import { CourseType } from '@/types/checkout-types'
 
 interface CourseHeroProps {
   data: HeroContentSection
+  courseInfo: {
+    title: string
+    slug: string
+    price: number
+    courseType: CourseType
+    isRegistrationOpen: boolean
+    isEnrolled: boolean
+  }
 }
 
-export function CourseHero({ data }: CourseHeroProps) {
+export function CourseHero({ data, courseInfo }: CourseHeroProps) {
   // Extract data with fallbacks - processed on server
   const title =
     data?.title || 'Frontend Ninja: Master React & Next.js Development'
@@ -19,31 +28,38 @@ export function CourseHero({ data }: CourseHeroProps) {
     data?.promoVideo || 'https://youtu.be/e74rB-14-m8?feature=shared'
   const posterImage = data?.promoImage?.url
 
-  // Generate enroll link from buttons data
-  const enrollButton = data?.btn?.find(
-    (button) =>
-      button.btnLabel.toLowerCase().includes('enroll') ||
-      button.btnLabel.toLowerCase().includes('start')
-  )
-  const enrollLink = enrollButton?.btnLink || '/enroll'
+  // // Generate enroll link from buttons data
+  // const enrollButton = data?.btn?.find(
+  //   (button) =>
+  //     button.btnLabel.toLowerCase().includes('enroll') ||
+  //     button.btnLabel.toLowerCase().includes('start')
+  // )
+
+  //enrollLink will be in this format checkout?courseSlug=mastering-java-script-1&courseType=course
+  // const enrollLink = `${
+  //   '/checkout?courseSlug=' +
+  //   slug +
+  //   '&courseType=' +
+  //   (courseInfo?.courseType || 'course')
+  // }`
 
   return (
     <div className="flex items-center justify-center">
       <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
         {/* Server-rendered content */}
         <div>
-          <Badge className="bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
+          <Badge className="bg-gradient-ninja-primary rounded-full py-1 border-none">
             {shortLabel}
           </Badge>
 
-          <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
+          <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight bg-">
             {title}
           </h1>
 
           <p className="mt-6 max-w-[60ch] text-lg">{description}</p>
 
           {/* Client component for interactive buttons only */}
-          <HeroCTA primaryBtnLink={enrollLink} videoUrl={videoUrl} />
+          <HeroCTA courseInfo={courseInfo} videoUrl={videoUrl} />
         </div>
 
         {/* Client component for video player */}

@@ -1,3 +1,5 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -8,17 +10,16 @@ import {
 import { Menu } from 'lucide-react'
 import Link from 'next/link'
 import { Logo } from './logo'
-// import { NavMenu } from './nav-menu'
-
 import { MenuItem, StrapiImage, User } from '@/types/shared-types'
 import Image from 'next/image'
+import { useState } from 'react'
 
 interface NavigationSheetProps {
   isLoggedIn?: boolean
   logo?: StrapiImage
   user?: User | null
   onLogout?: () => void
-  menuItems?: MenuItem[] // <-- Add this prop
+  menuItems?: MenuItem[]
 }
 
 export const NavigationSheet = ({
@@ -28,6 +29,19 @@ export const NavigationSheet = ({
   logo,
   menuItems = [],
 }: NavigationSheetProps) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  // Helper to close sheet when link is clicked
+  const handleLinkClick = () => {
+    setIsOpen(false)
+  }
+
+  // Helper to handle logout and close sheet
+  const handleLogout = () => {
+    onLogout?.()
+    setIsOpen(false)
+  }
+
   // Helper to render SVG icon from string
   const SVGIcon = ({ svgString }: { svgString: string }) =>
     svgString ? (
@@ -53,7 +67,7 @@ export const NavigationSheet = ({
   )
 
   return (
-    <Sheet>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button variant="outline" size="icon">
           <Menu />
@@ -61,39 +75,40 @@ export const NavigationSheet = ({
       </SheetTrigger>
       <SheetContent>
         <SheetTitle className="sr-only">Main Navigation</SheetTitle>
-        <Link href="/">
-          {logo?.url ? (
+
+        {/* Logo */}
+        <Link href="/" onClick={handleLinkClick}>
+          {logo?.formats?.thumbnail ? (
             <Image
-              width={200}
-              height={50}
-              src={logo.url}
+              width={150}
+              height={70}
+              src={logo.formats.thumbnail.url}
               alt={logo.alternativeText || 'Logo'}
-              className="h-8 w-auto"
+              className="object-contain"
             />
           ) : (
             <Logo />
           )}
         </Link>
 
-        {/* <NavMenu
-          orientation="vertical"
-          className="mt-12"
-          menuItems={menuItems}
-        /> */}
-
+        {/* User Section for Logged In Users */}
         {isLoggedIn && user && (
           <div className="mt-8 border-t pt-6">
-            <div className="flex flex-col gap-4">
-              <Button variant="ghost" className="justify-start">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <Button variant="ghost" className="justify-start">
-                <Link href="/dashboard/courses">Courses </Link>
-              </Button>
+            <div className="flex flex-col gap-2">
+              <Link href="/dashboard" onClick={handleLinkClick}>
+                <Button variant="ghost" className="justify-start w-full">
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/dashboard/courses" onClick={handleLinkClick}>
+                <Button variant="ghost" className="justify-start w-full">
+                  My Courses
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
-                className="justify-start text-destructive"
-                onClick={onLogout}
+                className="justify-start text-destructive w-full"
+                onClick={handleLogout}
               >
                 Logout
               </Button>
@@ -101,8 +116,9 @@ export const NavigationSheet = ({
           </div>
         )}
 
+        {/* Main Navigation */}
         <div className="mt-12 text-base space-y-6">
-          {/* Render top-level links */}
+          {/* Top-level links */}
           <div className="flex flex-col gap-2">
             {topLinks.map((link) => (
               <Link
@@ -110,22 +126,26 @@ export const NavigationSheet = ({
                 href={link.url}
                 target={link.target || '_self'}
                 className="py-2 px-1 rounded hover:bg-accent transition"
+                onClick={handleLinkClick}
               >
                 {link.title}
               </Link>
             ))}
-            {/* Hard-coded Sign In/Sign Up for guests */}
+
+            {/* Auth links for guests */}
             {!isLoggedIn && (
               <>
                 <Link
                   href="/login"
                   className="py-2 px-1 rounded hover:bg-accent transition"
+                  onClick={handleLinkClick}
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/register"
                   className="py-2 px-1 rounded hover:bg-accent transition"
+                  onClick={handleLinkClick}
                 >
                   Sign Up
                 </Link>
@@ -149,6 +169,7 @@ export const NavigationSheet = ({
                       href={course.url}
                       target={course.target || '_self'}
                       className="flex items-center gap-3 py-2 px-1 rounded hover:bg-accent transition"
+                      onClick={handleLinkClick}
                     >
                       {course.icon && <SVGIcon svgString={course.icon} />}
                       <span>{course.title}</span>
@@ -170,6 +191,7 @@ export const NavigationSheet = ({
                       href={bootcamp.url}
                       target={bootcamp.target || '_self'}
                       className="flex items-center gap-3 py-2 px-1 rounded hover:bg-accent transition"
+                      onClick={handleLinkClick}
                     >
                       {bootcamp.icon && <SVGIcon svgString={bootcamp.icon} />}
                       <span>{bootcamp.title}</span>

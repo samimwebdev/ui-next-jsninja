@@ -10,11 +10,13 @@ interface CourseSidebarProps {
     courseType: CourseType
     features: string[]
     slug: string
+    isRegistrationOpen: boolean
+    isEnrolled: boolean
   }
-  slug: string
 }
 
-export function CoursePriceSidebar({ courseInfo, slug }: CourseSidebarProps) {
+export function CoursePriceSidebar({ courseInfo }: CourseSidebarProps) {
+  const { price } = courseInfo
   return (
     <div className="bg-card rounded-lg p-6 shadow-lg">
       <h2 className="text-2xl font-bold mb-4">Course Features</h2>
@@ -28,16 +30,8 @@ export function CoursePriceSidebar({ courseInfo, slug }: CourseSidebarProps) {
       </ul>
 
       <div className="mt-6">
-        <div className="text-3xl font-bold mb-4">
-          {formatPrice(courseInfo.price)}
-        </div>
-
-        <GenericButton
-          courseSlug={slug}
-          courseType={courseInfo.courseType}
-          label="Enroll Now"
-          className="w-full"
-        />
+        <div className="text-3xl font-bold mb-4">{formatPrice(price)}</div>
+        <GenericButton courseInfo={courseInfo} className="w-full" />
       </div>
     </div>
   )

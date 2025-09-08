@@ -5,6 +5,7 @@ import DynamicIcon from '@/components/shared/DynamicIcon'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { StrapiIcon } from '@/types/shared-types'
+import { isAuthenticated } from '@/lib/auth'
 
 interface ButtonData {
   btnIcon?: StrapiIcon
@@ -20,14 +21,21 @@ export const BatchScheduleClient: React.FC<BatchScheduleClientProps> = ({
 }) => {
   const router = useRouter()
 
-  const handleRegisterClick = () => {
+  const handleRegisterClick = async () => {
+    const isUserAuthenticated = await isAuthenticated()
     // Add registration logic here
-    console.log('Registration button clicked')
-
-    // Example: Show toast notification
-    toast.success('Redirecting to registration...', {
-      description: 'You will be redirected to the registration form',
-    })
+    if (!isUserAuthenticated) {
+      router.push('/register')
+      // Example: Show toast notification
+      toast.success('Redirecting to registration...', {
+        description: 'You will be redirected to the registration form',
+      })
+    } else {
+      router.push('/dashboard')
+      toast.info('you already registered. Redirecting to dashboard...', {
+        description: 'You will be redirected to your dashboard',
+      })
+    }
 
     // Example: Navigate to registration page
     // router.push('/register')

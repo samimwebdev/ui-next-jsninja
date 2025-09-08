@@ -10,6 +10,7 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
+    initialData: serverUser,
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled: true,
   })

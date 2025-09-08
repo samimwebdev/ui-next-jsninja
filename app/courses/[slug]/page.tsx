@@ -19,6 +19,8 @@ import { AnimatedSection } from '@/components/shared/animated-section'
 import { notFound } from 'next/navigation'
 import { Curriculum } from '@/types/shared-types'
 import { CoursePageData } from '@/types/course-page-types'
+import { EnrolledCoursesResponse } from '@/types/dashboard-types'
+import { fetchEnrolledCourses } from '@/lib/actions/enrolled-courses'
 
 interface CoursePageProps {
   params: Promise<{
@@ -75,6 +77,7 @@ export async function generateMetadata({ params }: CoursePageProps) {
 export default async function CoursePage({ params }: CoursePageProps) {
   const { slug } = await params
   let courseData: CoursePageData
+  let enrolledCourses: EnrolledCoursesResponse | null = null
 
   try {
     courseData = await getCourseData(slug)
@@ -82,6 +85,23 @@ export default async function CoursePage({ params }: CoursePageProps) {
     console.error('Failed to fetch course data:', error)
     notFound()
   }
+
+  try {
+    enrolledCourses = await fetchEnrolledCourses({ isPublicPage: true })
+  } catch (error) {
+    console.error('Error fetching enrolled courses:', error)
+    // Continue with enrolledCourses as null
+  }
+
+  // Safely extract courses - default to empty array if no data
+  const courses = enrolledCourses?.data
+    ? [...enrolledCourses.data.courses, ...enrolledCourses.data.bootcamps]
+    : []
+
+  // Check if the user is enrolled in this course
+  const isEnrolled = courses.some(
+    (course) => course.slug === slug && course.isExpired === false
+  )
 
   // Extract section data
   const heroData = getCourseContentSection(
@@ -116,10 +136,12 @@ export default async function CoursePage({ params }: CoursePageProps) {
   // Format data for components
   const courseInfo = {
     title: courseData.baseContent?.title || courseData.courseName,
+    slug: slug,
     price: courseData.baseContent?.price || 0,
     features: getHighlightFeatures(courseData),
     courseType: courseData.baseContent?.courseType,
-    slug: slug,
+    isRegistrationOpen: courseData.baseContent?.isRegistrationEnabled || false,
+    isEnrolled: isEnrolled,
   }
 
   return (
@@ -131,7 +153,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
           {/* Hero Section - Server Component with Animation Wrapper */}
           {heroData && (
             <AnimatedSection animation="fadeInUp" delay={0.1} className="mb-8">
-              <CourseHero data={heroData} />
+              <CourseHero data={heroData} courseInfo={courseInfo} />
             </AnimatedSection>
           )}
 
@@ -210,7 +232,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 delay={0.3}
                 className="sticky top-4"
               >
-                <CoursePriceSidebar courseInfo={courseInfo} slug={slug} />
+                <CoursePriceSidebar courseInfo={courseInfo} />
               </AnimatedSection>
             </div>
           </div>

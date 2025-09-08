@@ -18,7 +18,8 @@ export interface CheckoutCourse {
 
 export interface Feature {
   id: number
-  feature: string
+  feature?: string
+  title?: string
 }
 
 export interface BaseContent {
@@ -32,7 +33,8 @@ export interface BaseContent {
   totalStudents: number
   averageRating: number
   locale: string | null
-  courseType: 'course' | 'bootcamp' | 'workshop' | 'course-bundle'
+  courseType: CourseType
+  isRegistrationEnabled: boolean
   totalLessons: number
   shortDescription: string
   longDescription: string

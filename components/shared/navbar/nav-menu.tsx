@@ -12,16 +12,15 @@ import {
 import { cn } from '@/lib/utils'
 import { MenuItem } from '@/types/shared-types'
 import { NavigationMenuProps } from '@radix-ui/react-navigation-menu'
-import { LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { usePathname } from 'next/navigation'
+import { LucideIcon } from 'lucide-react'
 
 // Component to safely render SVG strings from API
 const SVGIcon = ({ svgString }: { svgString: string }) => {
   if (!svgString) return null
 
-  // Fix potential namespace issues in SVG
   const fixedSvgString = svgString.replace(
     /xmlns=" http:\/\/www\.w3\.org\/2000\/svg\`  "/g,
     'xmlns="http://www.w3.org/2000/svg"'
@@ -41,69 +40,69 @@ export const NavMenu = ({
 }: NavigationMenuProps & { menuItems?: MenuItem[] }) => {
   const pathname = usePathname()
 
+  // Don't render anything if no menu items (prevents layout shift)
+  if (!menuItems.length) {
+    return null
+  }
+
   return (
     <NavigationMenu {...props}>
       <NavigationMenuList className="gap-1 space-x-0 text-sm">
-        <>
-          {menuItems.map((item) => {
-            // Check if current path matches this menu item or any of its children
-            const isActive =
-              pathname === item.url ||
-              (item.children &&
-                item.children.some((child) => pathname === child.url))
+        {menuItems.map((item) => {
+          const isActive =
+            pathname === item.url ||
+            (item.children &&
+              item.children.some((child) => pathname === child.url))
 
-            // If the menu item has children, render a dropdown
-            if (item.children && item.children.length > 0) {
-              return (
-                <NavigationMenuItem key={item.id}>
-                  <NavigationMenuTrigger
-                    className={cn(
-                      'text-[15px] font-normal transition-colors',
-                      isActive && 'bg-accent text-accent-foreground'
-                    )}
-                  >
-                    {item.title}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-background dark:bg-card border border-border">
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      {item.children.map((child) => (
-                        <DynamicListItem
-                          key={child.id}
-                          title={child.title}
-                          href={child.url}
-                          target={child.target}
-                          icon={child.icon}
-                        >
-                          {child?.shortDescription}
-                        </DynamicListItem>
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              )
-            }
-
-            // If the menu item has no children, render a simple link
-            const isCurrentPage = pathname === item.url
-
+          if (item.children && item.children.length > 0) {
             return (
               <NavigationMenuItem key={item.id}>
-                <Button
-                  variant="ghost"
+                <NavigationMenuTrigger
                   className={cn(
                     'text-[15px] font-normal transition-colors',
-                    isCurrentPage && 'bg-accent text-accent-foreground'
+                    isActive && 'bg-accent text-accent-foreground'
                   )}
-                  asChild
                 >
-                  <Link href={item.url} target={item.target || '_self'}>
-                    {item.title}
-                  </Link>
-                </Button>
+                  {item.title}
+                </NavigationMenuTrigger>
+                <NavigationMenuContent className="bg-background dark:bg-card border border-border">
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                    {item.children.map((child) => (
+                      <DynamicListItem
+                        key={child.id}
+                        title={child.title}
+                        href={child.url}
+                        target={child.target}
+                        icon={child.icon}
+                      >
+                        {child?.shortDescription}
+                      </DynamicListItem>
+                    ))}
+                  </ul>
+                </NavigationMenuContent>
               </NavigationMenuItem>
             )
-          })}
-        </>
+          }
+
+          const isCurrentPage = pathname === item.url
+
+          return (
+            <NavigationMenuItem key={item.id}>
+              <Button
+                variant="ghost"
+                className={cn(
+                  'text-[15px] font-normal transition-colors',
+                  isCurrentPage && 'bg-accent text-accent-foreground'
+                )}
+                asChild
+              >
+                <Link href={item.url} target={item.target || '_self'}>
+                  {item.title}
+                </Link>
+              </Button>
+            </NavigationMenuItem>
+          )
+        })}
       </NavigationMenuList>
     </NavigationMenu>
   )
@@ -145,11 +144,11 @@ const DynamicListItem = React.forwardRef<
           target={target || '_self'}
           {...props}
         >
-          {icon ? (
+          {icon && (
             <div className="mb-2">
               <SVGIcon svgString={icon} />
             </div>
-          ) : null}
+          )}
           <div className="text-sm font-semibold leading-none text-center transition-colors">
             {title}
           </div>

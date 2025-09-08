@@ -69,8 +69,6 @@ export default function PaymentSuccessPage() {
       } else if (verificationResponse.data.status === 'COMPLETED') {
         toast.success('Payment verified successfully! Welcome to the course.')
 
-        //refetch the enrolledCorse from react query Tag
-
         // Auto redirect to dashboard after 3 seconds
         const timer = setTimeout(() => {
           // router.push('/dashboard')

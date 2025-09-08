@@ -108,10 +108,7 @@ export interface Review {
   reviewerName: string
   profile?: Profile
   designation?: string
-  createdAt: string
-  updatedAt: string
-  publishedAt: string | null
-  locale: string | null
+  course?: CourseBase
 }
 
 export interface Video {
@@ -230,6 +227,7 @@ export interface CourseBase {
   featured?: boolean
   totalStudents: number
   averageRating: number
+  isRegistrationEnabled: boolean
   totalLessons: number
   totalModules: number | null
   shortDescription: string

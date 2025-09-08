@@ -1,28 +1,33 @@
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-
 import BootcampAssessment from './bootcamp-assessment'
 import BootcampShortFeature from './bootcamp-short-feature'
-
+import { HeroButtonClient } from './bootcamp-hero-client'
 import {
   AssessmentQuiz,
   HeroLayoutContentSection,
 } from '@/types/bootcamp-page-types'
 import { VideoPlayer } from '../shared/video-player'
 import { AnimatedSection } from '../shared/animated-section'
-import DynamicIcon from '../shared/DynamicIcon'
 import { AnimatedAvatars } from '../shared/animated-avatars'
+import { CourseType } from '@/types/checkout-types'
 
 interface BootcampHeroProps {
   data: HeroLayoutContentSection
   assessmentData: AssessmentQuiz | null
-  slug: string
+  courseInfo: {
+    title: string
+    isRegistrationOpen: boolean
+    slug: string
+    price: number
+    courseType: CourseType
+    isEnrolled: boolean
+  }
 }
 
 export const BootcampHero = ({
   data,
   assessmentData,
-  slug,
+  courseInfo,
 }: BootcampHeroProps) => {
   // Extract data with fallbacks - processed on server
   const title = data?.title || 'Javascript Bootcamp'
@@ -41,14 +46,12 @@ export const BootcampHero = ({
   // Assessment Button
   const assessmentButton = buttons[1]
 
-  const enrollLabel = enrollButton?.btnLabel || 'Enroll Now'
-
   return (
     <div className="flex items-center justify-center">
       <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
         <div>
           <AnimatedSection animation="fadeInUp">
-            <Badge className="bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
+            <Badge className="bg-gradient-ninja-primary rounded-full py-1 border-none">
               {shortLabel}
             </Badge>
           </AnimatedSection>
@@ -66,27 +69,15 @@ export const BootcampHero = ({
             animation="fadeInUp"
             className="mt-12 flex items-center gap-4"
           >
-            <Button size="lg" className="rounded-full text-base">
-              <DynamicIcon
-                icon={
-                  enrollButton?.btnIcon || {
-                    iconName: 'mdi:wallet',
-                    width: 24,
-                    height: 24,
-                    iconData: '',
-                  }
-                }
-                className="!h-5 !w-5 transition-transform group-hover:translate-x-1"
-                width={24}
-                height={24}
-              />
-              {enrollLabel}
-            </Button>
+            <HeroButtonClient
+              enrollButton={enrollButton}
+              courseInfo={courseInfo}
+            />
 
             <BootcampAssessment
               btn={assessmentButton}
               data={assessmentData}
-              bootcampSlug={slug}
+              bootcampSlug={courseInfo?.slug}
             />
           </AnimatedSection>
 

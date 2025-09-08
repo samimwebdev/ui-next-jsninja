@@ -1,15 +1,20 @@
+'use client'
 import { Badge } from '@/components/ui/badge'
 import React from 'react'
 import { HeroMarquee } from './hero-marquee'
 import { HeroSectionData } from '@/types/home-page-types'
-import { HeroCTA } from '../shared/hero-cta'
 import { AnimatedAvatars } from '../shared/animated-avatars'
+import { CTAButtons } from '../shared/cta-buttons'
+import { useRouter } from 'next/navigation'
+import { useVideo } from '../context/video-provider'
 
 interface HeroSectionProps {
   data: HeroSectionData
 }
 
 export function HeroSection({ data: heroSectionData }: HeroSectionProps) {
+  const router = useRouter()
+  const { openVideo } = useVideo()
   // Ensure courses is always an array - processed on server
   const courses =
     Array.isArray(heroSectionData.courses) || heroSectionData.courses === null
@@ -32,7 +37,7 @@ export function HeroSection({ data: heroSectionData }: HeroSectionProps) {
             {heroSectionData.shortLabel}
           </Badge>
 
-          <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
+          <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight text-gradient-ninja">
             {heroSectionData.title}
           </h1>
 
@@ -42,9 +47,23 @@ export function HeroSection({ data: heroSectionData }: HeroSectionProps) {
 
           {/* Client component for interactive buttons */}
 
-          <HeroCTA
+          {/* <HeroCTA
             primaryBtnLink={'/courses'}
             videoUrl={heroSectionData.promoVideo}
+          /> */}
+
+          <CTAButtons
+            handleClick={() => {
+              // Handle primary button click
+              router.push('/courses')
+            }}
+            primaryLabel="Browse Courses"
+            isSecondaryBtn={true}
+            secondaryLabel="Watch Preview"
+            onPreviewClick={() => {
+              openVideo(heroSectionData.promoVideo)
+            }}
+            className="mt-8"
           />
 
           {/* Client component for animated avatars */}

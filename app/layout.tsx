@@ -63,6 +63,13 @@ export async function generateMetadata(): Promise<Metadata> {
         'Backend Development',
         'Full Stack Development',
       ],
+      icons: {
+        icon: [
+          { url: '/favicon.svg', type: 'image/svg+xml' },
+          { url: '/apple-touch-icon.png', sizes: '180x180' },
+        ],
+        apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
+      },
       robots: seo?.metaRobots || 'index, follow',
       openGraph: {
         type: 'website',
