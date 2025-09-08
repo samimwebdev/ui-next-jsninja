@@ -8,6 +8,11 @@ export async function getPageData(slug: string): Promise<PageResponse> {
       headers: {
         'Content-Type': 'application/json',
       },
+      cache: 'force-cache', // Use cache for static generation
+      next: {
+        revalidate: 3600, // Revalidate every hour
+        tags: ['pages'], // Optional: cache tags for better cache management
+      },
     })
     return data
   } catch (error) {
