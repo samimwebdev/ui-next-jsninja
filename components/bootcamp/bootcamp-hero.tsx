@@ -20,7 +20,6 @@ interface BootcampHeroProps {
     slug: string
     price: number
     courseType: CourseType
-    isEnrolled: boolean
   }
 }
 
@@ -31,9 +30,7 @@ export const BootcampHero = ({
 }: BootcampHeroProps) => {
   // Extract data with fallbacks - processed on server
   const title = data?.title || 'Javascript Bootcamp'
-  const description =
-    data?.shortDescription ||
-    'Explore a collection of Shadcn UI blocks and components, ready to preview and copy. Streamline your development workflow with easy-to-implement examples.'
+  const description = data?.shortDescription || 'Learn to code from scratch'
   const shortLabel = data?.shortLabel || 'Short Label'
   const videoUrl =
     data?.promoVideo || 'https://youtu.be/RGaW82k4dK4?feature=shared'

@@ -13,7 +13,6 @@ const tabItems = [
 ]
 
 export const CourseTabs: React.FC<{ data: CoursePageData }> = ({ data }) => {
-  console.log('CourseTabs data:', { data })
   const [activeTab, setActiveTab] = useState('overview')
 
   const handleTabChange = (value: string) => {

@@ -12,7 +12,6 @@ interface CourseHeroProps {
     price: number
     courseType: CourseType
     isRegistrationOpen: boolean
-    isEnrolled: boolean
   }
 }
 
@@ -27,21 +26,6 @@ export function CourseHero({ data, courseInfo }: CourseHeroProps) {
   const videoUrl =
     data?.promoVideo || 'https://youtu.be/e74rB-14-m8?feature=shared'
   const posterImage = data?.promoImage?.url
-
-  // // Generate enroll link from buttons data
-  // const enrollButton = data?.btn?.find(
-  //   (button) =>
-  //     button.btnLabel.toLowerCase().includes('enroll') ||
-  //     button.btnLabel.toLowerCase().includes('start')
-  // )
-
-  //enrollLink will be in this format checkout?courseSlug=mastering-java-script-1&courseType=course
-  // const enrollLink = `${
-  //   '/checkout?courseSlug=' +
-  //   slug +
-  //   '&courseType=' +
-  //   (courseInfo?.courseType || 'course')
-  // }`
 
   return (
     <div className="flex items-center justify-center">
@@ -59,7 +43,11 @@ export function CourseHero({ data, courseInfo }: CourseHeroProps) {
           <p className="mt-6 max-w-[60ch] text-lg">{description}</p>
 
           {/* Client component for interactive buttons only */}
-          <HeroCTA courseInfo={courseInfo} videoUrl={videoUrl} />
+          <HeroCTA
+            courseInfo={courseInfo}
+            videoUrl={videoUrl}
+            checkOnMount={true}
+          />
         </div>
 
         {/* Client component for video player */}

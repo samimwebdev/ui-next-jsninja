@@ -137,8 +137,6 @@ export function AssignmentSection({
     .split(',')
     .map((type) => type.trim()) || []) as SubmissionType[]
 
-  console.log(submissionTypes)
-
   const [githubRepo, setGithubRepo] = React.useState('')
   const [live, setLive] = React.useState('')
   const [code, setCode] = React.useState('')

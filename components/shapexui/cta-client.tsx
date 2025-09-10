@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { CallToActionContentSection } from '@/types/bootcamp-page-types'
@@ -8,7 +8,7 @@ import DynamicIcon from '../shared/DynamicIcon'
 import { getCleanText } from '@/lib/utils'
 import { CourseInfoType } from './cta'
 import { useRouter } from 'next/navigation'
-import { checkAuthAction } from '@/lib/actions/auth'
+import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 
 interface CTAClientWrapperProps {
   data: CallToActionContentSection
@@ -22,26 +22,29 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({
   isRegistrationOpen,
 }) => {
   const router = useRouter()
+  const { isEnrolled, checkEnrollment, checkAuthOnly } = useEnrollmentCheck()
 
-  const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
-  const courseViewLink = `/course-view/${courseInfo.slug}`
+  useEffect(() => {
+    checkEnrollment(courseInfo.slug)
+    checkAuthOnly()
+  }, [courseInfo.slug, checkEnrollment, checkAuthOnly])
 
   const handleClick = async () => {
-    // If user is already enrolled, go to course view
-    if (courseInfo.isEnrolled) {
-      router.push(courseViewLink)
+    // Check enrollment status first
+    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
+    const enrolled = await checkEnrollment(courseInfo.slug)
+    const auth = await checkAuthOnly()
+    if (!auth) {
+      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
       return
     }
 
-    // If registration is closed, do nothing
-    if (!isRegistrationOpen) return
-
-    // Check auth for enrollment
-    const isAuth = await checkAuthAction()
-    if (isAuth) {
-      router.push(enrollLink)
+    if (enrolled) {
+      // User is enrolled, go to course
+      router.push(`/course-view/${courseInfo.slug}`)
     } else {
-      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
+      // User not enrolled, go to checkout
+      router.push(enrollLink)
     }
   }
 
@@ -60,7 +63,7 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({
 
   // Determine button label and state
   const getButtonContent = () => {
-    if (courseInfo.isEnrolled) {
+    if (isEnrolled) {
       return {
         label: 'Access Course',
         icon: createFallbackIcon('mdi:play-circle'),

@@ -9,7 +9,6 @@ export interface CourseInfoType {
   price: number
   courseType: CourseType
   isRegistrationOpen: boolean
-  isEnrolled: boolean
 }
 
 const CallToAction: React.FC<{

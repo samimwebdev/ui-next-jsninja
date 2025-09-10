@@ -7,7 +7,6 @@ export async function trackExistingWatchedLesson(
   moduleId?: string,
   lessonId?: string
 ) {
-  console.log({ userId, courseId, moduleId, lessonId })
   // Simulate an API call to check if the lesson has been watched
   const token = await getAuthToken()
 
@@ -31,7 +30,6 @@ export async function trackExistingWatchedLesson(
       allowNotFound: true,
     })
 
-    console.log('Fetched data:', lessonProgress)
     if (lessonProgress.data) {
       return lessonProgress.data.lastPosition
     } else {

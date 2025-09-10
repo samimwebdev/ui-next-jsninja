@@ -2,7 +2,7 @@
 
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 
 interface AuthGuardProps {
@@ -16,16 +16,35 @@ export function AuthGuard({
   redirectTo = '/login',
   fallback,
 }: AuthGuardProps) {
-  const { data: user, isLoading, error } = useCurrentUser()
+  const { data: user, isLoading } = useCurrentUser()
   const router = useRouter()
+  const [hasRedirected, setHasRedirected] = useState(false)
 
   useEffect(() => {
-    if (!isLoading && !user && !error) {
-      router.push(redirectTo)
+    console.log(
+      user,
+      isLoading,
+      user,
+      hasRedirected,
+      'AuthGuard: User is authenticated'
+    )
+    if (!isLoading && !user && !hasRedirected) {
+      setHasRedirected(true)
+      // Preserve current URL for redirect after login
+      const currentUrl = window.location.pathname + window.location.search
+      const loginUrl = `${redirectTo}?redirect=${encodeURIComponent(
+        currentUrl
+      )}`
+      console.log(
+        'AuthGuard: Redirecting to login with redirect URL:',
+        loginUrl
+      )
+      router.push(loginUrl)
     }
-  }, [user, isLoading, error, router, redirectTo])
+  }, [user, isLoading, router, redirectTo, hasRedirected])
 
-  if (isLoading) {
+  // Show loading while checking authentication or during redirect
+  if (isLoading || !user) {
     return (
       fallback || (
         <div className="container mx-auto px-4 py-16 flex justify-center items-center min-h-[60vh]">
@@ -39,8 +58,9 @@ export function AuthGuard({
     )
   }
 
+  // Don't render children if user is not authenticated
   if (!user) {
-    return null // Will redirect via useEffect
+    return null
   }
 
   return <>{children}</>

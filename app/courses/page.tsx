@@ -20,7 +20,6 @@ async function getCoursesData(): Promise<CoursesApiResponse['data']> {
       cache: 'force-cache',
     })
 
-    console.log(response, 'Courses API response')
     if (!response?.data) {
       throw new Error('No courses data found')
     }

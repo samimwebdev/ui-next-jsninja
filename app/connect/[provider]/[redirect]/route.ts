@@ -38,7 +38,6 @@ export async function GET(
         documentId: string
       }
     }>(`/api/auth/${provider}/callback?access_token=${token}`)
-    console.log('Strapi response:', res)
 
     await setAuthCookie(res.jwt)
 

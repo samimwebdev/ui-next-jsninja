@@ -63,7 +63,6 @@ export function QuizSection({
     lessonDocumentId,
   })
 
-  console.log({ existingSubmission })
   // Use dynamic data or fallback
   const quizData = quiz || {
     id: 0,

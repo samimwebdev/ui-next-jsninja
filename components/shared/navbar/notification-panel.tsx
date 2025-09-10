@@ -193,7 +193,6 @@ export function NotificationPanel() {
 
   const notifications = notificationsData?.data || []
 
-  console.log({ notifications })
   const unreadCount = notifications.filter((n) => !n.isRead).length
   const filteredNotifications =
     activeTab === 'all' ? notifications : notifications.filter((n) => !n.isRead)

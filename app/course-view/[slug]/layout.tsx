@@ -25,7 +25,6 @@ interface CourseErrorResponse {
 function isNextRedirectError(
   error: unknown
 ): error is Error & { digest: string } {
-  console.log({ error }, 'isNextRedirectError')
   return (
     error instanceof Error &&
     'digest' in error &&
@@ -49,7 +48,6 @@ async function CourseViewLayout({
     const securityCheck = await checkUserSecurity(slug)
 
     if (!securityCheck.allowed) {
-      console.log('Security check failed, redirecting:', securityCheck.message)
       redirect(
         `/dashboard?error=${encodeURIComponent(
           securityCheck.message || 'Access denied'
@@ -78,8 +76,6 @@ async function CourseViewLayout({
 
     // Check if response has error property using proper type checking
     if ('error' in response && response.error) {
-      console.log('Course API returned error:', response.error)
-
       // Handle specific error statuses
       if (response.error.status === 404) {
         redirect(`/dashboard?error=${encodeURIComponent('Course not found.')}`)

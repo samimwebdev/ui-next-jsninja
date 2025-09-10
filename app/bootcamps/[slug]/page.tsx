@@ -16,8 +16,8 @@ import { getBootcampContentSection } from '@/lib/bootcamp-utils'
 import { getBootcampData } from '@/lib/bootcamp'
 import { BootcampAuthor } from '@/components/bootcamp/bootcamp-author'
 import { generateSEOMetadata } from '@/lib/seo'
-import { fetchEnrolledCourses } from '@/lib/actions/enrolled-courses'
-import { EnrolledCoursesResponse } from '@/types/dashboard-types'
+import { BootcampPageData } from '@/types/bootcamp-page-types'
+import { notFound } from 'next/navigation'
 
 interface BootcampPageProps {
   params: Promise<{
@@ -29,7 +29,13 @@ interface BootcampPageProps {
 export async function generateMetadata({ params }: BootcampPageProps) {
   const { slug } = await params
   try {
-    const bootcampData = await getBootcampData(slug)
+    let bootcampData: BootcampPageData
+    try {
+      bootcampData = await getBootcampData(slug)
+    } catch (error) {
+      console.error('Error fetching bootcamp data:', error)
+      notFound()
+    }
 
     return generateSEOMetadata(
       bootcampData.baseContent?.seo,
@@ -60,24 +66,6 @@ export default async function BootcampPage({
   const { slug } = await params
   const bootcampData = await getBootcampData(slug)
 
-  // Safely fetch enrolled courses - returns null if user not logged in
-  let enrolledCourses: EnrolledCoursesResponse | null = null
-  try {
-    enrolledCourses = await fetchEnrolledCourses({ isPublicPage: true })
-  } catch (error) {
-    console.error('Error fetching enrolled courses:', error)
-    // Continue with enrolledCourses as null
-  }
-
-  // Safely extract courses - default to empty array if no data
-  const courses = enrolledCourses?.data
-    ? [...enrolledCourses.data.courses, ...enrolledCourses.data.bootcamps]
-    : []
-
-  // Check if the user is enrolled in this bootcamp
-  const isEnrolled = courses.some(
-    (course) => course.slug === slug && course.isExpired === false
-  )
   // Extract content sections from contentBlock
   const overviewData = getBootcampContentSection(
     bootcampData,
@@ -136,7 +124,6 @@ export default async function BootcampPage({
     price: bootcampData.baseContent?.price,
     courseType: bootcampData.baseContent?.courseType,
     isRegistrationOpen: bootcampData.baseContent?.isRegistrationEnabled ?? true,
-    isEnrolled: isEnrolled, // Will be false if user not logged in
   }
 
   return (

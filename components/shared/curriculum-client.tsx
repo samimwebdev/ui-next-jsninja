@@ -52,10 +52,6 @@ export const CurriculumClient: React.FC<{
         return
       }
 
-      // Debug logging
-      console.log('Opening video for lesson:', lesson.title)
-      console.log('Video URL/HTML:', lesson.videoUrl)
-
       try {
         openVideo(lesson.videoUrl)
       } catch (error) {

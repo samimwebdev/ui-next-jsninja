@@ -13,7 +13,6 @@ export const BootcampPricing: React.FC<{
     price: number
     courseType: string
     isRegistrationOpen: boolean
-    isEnrolled: boolean
   }
 }> = ({ data, courseInfo }) => {
   // Server-side HTML parsing using cheerio-like approach or regex

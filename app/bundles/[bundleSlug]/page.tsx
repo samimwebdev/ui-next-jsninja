@@ -135,8 +135,6 @@ export default async function CourseBundlePage({
     if (!bundleData) {
       notFound()
     }
-
-    console.log('Course Bundle Data:', JSON.stringify(bundleData, null, 2))
   } catch (error) {
     console.error('Failed to fetch course bundle data:', error)
     return <BundleError />

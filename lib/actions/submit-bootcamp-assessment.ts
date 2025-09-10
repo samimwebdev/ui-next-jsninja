@@ -33,8 +33,6 @@ export async function submitBootcampAssessment(
       }
     }
 
-    console.log('Server: Submitting bootcamp assessment for:', bootcampSlug)
-
     const results = await strapiFetch<QuizSubmissionResponse>(
       `/api/bootcamps/${bootcampSlug}/assessment-quiz`,
       {
@@ -46,8 +44,6 @@ export async function submitBootcampAssessment(
         },
       }
     )
-
-    console.log('Server: Assessment submission successful')
 
     return {
       success: true,

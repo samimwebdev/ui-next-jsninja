@@ -11,7 +11,6 @@ interface CourseSidebarProps {
     features: string[]
     slug: string
     isRegistrationOpen: boolean
-    isEnrolled: boolean
   }
 }
 
@@ -31,7 +30,12 @@ export function CoursePriceSidebar({ courseInfo }: CourseSidebarProps) {
 
       <div className="mt-6">
         <div className="text-3xl font-bold mb-4">{formatPrice(price)}</div>
-        <GenericButton courseInfo={courseInfo} className="w-full" />
+        <GenericButton
+          courseInfo={courseInfo}
+          className="w-full"
+          label="Enroll Now"
+          checkOnMount={true}
+        />
       </div>
     </div>
   )

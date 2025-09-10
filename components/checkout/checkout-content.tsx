@@ -1,14 +1,14 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
 import { AuthGuard } from '@/components/auth/auth-guard'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useCheckoutCourse } from '@/hooks/use-checkout-course'
 import { fetchEnrolledCourses } from '@/lib/actions/enrolled-courses'
 import { CourseType } from '@/types/checkout-types'
-import { CheckoutPageSkeleton } from './checkout-skeleton'
+import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import { CheckoutError } from './checkout-error'
+import { CheckoutPageSkeleton } from './checkout-skeleton'
 import { CheckoutSummary } from './checkout-summary'
 
 export function CheckoutContent() {
@@ -16,21 +16,25 @@ export function CheckoutContent() {
   const courseSlug = searchParams.get('courseSlug')
   const courseType = searchParams.get('courseType') as CourseType | null
 
-  const { data: user } = useCurrentUser()
+  const { data: user, isLoading: userLoading } = useCurrentUser()
+
+  // Only fetch course data if user is authenticated
+  const {
+    data: courseResponse,
+    isLoading: courseLoading,
+    error,
+    isError,
+  } = useCheckoutCourse(courseSlug, courseType, {
+    enabled: !!user && !!courseSlug && !!courseType, // Only run when user is authenticated
+  })
 
   const { data: enrolledCourseResponse } = useQuery({
     queryKey: ['enrolledCourses'],
     queryFn: () => fetchEnrolledCourses({ isPublicPage: true }),
+    enabled: !!user, // Only run when user is authenticated
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   })
-
-  const {
-    data: courseResponse,
-    isLoading,
-    error,
-    isError,
-  } = useCheckoutCourse(courseSlug, courseType)
 
   // Check enrollment status
   const enrolledCourses = enrolledCourseResponse?.data
@@ -44,22 +48,28 @@ export function CheckoutContent() {
     (course) => course.slug === courseSlug && course.isExpired === false
   )
 
-  if (isLoading) {
+  // Show loading while checking authentication or fetching course data
+  if (userLoading || (user && courseLoading)) {
     return <CheckoutPageSkeleton />
   }
 
-  if (isError || !courseResponse?.data) {
+  // If user is authenticated but there's an error fetching course data
+  if (user && (isError || !courseResponse?.data)) {
     return <CheckoutError error={error} />
   }
 
   return (
-    <AuthGuard redirectTo="/login">
-      <CheckoutSummary
-        course={courseResponse.data}
-        courseType={courseType}
-        user={user}
-        isEnrolled={isEnrolled}
-      />
+    <AuthGuard redirectTo="/login" fallback={<CheckoutPageSkeleton />}>
+      {user && courseResponse?.data ? (
+        <CheckoutSummary
+          course={courseResponse.data}
+          courseType={courseType}
+          user={user}
+          isEnrolled={isEnrolled}
+        />
+      ) : (
+        <CheckoutPageSkeleton />
+      )}
     </AuthGuard>
   )
 }

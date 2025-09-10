@@ -56,8 +56,6 @@ export async function checkUserSecurity(courseSlug: string): Promise<{
       returnErrorResponse: true, // Return error responses instead of throwing
     })
 
-    console.log('Security response:', securityResponse)
-
     // Check if response has error property (this will now include 403, 404, etc.)
     if ('error' in securityResponse && securityResponse.error) {
       // Check for 404 (user not found - first time access)

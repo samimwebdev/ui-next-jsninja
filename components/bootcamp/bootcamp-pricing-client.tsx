@@ -3,8 +3,9 @@
 import { Button } from '@/components/ui/button'
 import DynamicIcon from '@/components/shared/DynamicIcon'
 import { StrapiIcon } from '@/types/shared-types'
-import { isAuthenticated } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
+import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
+import { useEffect } from 'react'
 
 interface PricingPackageData {
   id: number
@@ -25,7 +26,6 @@ interface PricingClientWrapperProps {
     slug: string
     courseType: string
     isRegistrationOpen: boolean
-    isEnrolled: boolean
   }
 }
 
@@ -35,27 +35,30 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
 }) => {
   const router = useRouter()
 
-  const { isEnrolled, isRegistrationOpen, slug, courseType } = courseInfo
+  const { isRegistrationOpen, slug } = courseInfo
+  const { isEnrolled, checkEnrollment, checkAuthOnly } = useEnrollmentCheck()
 
-  const enrollLink = `/checkout?courseSlug=${slug}&courseType=${courseType}`
-  const courseViewLink = `/course-view/${slug}`
+  useEffect(() => {
+    checkEnrollment(slug)
+    checkAuthOnly()
+  }, [slug, checkEnrollment, checkAuthOnly])
 
   const handleClick = async () => {
-    // If user is already enrolled, go to course view
-    if (isEnrolled) {
-      router.push(courseViewLink)
+    // Check enrollment status first
+    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
+    const enrolled = await checkEnrollment(courseInfo.slug)
+    const auth = await checkAuthOnly()
+    if (!auth) {
+      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
       return
     }
 
-    // If registration is closed, do nothing
-    if (!isRegistrationOpen) return
-
-    // Check auth for enrollment
-    const isAuth = await isAuthenticated()
-    if (isAuth) {
-      router.push(enrollLink)
+    if (enrolled) {
+      // User is enrolled, go to course
+      router.push(`/course-view/${courseInfo.slug}`)
     } else {
-      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
+      // User not enrolled, go to checkout
+      router.push(enrollLink)
     }
   }
 

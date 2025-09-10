@@ -23,8 +23,6 @@ export function SecurityTracker({ courseSlug }: SecurityTrackerProps) {
 
   const sendSecurityDataAndCheck = async (fingerprintId: string) => {
     try {
-      console.log('Client: Collecting browser data and sending to server')
-
       // Get browser data
       const browserData = {
         userAgent: navigator.userAgent,
@@ -103,14 +101,10 @@ export function SecurityTracker({ courseSlug }: SecurityTrackerProps) {
     hasInitialized.current = true
 
     try {
-      console.log('Client: Initializing security tracking')
-
       // Initialize FingerprintJS
       const fp = await FingerprintJS.load()
       const result = await fp.get()
       const fingerprintId = `fp_${result.visitorId}`
-
-      console.log('Client: Generated fingerprint ID:', fingerprintId)
 
       // Send tracking data and check security status
       await sendSecurityDataAndCheck(fingerprintId)
@@ -140,7 +134,7 @@ export function SecurityTracker({ courseSlug }: SecurityTrackerProps) {
         !hasTrackedSession.current
       ) {
         // User returned to tab, reinitialize if not already tracked in this session
-        console.log('Client: Tab became visible, reinitializing security')
+
         initializeSecurity()
       }
     }

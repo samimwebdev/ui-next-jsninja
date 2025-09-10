@@ -13,6 +13,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { loginAction } from '../actions'
 import { loginSchema } from '@/lib/validation'
+import { useQueryClient } from '@tanstack/react-query'
 
 type FormData = {
   identifier: string
@@ -32,10 +33,13 @@ const Login = () => {
     success: false,
   } as ActionState)
 
+  const queryClient = useQueryClient()
+
   const [isVisible, setIsVisible] = React.useState<boolean>(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectPath = searchParams.get('redirect') || '/dashboard' //
+  console.log({ redirectPath })
 
   const {
     register,
@@ -85,13 +89,20 @@ const Login = () => {
   // Redirect after successful login
   useEffect(() => {
     if (state.success) {
-      const timer = setTimeout(() => {
-        router.push(redirectPath)
-      }, 1500)
-
-      return () => clearTimeout(timer)
+      // Invalidate user cache to force refetch
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] })
+      // queryClient.invalidateQueries({ queryKey: ['enrolledCourses'] })
+      // Small delay to let cache invalidation happen
+      setTimeout(() => {
+        if (redirectPath) {
+          console.log('Redirecting to:', redirectPath)
+          window.location.href = redirectPath
+        } else {
+          router.push('/dashboard')
+        }
+      }, 200)
     }
-  }, [state.success, router, redirectPath])
+  }, [state.success, router, redirectPath, queryClient])
 
   return (
     <div className="h-screen flex items-center justify-center">

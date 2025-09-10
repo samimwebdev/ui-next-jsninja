@@ -218,6 +218,7 @@ export async function loginAction(
 }
 
 export async function logoutAction() {
+  'use server'
   await clearAuthCookie()
   revalidatePath('/')
   redirect('/login')
@@ -396,8 +397,6 @@ export async function updateProfileAction(
       headers,
       body: requestBody,
     })
-
-    // console.log({ response }, 'Profile update response')
 
     revalidatePath('/dashboard')
 

@@ -26,7 +26,6 @@ export async function strapiFetch<T>(
   } = options
 
   try {
-    console.log(`Fetching API endpoint: ${STRAPI}${path}`)
     const res = await fetch(`${STRAPI}${path}`, {
       headers: {
         'Content-Type': 'application/json',
