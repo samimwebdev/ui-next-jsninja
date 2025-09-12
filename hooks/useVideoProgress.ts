@@ -6,7 +6,7 @@ import { Player } from 'player.js'
 import {
   updateLessonProgress,
   type LessonProgressPayload,
-} from '@/lib/user-progress'
+} from '@/lib/actions/user-progress'
 
 interface UseVideoProgressOptions {
   lectureId: string

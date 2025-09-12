@@ -1,4 +1,3 @@
-// lib/actions/course-stats.ts
 'use server'
 
 import { CourseStatsResponse } from '@/types/dashboard-types'

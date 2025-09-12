@@ -1,7 +1,9 @@
 import DynamicIcon from '@/components/shared/DynamicIcon'
 import Link from 'next/link'
 import { BootcampStepsContentSection } from '@/types/bootcamp-page-types'
-import { StepsClient } from './steps-client'
+import { StepsLazy } from './steps-lazy'
+import { Suspense } from 'react'
+import { StepsClientSkeleton } from './steps-lazy'
 
 const Steps: React.FC<{ data: BootcampStepsContentSection }> = ({ data }) => {
   const steps = data.stepSection.map((step, index) => ({
@@ -37,11 +39,15 @@ const Steps: React.FC<{ data: BootcampStepsContentSection }> = ({ data }) => {
           </Link>
         )}
       </div>
-      <StepsClient
-        secondaryHeading={data.secondaryHeading}
-        secondaryDescription={data.secondaryDescription}
-        steps={steps}
-      />
+
+      {/* Lazy-loaded interactive steps component */}
+      <Suspense fallback={<StepsClientSkeleton />}>
+        <StepsLazy
+          secondaryHeading={data.secondaryHeading}
+          secondaryDescription={data.secondaryDescription}
+          steps={steps}
+        />
+      </Suspense>
     </div>
   )
 }

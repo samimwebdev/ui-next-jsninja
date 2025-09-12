@@ -19,11 +19,79 @@ import { AnimatedSection } from '@/components/shared/animated-section'
 import { notFound } from 'next/navigation'
 import { Curriculum } from '@/types/shared-types'
 import { CoursePageData } from '@/types/course-page-types'
+import { strapiFetch } from '@/lib/strapi'
 
 interface CoursePageProps {
   params: Promise<{
     slug: string
   }>
+}
+
+// Generate static params for all course pages
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  try {
+    console.log('🚀 Generating static params for courses...')
+
+    // Fetch all course slugs - data structure is different than expected
+    const response = await strapiFetch<{
+      data: {
+        course: Array<{
+          slug: string
+          title: string
+          isRegistrationEnabled?: boolean
+          courseType?: string
+        }>
+        bootcamp: Array<{
+          slug: string
+          title: string
+          isRegistrationEnabled?: boolean
+          courseType?: string
+        }>
+        courseBundle: Array<{
+          slug: string
+          title: string
+        }>
+      }
+    }>('/api/courses', {
+      next: {
+        revalidate: 3600, // Revalidate every hour
+      },
+    })
+
+    if (!response?.data?.course) {
+      console.warn('No course data found for static generation')
+      return []
+    }
+
+    // Filter and extract slugs from course array
+    const validCourses = response.data.course.filter((course) => {
+      const hasSlug = course.slug
+
+      if (!hasSlug) {
+        console.warn(`Course "${course.title || 'Unknown'}" missing slug`)
+        return false
+      }
+
+      return hasSlug
+    })
+
+    console.log(
+      `✅ Generating ${validCourses.length} course pages out of ${response.data.course.length} total`
+    )
+
+    return validCourses.map((course) => {
+      console.log(`📄 Static page for: ${course.slug} (${course.title})`)
+      return {
+        slug: course.slug, // Direct access to slug property
+      }
+    })
+  } catch (error) {
+    console.error(
+      '❌ Error fetching course slugs for static generation:',
+      error
+    )
+    return []
+  }
 }
 
 // Helper function to sanitize curriculum data
@@ -49,6 +117,7 @@ const sanitizeCurriculumData = (curriculum: Curriculum): Curriculum => {
 export async function generateMetadata({ params }: CoursePageProps) {
   const { slug } = await params
   try {
+    console.log('🔍 Generating metadata for course:', slug)
     const courseData = await getCourseData(slug)
 
     return generateSEOMetadata(
@@ -62,7 +131,7 @@ export async function generateMetadata({ params }: CoursePageProps) {
       }
     )
   } catch (error) {
-    console.error('Error generating course metadata:', error)
+    console.error('❌ Error generating course metadata:', error)
     return generateSEOMetadata(
       undefined,
       { title: 'Course Not Found' },
@@ -74,12 +143,14 @@ export async function generateMetadata({ params }: CoursePageProps) {
 // Server Component
 export default async function CoursePage({ params }: CoursePageProps) {
   const { slug } = await params
+  console.log('🔥 Statically generating course page for:', slug)
+
   let courseData: CoursePageData
 
   try {
     courseData = await getCourseData(slug)
   } catch (error) {
-    console.error('Failed to fetch course data:', error)
+    console.error('❌ Failed to fetch course data:', error)
     notFound()
   }
 
@@ -138,7 +209,6 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
-
             {courseData && (
               <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
                 {/* Course Tabs - Server Component with Animation */}
@@ -219,11 +289,4 @@ export default async function CoursePage({ params }: CoursePageProps) {
       </div>
     </>
   )
-}
-
-// Generate static params for SSG (optional)
-export async function generateStaticParams() {
-  // You can fetch course slugs here for SSG
-  // For now, we'll use ISR
-  return []
 }

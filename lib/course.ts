@@ -8,12 +8,11 @@ export async function getCourseData(slug: string): Promise<CoursePageData> {
       {
         next: {
           revalidate: 3600, // Revalidate every hour
-          tags: ['course-page', `course-${slug}`],
+          tags: ['courses-page', `course-${slug}`],
         },
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'force-cache',
       }
     )
 

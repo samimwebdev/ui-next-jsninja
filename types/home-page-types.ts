@@ -16,21 +16,23 @@ import {
 export interface Course {
   id: number
   documentId: string
-  title: string
-  shortDescription?: string
-  longDescription?: string
-  startingFrom?: string
-  slug: string
-  price: number
-  level: string
-  totalStudents: number
-  averageRating: number
-  duration: number | string
-  totalLessons: number
-  courseType?: 'course' | 'bootcamp' | 'workshop'
-  featureImage?: StrapiImage
-  categories: Category[]
-  browseCoursesBtn?: ButtonType
+  baseContent: {
+    title: string
+    shortDescription?: string
+    longDescription?: string
+    startingFrom?: string
+    slug: string
+    price: number
+    level: string
+    totalStudents: number
+    averageRating: number
+    duration: number | string
+    totalLessons: number
+    courseType?: 'course' | 'bootcamp' | 'workshop'
+    featureImage?: StrapiImage
+    categories: Category[]
+    browseCoursesBtn?: ButtonType
+  }
 }
 
 export interface HeroSectionData {
@@ -77,7 +79,7 @@ export interface CourseSectionData {
   __component: 'home-layout.feature-course'
   title: string
   description: string
-  courseBases: Course[]
+  courses: Course[]
 }
 
 export interface BootcampSectionData {
@@ -86,7 +88,7 @@ export interface BootcampSectionData {
   title: string
   description: string
   browseCoursesBtn: ButtonType
-  courseBases: Course[]
+  bootcamps: Course[]
 }
 
 export interface ReviewSectionData {

@@ -123,7 +123,7 @@ export default function LeaderboardPage() {
     error: coursesError,
   } = useQuery({
     queryKey: ['enrolledCourses'],
-    queryFn: fetchEnrolledCourses,
+    queryFn: () => fetchEnrolledCourses({ isPublicPage: false }),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   })
@@ -149,9 +149,20 @@ export default function LeaderboardPage() {
     enabled: !!selectedCourseId,
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    retry: 0,
+    retry: (failureCount, error) => {
+      console.log('Leaderboard fetch error:', error)
+      // Don't retry if it's a "not available" error
+      if (
+        error instanceof Error &&
+        error.message.includes('only available for bootcamps')
+      ) {
+        return false
+      }
+      return failureCount < 2
+    },
   })
 
+  console.log({ leaderboardData })
   // Show courses loading state
   if (!courses.length && !coursesLoading) {
     return (
@@ -214,6 +225,7 @@ export default function LeaderboardPage() {
 
   const currentUserStats = leaderboardData?.data?.userScoreboard
   const leaderboard = leaderboardData?.data?.leaderboard || []
+  console.log({ leaderboardData })
 
   // Check if leaderboard is not available (API returned null data)
   const isLeaderboardNotAvailable =

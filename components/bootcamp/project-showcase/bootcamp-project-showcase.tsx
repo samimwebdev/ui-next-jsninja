@@ -1,8 +1,10 @@
 import { ProjectShowcaseContentSection } from '@/types/bootcamp-page-types'
-import { ProjectShowcaseClient } from './bootcamp-project-showcase-client'
+import { ProjectShowcaseLazy } from './bootcamp-project-showcase-lazy'
 import { extractFeatures, getCleanText } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
+import { Suspense } from 'react'
+import { ProjectShowcaseSkeleton } from './bootcamp-project-showcase-lazy'
 
 export const BootcampProjectShowcase: React.FC<{
   data: ProjectShowcaseContentSection
@@ -26,37 +28,44 @@ export const BootcampProjectShowcase: React.FC<{
         </h2>
         <p className="text-muted-foreground text-lg">{data.description}</p>
       </div>
-      {/* SSR fallback grid */}
-      {/* SSR: Show static grid for no-JS users */}
-      <div className="hidden noscript:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {projectsData.slice(0, 6).map((project) => (
-          <div key={project.id} className="bg-card rounded-lg overflow-hidden">
-            <Image
-              src={project.image?.url || '/placeholder.svg'}
-              alt={project.title}
-              className="w-full h-[200px] object-cover"
-              width="300"
-              height="200"
-            />
-            <div className="p-4">
-              <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                {project.cleanDescription.substring(0, 100)}...
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {project.technologies.map((tech, index) => (
-                  <Badge key={index} variant="secondary">
-                    {tech}
-                  </Badge>
-                ))}
+
+      {/* SSR fallback grid for no-JS users */}
+      <noscript>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {projectsData.slice(0, 6).map((project) => (
+            <div
+              key={project.id}
+              className="bg-card rounded-lg overflow-hidden border"
+            >
+              <Image
+                src={project.image?.url || '/placeholder.svg'}
+                alt={project.title}
+                className="w-full h-[200px] object-cover"
+                width="300"
+                height="200"
+              />
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  {project.cleanDescription.substring(0, 100)}...
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {project.technologies.map((tech, index) => (
+                    <Badge key={index} variant="secondary">
+                      {tech}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </noscript>
 
-      {/* Client Masonry enhancement */}
-      <ProjectShowcaseClient projectsData={projectsData} />
+      {/* Lazy-loaded Masonry enhancement */}
+      <Suspense fallback={<ProjectShowcaseSkeleton />}>
+        <ProjectShowcaseLazy projectsData={projectsData} />
+      </Suspense>
     </section>
   )
 }

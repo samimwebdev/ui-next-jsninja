@@ -8,12 +8,11 @@ export async function getBootcampData(slug: string): Promise<BootcampPageData> {
       {
         next: {
           revalidate: 3600, // Revalidate every hour
-          tags: ['course-page', `course-${slug}`],
+          tags: ['bootcamp-page', `bootcamp-${slug}`],
         },
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'force-cache',
       }
     )
 

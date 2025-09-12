@@ -1,7 +1,9 @@
 import { Card } from '@/components/ui/card'
 import { BootcampOverviewContentSection } from '@/types/bootcamp-page-types'
 import DynamicIcon from '@/components/shared/DynamicIcon'
-import { BootcampOverviewClient } from './bootcamp-overview-client'
+import { BootcampOverviewLazy } from './bootcamp-overview-lazy'
+import { Suspense } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 // Static Section Component for SSR
 const StaticSection: React.FC<{
@@ -41,6 +43,22 @@ const StaticSection: React.FC<{
   </div>
 )
 
+// Fallback skeleton for the sidebar
+const SidebarSkeleton = () => (
+  <Card className="overflow-hidden">
+    <div className="flex flex-col h-auto bg-card dark:bg-card p-2 space-y-2">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="w-full p-4 space-y-2">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-5 w-5 rounded" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+      ))}
+    </div>
+  </Card>
+)
+
 // Main SSR Component
 export const BootcampOverview: React.FC<{
   data: BootcampOverviewContentSection
@@ -69,15 +87,17 @@ export const BootcampOverview: React.FC<{
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-8 mt-16">
-        {/* Left Sidebar - Enhanced with client functionality */}
+        {/* Left Sidebar - Lazy loaded with enhanced client functionality */}
         <div className="md:sticky md:top-24 h-fit">
-          <BootcampOverviewClient
-            sections={processedSections}
-            defaultActiveSection={sectionKeys[0] || ''}
-          />
+          <Suspense fallback={<SidebarSkeleton />}>
+            <BootcampOverviewLazy
+              sections={processedSections}
+              defaultActiveSection={sectionKeys[0] || ''}
+            />
+          </Suspense>
         </div>
 
-        {/* Right Content - Static sections with client enhancements */}
+        {/* Right Content - Static sections (SSR) */}
         <Card className="p-8 relative">
           <div className="space-y-16">
             {data.sections.map((section) => {

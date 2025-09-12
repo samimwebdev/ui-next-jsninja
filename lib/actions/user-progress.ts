@@ -1,7 +1,7 @@
 'use server'
 
 import { strapiFetch } from '@/lib/strapi'
-import { getAuthToken } from './auth'
+import { getAuthToken } from '../auth'
 
 export interface LessonProgressPayload {
   startedAt: string

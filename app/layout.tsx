@@ -12,7 +12,7 @@ import { strapiFetch } from '@/lib/strapi'
 import { Menu, SEOData, StrapiImage } from '@/types/shared-types'
 
 import ReactQueryProvider from '@/components/context/react-query-provider'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ['latin', 'bengali'],
@@ -41,7 +41,6 @@ export async function generateMetadata(): Promise<Metadata> {
       '/api/setting?populate=*',
       {
         headers: { 'Content-Type': 'application/json' },
-        cache: 'force-cache',
       }
     )
     const seo = setting?.seo
@@ -132,7 +131,6 @@ export default async function RootLayout({
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
     }
   )
 
@@ -141,7 +139,6 @@ export default async function RootLayout({
     '/api/setting?populate=*',
     {
       headers: { 'Content-Type': 'application/json' },
-      cache: 'force-cache',
     }
   )
   const logo = setting?.logo
@@ -156,7 +153,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <ReactQueryProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
+          {/* <ReactQueryDevto  ols initialIsOpen={false} /> */}
           <AuthProvider user={currentUser}>
             <ThemeProvider
               attribute="class"

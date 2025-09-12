@@ -7,6 +7,7 @@ import { RelatedBlogsSection } from '@/components/blog/related-blogs-section'
 import { BlogDetailSkeleton } from '@/components/blog/blog-detail-skeleton'
 import { RelatedBlogsSkeleton } from '@/components/blog/related-blogs-skeleton'
 import { BlogPost } from '@/types/blog-types'
+import { strapiFetch } from '@/lib/strapi'
 
 interface BlogPageProps {
   params: Promise<{
@@ -112,9 +113,56 @@ async function RelatedBlogsWrapper({ slug }: { slug: string }) {
   return <RelatedBlogsSection blogs={relatedBlogs} />
 }
 
-// Generate static params for popular blogs (optional)
-export async function generateStaticParams() {
-  // You can fetch popular blog slugs here for SSG
-  // For now, we'll use ISR
-  return []
+// Generate static params for all blog pages
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  try {
+    console.log('🚀 Generating static params for blogs...')
+
+    // Fetch all blog slugs for SSG
+    const response = await strapiFetch<{
+      data: Array<{
+        slug: string
+        title: string
+        publishedDate?: string
+      }>
+    }>(
+      '/api/blogs?fields[0]=slug&fields[1]=title&fields[2]=publishedDate&pagination[limit]=100&sort[0]=publishedDate:desc',
+      {
+        next: {
+          revalidate: 3600, // Revalidate every hour
+        },
+      }
+    )
+
+    if (!response?.data) {
+      console.warn('No blog data found for static generation')
+      return []
+    }
+
+    // Filter and extract slugs
+    const validBlogs = response.data.filter((blog) => {
+      const hasSlug = blog.slug
+
+      if (!hasSlug) {
+        console.warn(`Blog "${blog.title || 'Unknown'}" missing slug`)
+        return false
+      }
+
+      return hasSlug
+    })
+
+    console.log(
+      `✅ Generating ${validBlogs.length} blog pages out of ${response.data.length} total`
+    )
+
+    return validBlogs.map((blog) => {
+      console.log(`📄 Static page for: ${blog.slug} (${blog.title})`)
+      return {
+        slug: blog.slug,
+      }
+    })
+  } catch (error) {
+    console.error('❌ Error fetching blog slugs for static generation:', error)
+    return []
+  }
 }

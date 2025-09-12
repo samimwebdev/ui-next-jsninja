@@ -16,9 +16,10 @@ interface ProfileData {
 }
 
 export const dynamic = 'force-dynamic' // defaults to auto
+
 export async function GET(
   request: Request,
-  params: { params: { provider: string } }
+  context: { params: Promise<{ provider: string; redirect: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url)
@@ -26,7 +27,8 @@ export async function GET(
 
     if (!token) return NextResponse.redirect(new URL('/', request.url))
 
-    const { provider } = await params.params
+    // Await the params Promise to get the actual params object
+    const { provider } = await context.params
 
     // Exchange access token with Strapi
     const res = await strapiFetch<{
@@ -61,6 +63,7 @@ export async function GET(
     })
 
     console.log('Existing profile:', existingProfile)
+    
     // Only create profile if it doesn't exist
     if (!existingProfile.data || existingProfile.data.length === 0) {
       // Fetch user details from GitHub

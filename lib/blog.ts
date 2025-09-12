@@ -8,12 +8,11 @@ export async function getBlogData(
     const response = await strapiFetch<BlogApiResponse>(`/api/blogs/${slug}`, {
       next: {
         revalidate: 3600, // Revalidate every hour
-        tags: ['blog', `blog-${slug}`],
+        tags: ['blogs', `blog-${slug}`],
       },
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'force-cache',
     })
 
     if (!response.data) {
@@ -33,22 +32,21 @@ export async function getAllBlogs(
   category?: string
 ): Promise<BlogsListApiResponse> {
   try {
-    let url = `/api/blogs?populate=*&pagination[page]=${page}&pagination[pageSize]=${pageSize}&sort=publishedDate:desc`
+    let url = `/api/blogs?populate=categories&pagination[page]=${page}&pagination[pageSize]=${pageSize}&sort=publishedDate:desc`
 
-    // Add category filter if provided
+    //  Add category filter if provided
     if (category) {
       url += `&filters[categories][name][$eq]=${encodeURIComponent(category)}`
     }
 
     const response = await strapiFetch<BlogsListApiResponse>(url, {
       next: {
-        revalidate: 1800, // Revalidate every 30 minutes
-        tags: ['blogs', 'blogs-list', category ? `category-${category}` : ''],
+        revalidate: 3600, // Revalidate every hour
+        tags: ['blogs'],
       },
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'force-cache',
     })
 
     return response
@@ -58,37 +56,54 @@ export async function getAllBlogs(
   }
 }
 
-export async function getBlogCategories(): Promise<
-  { name: string; totalPosts: number; slug: string }[]
-> {
+// Extract categories from blog data instead of making separate API call
+export function extractCategoriesFromBlogs(
+  blogs: BlogsListApiResponse['data']
+): Array<{ name: string; totalPosts: number; slug: string }> {
   try {
-    const response = await strapiFetch<{
-      data: Array<{
-        id: number
-        documentId: string
-        name: string
-        slug: string
-        description: string
-        blogs?: Array<{ id: number }>
-      }>
-    }>(`/api/categories?populate=blogs`, {
-      next: {
-        revalidate: 3600, // Revalidate every hour
-        tags: ['categories', 'blog-categories'],
-      },
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      cache: 'force-cache',
+    if (!blogs || blogs.length === 0) {
+      return []
+    }
+
+    const categoryMap = new Map<
+      string,
+      { name: string; slug: string; count: number }
+    >()
+
+    // Iterate through all blogs and collect categories
+    blogs.forEach((blog) => {
+      if (blog?.categories && Array.isArray(blog.categories)) {
+        blog.categories.forEach((category) => {
+          if (category?.name && category?.slug) {
+            const key = category.slug
+            if (categoryMap.has(key)) {
+              const existing = categoryMap.get(key)!
+              categoryMap.set(key, {
+                ...existing,
+                count: existing.count + 1,
+              })
+            } else {
+              categoryMap.set(key, {
+                name: category.name,
+                slug: category.slug,
+                count: 1,
+              })
+            }
+          }
+        })
+      }
     })
 
-    return response.data.map((category) => ({
-      name: category.name,
-      slug: category.slug,
-      totalPosts: category.blogs?.length || 0,
-    }))
+    // Convert map to array and sort by count (descending)
+    return Array.from(categoryMap.values())
+      .map((category) => ({
+        name: category.name,
+        slug: category.slug,
+        totalPosts: category.count,
+      }))
+      .sort((a, b) => b.totalPosts - a.totalPosts)
   } catch (error) {
-    console.error('Error fetching blog categories:', error)
+    console.error('Error extracting categories from blogs:', error)
     return []
   }
 }
@@ -99,7 +114,7 @@ export async function getRelatedBlogs(
 ): Promise<BlogApiResponse['data'][]> {
   try {
     const response = await strapiFetch<BlogsListApiResponse>(
-      `/api/blogs?populate=*&filters[slug][$ne]=${currentSlug}&pagination[limit]=${limit}`,
+      `/api/blogs?populate=categories&filters[slug][$ne]=${currentSlug}&pagination[limit]=${limit}`,
       {
         next: {
           revalidate: 3600,
@@ -108,7 +123,6 @@ export async function getRelatedBlogs(
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'force-cache',
       }
     )
 

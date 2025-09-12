@@ -19,7 +19,7 @@ import { Sidebar } from '@/components/course-view/sidebar'
 import {
   initializeCourseProgress,
   UserProgressResponse,
-} from '@/lib/user-progress'
+} from '@/lib/actions/user-progress'
 import { trackExistingWatchedLesson } from '@/lib/actions/track-existing-watched-lesson'
 
 interface CourseViewContextType {

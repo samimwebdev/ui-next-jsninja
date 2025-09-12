@@ -1,5 +1,3 @@
-'use client'
-
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import Marquee from '@/components/ui/marquee'
 import Image from 'next/image'

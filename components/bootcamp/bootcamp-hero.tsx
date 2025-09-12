@@ -6,10 +6,12 @@ import {
   AssessmentQuiz,
   HeroLayoutContentSection,
 } from '@/types/bootcamp-page-types'
-import { VideoPlayer } from '../shared/video-player'
+import { VideoPlayerLazy } from '../shared/video-player-lazy'
 import { AnimatedSection } from '../shared/animated-section'
 import { AnimatedAvatars } from '../shared/animated-avatars'
 import { CourseType } from '@/types/checkout-types'
+import { Suspense } from 'react'
+import { VideoPlayerSkeleton } from '../shared/video-player-lazy'
 
 interface BootcampHeroProps {
   data: HeroLayoutContentSection
@@ -28,7 +30,6 @@ export const BootcampHero = ({
   assessmentData,
   courseInfo,
 }: BootcampHeroProps) => {
-  // Extract data with fallbacks - processed on server
   const title = data?.title || 'Javascript Bootcamp'
   const description = data?.shortDescription || 'Learn to code from scratch'
   const shortLabel = data?.shortLabel || 'Short Label'
@@ -90,14 +91,16 @@ export const BootcampHero = ({
           </AnimatedSection>
         </div>
 
-        {/* Video */}
+        {/* Video - Lazy loaded */}
         <div>
           <AnimatedSection animation="fadeInUp">
-            <VideoPlayer
-              videoUrl={videoUrl}
-              aspectRatio="video"
-              dataAttribute="bootcamp-hero-video"
-            />
+            <Suspense fallback={<VideoPlayerSkeleton aspectRatio="video" />}>
+              <VideoPlayerLazy
+                videoUrl={videoUrl}
+                aspectRatio="video"
+                dataAttribute="bootcamp-hero-video"
+              />
+            </Suspense>
           </AnimatedSection>
           <AnimatedSection animation="fadeInUp" delay={0.5}>
             <BootcampShortFeature highlightedFeatures={highlightedFeatures} />

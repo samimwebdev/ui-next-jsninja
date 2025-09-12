@@ -8,9 +8,9 @@ import { CourseBundleApiResponse } from '@/types/course-bundle-types'
 import Link from 'next/link'
 
 interface CourseBundlePageProps {
-  params: {
-    bundleSlug: Promise<string>
-  }
+  params: Promise<{
+    bundleSlug: string
+  }>
 }
 
 // Server-side data fetching function
@@ -23,12 +23,11 @@ async function getCourseBundleData(
       {
         next: {
           revalidate: 3600, // Revalidate every hour
-          tags: ['course-bundle', `course-bundle-${bundleSlug}`],
+          tags: ['course-bundle', `bundle-${bundleSlug}`],
         },
         headers: {
           'Content-Type': 'application/json',
         },
-        cache: 'force-cache',
       }
     )
 
@@ -48,7 +47,8 @@ export async function generateMetadata({
   params,
 }: CourseBundlePageProps): Promise<Metadata> {
   try {
-    const bundleData = await getCourseBundleData(await params.bundleSlug)
+    const { bundleSlug } = await params
+    const bundleData = await getCourseBundleData(bundleSlug)
 
     return generateSEOMetadata(
       bundleData?.seo,
@@ -62,7 +62,7 @@ export async function generateMetadata({
           } with comprehensive learning materials.`,
       },
       {
-        path: `/bundles/${params.bundleSlug}`,
+        path: `/bundles/${bundleSlug}`,
         type: 'article',
       }
     )
@@ -129,7 +129,8 @@ export default async function CourseBundlePage({
   let bundleData: CourseBundleApiResponse['data']
 
   try {
-    bundleData = await getCourseBundleData(await params.bundleSlug)
+    const { bundleSlug } = await params
+    bundleData = await getCourseBundleData(bundleSlug)
 
     // Additional safety check
     if (!bundleData) {

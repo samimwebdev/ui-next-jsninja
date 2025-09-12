@@ -2,6 +2,11 @@ import type React from 'react'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
 import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
+import { getUserWithProfile } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+// Force dynamic rendering for all dashboard routes
+export const dynamic = 'force-dynamic'
 
 const sidebarNavItems = [
   {
@@ -38,11 +43,17 @@ const sidebarNavItems = [
   },
 ]
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Check authentication
+  const user = await getUserWithProfile()
+
+  if (!user) {
+    redirect('/login?redirect=/dashboard')
+  }
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <FlashMessageHandler />

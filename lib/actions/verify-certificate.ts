@@ -1,4 +1,3 @@
-// lib/actions/verify-certificate.ts
 'use server'
 
 import { Certificate } from '@/types/dashboard-types'

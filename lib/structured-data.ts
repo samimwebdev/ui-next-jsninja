@@ -1,4 +1,5 @@
-import { SEOData, StructuredData } from '@/types/home-page-types'
+import { SEOData } from '@/types/home-page-types'
+import { SchemaOrgData } from '@/types/page-types'
 
 export interface PageData {
   title: string
@@ -10,17 +11,20 @@ export interface PageData {
 
 export class StructuredDataGenerator {
   // Simple method to get structured data from SEO data or return null
-  getStructuredData(seoData?: SEOData): StructuredData | null {
+  getStructuredData(seoData?: SEOData): SchemaOrgData | null {
     // If custom structured data exists in SEO from Strapi, use it
-    if (seoData?.structuredData) {
-      return seoData.structuredData as StructuredData
+    if (seoData?.structuredData && typeof seoData.structuredData === 'object') {
+      // Check if it's already a proper Schema.org object
+      if (this.isValidStructuredData(seoData.structuredData)) {
+        return seoData.structuredData as SchemaOrgData
+      }
     }
 
-    // No structured data from Strapi, return null
+    // No valid structured data from Strapi, return null
     return null
   }
 
-  // Optional: Validate if the structured data is valid JSON-LD
+  // Validate if the structured data is valid JSON-LD
   isValidStructuredData(data: unknown): boolean {
     return (
       typeof data === 'object' &&
@@ -35,6 +39,6 @@ export class StructuredDataGenerator {
 export const structuredDataGenerator = new StructuredDataGenerator()
 
 // Simple helper function
-export function getStructuredData(seoData?: SEOData): StructuredData | null {
+export function getStructuredData(seoData?: SEOData): SchemaOrgData | null {
   return structuredDataGenerator.getStructuredData(seoData)
 }

@@ -8,6 +8,7 @@ import { cache } from 'react'
 const COOKIE = 'strapi_jwt'
 
 export async function setAuthCookie(token: string) {
+  'use server'
   const cookieStore = await cookies()
   cookieStore.set(COOKIE, token, {
     httpOnly: true,
@@ -19,17 +20,15 @@ export async function setAuthCookie(token: string) {
 }
 
 export async function clearAuthCookie() {
+  'use server'
   const cookieStore = await cookies()
   cookieStore.delete(COOKIE)
 }
 
 export async function getUser(): Promise<User | null> {
+  'use server'
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE)?.value
-
-  // console.log('=== getUser Debug ===')
-  // console.log('Token exists:', !!token)
-  // console.log('Token value:', token ? 'Present' : 'Missing')
 
   if (!token) {
     console.log('No token found in cookies')
@@ -57,12 +56,14 @@ export async function getUser(): Promise<User | null> {
 }
 
 export const getAuthToken = cache(async (): Promise<string | null> => {
+  'use server'
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE)
   return token?.value || null
 })
 
 export async function getUserWithProfile(): Promise<UserWithProfile | null> {
+  'use server'
   try {
     const token = await getAuthToken()
     if (!token) return null

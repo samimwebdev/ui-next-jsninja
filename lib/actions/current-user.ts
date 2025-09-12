@@ -1,3 +1,4 @@
+'use server'
 import { cache } from 'react'
 import { getAuthToken } from '../auth'
 import { strapiFetch } from '../strapi'

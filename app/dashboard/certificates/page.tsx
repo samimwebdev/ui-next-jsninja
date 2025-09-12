@@ -31,6 +31,8 @@ import {
   downloadCertificate,
 } from '@/lib/certificate-utils'
 
+export const dynamic = 'force-dynamic'
+
 function CertificateCardSkeleton() {
   return (
     <Card className="h-[420px]">

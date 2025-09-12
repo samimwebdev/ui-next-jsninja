@@ -1,7 +1,7 @@
 // 'use client'
 
 import * as React from 'react'
-import { getPageData } from '@/lib/api/pages'
+import { getPageData } from '@/lib/actions/get-generic-page-data'
 import { HtmlContentRenderer } from '@/components/shared/html-content-renderer'
 import { Card } from '@/components/ui/card'
 import { notFound } from 'next/navigation'

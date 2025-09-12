@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   updateLessonProgress,
   type LessonProgressPayload,
-} from '@/lib/user-progress'
+} from '@/lib/actions/user-progress'
 
 interface UseTextProgressOptions {
   courseDocumentId: string

@@ -35,7 +35,6 @@ async function getHomeData(): Promise<HomePageData> {
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'force-cache',
     })
 
     if (!response) {

@@ -55,7 +55,7 @@ const getDifficultyStyle = (level: string) => {
 export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
   data: bootcampSectionData,
 }) => {
-  const bootcampList = bootcampSectionData.courseBases || []
+  const bootcampList = bootcampSectionData.bootcamps || []
   const [bootcamp, setBootcamp] = useState<Course | null>(null)
   const ref = useRef<HTMLDivElement>(null as unknown as HTMLDivElement)
   const id = useId()
@@ -135,7 +135,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
             {bootcamp && (
               <div className="fixed inset-0 grid place-items-center z-20 p-4">
                 <motion.div
-                  layoutId={`card-${bootcamp.title}-${id}`}
+                  layoutId={`card-${bootcamp.baseContent.title}-${id}`}
                   ref={ref}
                   className="w-full max-w-2xl bg-background rounded-lg shadow-lg overflow-hidden"
                   initial={{ scale: 0.9, opacity: 0.5 }}
@@ -145,11 +145,12 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                   <div className="relative">
                     <Image
                       src={
-                        bootcamp.featureImage?.formats?.medium?.url ||
-                        bootcamp.featureImage?.url ||
+                        bootcamp.baseContent.featureImage?.formats?.medium
+                          ?.url ||
+                        bootcamp.baseContent.featureImage?.url ||
                         '/images/placeholder.svg'
                       }
-                      alt={bootcamp.title}
+                      alt={bootcamp.baseContent.title}
                       width={800}
                       height={400}
                       className="w-full h-60 object-cover"
@@ -167,14 +168,14 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                     {/* Price Badge */}
                     <div className="absolute top-4 left-4">
                       <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm font-semibold">
-                        {formatBootcampPrice(bootcamp.price)}
+                        {formatBootcampPrice(bootcamp.baseContent.price)}
                       </Badge>
                     </div>
                   </div>
 
                   <div className="p-6">
                     <h2 className="text-3xl font-bold mb-3 text-foreground">
-                      {bootcamp.title}
+                      {bootcamp.baseContent.title}
                     </h2>
 
                     {/* Bootcamp Details - Single Row */}
@@ -182,36 +183,43 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar size={16} />
                         <span>
-                          Starts: {formatDate(bootcamp.startingFrom || '')}
+                          Starts:{' '}
+                          {formatDate(bootcamp.baseContent.startingFrom || '')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <Clock size={16} className="text-muted-foreground" />
                         <span className="text-muted-foreground">Duration:</span>
                         <Badge variant="secondary" className="ml-1">
-                          {formatDuration(bootcamp.duration)}
+                          {formatDuration(bootcamp.baseContent.duration)}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <DollarSign size={16} />
-                        <span>{formatBootcampPrice(bootcamp.price)}</span>
+                        <span>
+                          {formatBootcampPrice(bootcamp.baseContent.price)}
+                        </span>
                       </div>
                     </div>
 
                     {/* Categories */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {bootcamp.categories?.map((category, indx) => (
-                        <Badge key={indx} variant="secondary">
-                          {category.name}
+                      {bootcamp.baseContent.categories?.map(
+                        (category, indx) => (
+                          <Badge key={indx} variant="secondary">
+                            {category.name}
+                          </Badge>
+                        )
+                      )}
+                      {bootcamp.baseContent.level && (
+                        <Badge variant="outline">
+                          {bootcamp.baseContent.level}
                         </Badge>
-                      ))}
-                      {bootcamp.level && (
-                        <Badge variant="outline">{bootcamp.level}</Badge>
                       )}
                     </div>
 
                     <p className="text-muted-foreground mb-6 leading-relaxed">
-                      {bootcamp.shortDescription}
+                      {bootcamp.baseContent.shortDescription}
                     </p>
 
                     <div className="flex gap-3">
@@ -222,10 +230,10 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       >
                         <Button className="w-full">
                           <Link
-                            href={`/bootcamps/${bootcamp.slug}`}
+                            href={`/bootcamps/${bootcamp.baseContent.slug}`}
                             className="w-full"
                           >
-                            {bootcamp?.browseCoursesBtn?.btnLabel ||
+                            {bootcamp?.baseContent.browseCoursesBtn?.btnLabel ||
                               'Enroll Now'}
                           </Link>
                         </Button>
@@ -245,7 +253,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
           >
             {bootcampList.map((bootcamp, index) => (
               <motion.div
-                layoutId={`card-${bootcamp.title}-${id}`}
+                layoutId={`card-${bootcamp.baseContent.title}-${id}`}
                 key={bootcamp.documentId}
                 onClick={() => setBootcamp(bootcamp)}
                 className="group cursor-pointer"
@@ -261,26 +269,27 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                     <div className="relative h-48 overflow-hidden">
                       <Image
                         src={
-                          bootcamp.featureImage?.formats?.medium?.url ||
-                          bootcamp.featureImage?.url ||
+                          bootcamp.baseContent.featureImage?.formats?.medium
+                            ?.url ||
+                          bootcamp.baseContent.featureImage?.url ||
                           '/images/placeholder.svg'
                         }
-                        alt={bootcamp.title}
+                        alt={bootcamp.baseContent.title}
                         fill
                         className="object-cover transition-all duration-300 group-hover:scale-110"
                       />
                       {/* Price and Level Badges */}
                       <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
                         <Badge className="bg-primary text-primary-foreground font-semibold shadow-lg">
-                          {formatBootcampPrice(bootcamp.price)}
+                          {formatBootcampPrice(bootcamp.baseContent.price)}
                         </Badge>
-                        {bootcamp.level && (
+                        {bootcamp.baseContent.level && (
                           <Badge
                             className={`font-semibold shadow-lg border text-xs hover:text-white ${getDifficultyStyle(
-                              bootcamp.level
+                              bootcamp.baseContent.level
                             )}`}
                           >
-                            {bootcamp.level}
+                            {bootcamp.baseContent.level}
                           </Badge>
                         )}
                       </div>
@@ -289,11 +298,11 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
 
                   <CardContent className="p-4 flex-1 flex flex-col">
                     <CardTitle className="text-lg font-bold mb-2 line-clamp-2">
-                      {bootcamp.title}
+                      {bootcamp.baseContent.title}
                     </CardTitle>
 
                     <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
-                      {bootcamp.shortDescription}
+                      {bootcamp.baseContent.shortDescription}
                     </p>
 
                     {/* Bootcamp Info - Single Row for Cards */}
@@ -301,7 +310,8 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       <div className="flex items-center gap-1">
                         <Calendar size={12} />
                         <span>
-                          Starts: {formatDate(bootcamp.startingFrom || '')}
+                          Starts:{' '}
+                          {formatDate(bootcamp.baseContent.startingFrom || '')}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -310,7 +320,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                           variant="secondary"
                           className="text-xs px-2 py-1"
                         >
-                          {formatDuration(bootcamp.duration)}
+                          {formatDuration(bootcamp.baseContent.duration)}
                         </Badge>
                       </div>
                     </div>
@@ -321,7 +331,8 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
                       variant="outline"
                     >
-                      {bootcamp?.browseCoursesBtn?.btnLabel || 'View Details'}
+                      {bootcamp?.baseContent.browseCoursesBtn?.btnLabel ||
+                        'View Details'}
                     </Button>
                   </CardFooter>
                 </Card>

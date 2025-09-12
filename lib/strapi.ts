@@ -17,7 +17,7 @@ export async function strapiFetch<T>(
   } = {}
 ): Promise<T> {
   const {
-    cache = 'no-store',
+    cache = 'default',
     token,
     next,
     returnErrorResponse = false,
@@ -31,7 +31,7 @@ export async function strapiFetch<T>(
         'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` }),
       },
-      cache, // 'no-store' | 'force-cache' | 'default'
+      cache, // 'no-store' | '' | 'default'
       next, // supports { revalidate, tags } for Next.js 15
       ...rest,
     })

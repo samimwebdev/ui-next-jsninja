@@ -1,7 +1,7 @@
-// lib/actions/user-login-history.ts
-import { strapiFetch } from '@/lib/strapi'
+'use server'
 import { LoginHistoryResponse } from '@/types/dashboard-types'
 import { getAuthToken } from '@/lib/auth'
+import { strapiFetch } from '../strapi'
 
 export async function fetchLoginHistory(): Promise<LoginHistoryResponse> {
   try {

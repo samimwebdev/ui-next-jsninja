@@ -17,7 +17,6 @@ async function getCoursesData(): Promise<CoursesApiResponse['data']> {
       headers: {
         'Content-Type': 'application/json',
       },
-      cache: 'force-cache',
     })
 
     if (!response?.data) {

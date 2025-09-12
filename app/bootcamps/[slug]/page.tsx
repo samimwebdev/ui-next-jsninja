@@ -1,7 +1,7 @@
 import { BootcampHero } from '@/components/bootcamp/bootcamp-hero'
 import { BootcampProjectShowcase } from '@/components/bootcamp/project-showcase/bootcamp-project-showcase'
 import { BootcampSpeciality } from '@/components/bootcamp/bootcamp-speciality'
-import { PromoVideos } from '@/components/bootcamp/promo-videos'
+import { PromoVideosLazy } from '@/components/bootcamp/promo-videos/promo-videos-lazy'
 import { BatchSchedule } from '@/components/bootcamp/next-batch-schedule'
 import { BootcampOverview } from '@/components/bootcamp/bootcamp-overview'
 import FAQBootcamp from '@/components/bootcamp/faq-bootcamp'
@@ -18,11 +18,50 @@ import { BootcampAuthor } from '@/components/bootcamp/bootcamp-author'
 import { generateSEOMetadata } from '@/lib/seo'
 import { BootcampPageData } from '@/types/bootcamp-page-types'
 import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
+import { PromoVideosSkeleton } from '@/components/bootcamp/promo-videos/promo-videos-lazy'
+import { strapiFetch } from '@/lib/strapi'
 
 interface BootcampPageProps {
   params: Promise<{
     slug: string
   }>
+}
+
+// Generate static params for all bootcamp pages
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  try {
+    // Fetch all bootcamp slugs from baseContent
+    const response = await strapiFetch<{
+      data: Array<{
+        baseContent: {
+          slug: string
+        }
+      }>
+    }>(
+      '/api/bootcamps?populate[baseContent][fields][0]=slug&pagination[limit]=100',
+      {
+        next: {
+          revalidate: 3600, // Revalidate every hour
+        },
+      }
+    )
+
+    if (!response?.data) {
+      console.warn('No bootcamp data found for static generation')
+      return []
+    }
+
+    // Extract slug from baseContent
+    return response.data
+      .filter((bootcamp) => bootcamp.baseContent?.slug) // Filter out any without slugs
+      .map((bootcamp) => ({
+        slug: bootcamp.baseContent.slug,
+      }))
+  } catch (error) {
+    console.error('Error fetching bootcamp slugs for static generation:', error)
+    return []
+  }
 }
 
 // Generate metadata for SEO
@@ -32,8 +71,9 @@ export async function generateMetadata({ params }: BootcampPageProps) {
     let bootcampData: BootcampPageData
     try {
       bootcampData = await getBootcampData(slug)
+      console.log('🔥 Generating metadata for:', slug)
     } catch (error) {
-      console.error('Error fetching bootcamp data:', error)
+      console.error('Error fetching bootcamp data for metadata:', error)
       notFound()
     }
 
@@ -64,6 +104,8 @@ export default async function BootcampPage({
 }) {
   // Await params before using its properties
   const { slug } = await params
+  console.log('🔥 Statically generating bootcamp page for:', slug)
+
   const bootcampData = await getBootcampData(slug)
 
   // Extract content sections from contentBlock
@@ -186,7 +228,9 @@ export default async function BootcampPage({
 
       {demoVideosData && (
         <AnimatedSection animation="scrollFadeIn" delay={0.2}>
-          <PromoVideos data={demoVideosData} />
+          <Suspense fallback={<PromoVideosSkeleton />}>
+            <PromoVideosLazy data={demoVideosData} />
+          </Suspense>
         </AnimatedSection>
       )}
 

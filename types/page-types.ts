@@ -24,7 +24,7 @@ export interface SeoData {
   metaDescription: string
   keywords: string
   metaRobots: string
-  structuredData: StructuredData
+  structuredData?: SchemaOrgData | string // Can be object or JSON string
   metaViewport: string
   canonicalURL: string
   metaImage?: StrapiImage
@@ -39,6 +39,7 @@ export interface MetaSocial {
   image?: StrapiImage
 }
 
+// This interface represents the full SEO metadata structure (not Schema.org)
 export interface StructuredData {
   title: string
   metaDescription: string
@@ -55,10 +56,12 @@ export interface StructuredData {
   structuredData: SchemaOrgData
 }
 
+// This interface represents Schema.org JSON-LD data
 export interface SchemaOrgData {
   '@context': string
   '@type': string
   name: string
-  url: string
-  description: string
+  url?: string
+  description?: string
+  [key: string]: unknown // Allow additional Schema.org properties
 }

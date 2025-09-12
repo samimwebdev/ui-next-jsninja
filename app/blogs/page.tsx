@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react'
 import { Metadata } from 'next'
-import { getAllBlogs, getBlogCategories } from '@/lib/blog'
+import { getAllBlogs, extractCategoriesFromBlogs } from '@/lib/blog'
 import { BlogsListClient } from '@/components/blog/blogs-list-client'
 import { BlogsListSkeleton } from '@/components/blog/blogs-list-skeleton'
 import { notFound } from 'next/navigation'
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
         url: 'https://res.cloudinary.com/dpb8r7bqq/image/upload/v1726390892/Black_Minimalist_Website_Mockup_Instagram_Post_j5ca4p.png',
         width: 1200,
         height: 630,
-        alt: 'Frontend Ninja Blog',
+        alt: 'Javascript Ninja Blog',
       },
     ],
   },
@@ -44,11 +44,8 @@ export const metadata: Metadata = {
 // Server Component
 export default async function BlogsPage() {
   try {
-    // Fetch blogs and categories concurrently
-    const [blogsResponse, categories] = await Promise.all([
-      getAllBlogs(1, 25), // Get first 25 blogs
-      getBlogCategories(),
-    ])
+    // Fetch blogs with categories populated
+    const blogsResponse = await getAllBlogs(1, 25) // Get first 25 blogs
 
     if (!blogsResponse.data || blogsResponse.data.length === 0) {
       return (
@@ -61,6 +58,9 @@ export default async function BlogsPage() {
         </div>
       )
     }
+
+    // Extract categories from blog data
+    const categories = extractCategoriesFromBlogs(blogsResponse.data)
 
     return (
       <div className="min-h-screen">
@@ -85,8 +85,8 @@ function BlogsContent({ blogs, categories }: BlogsContentProps) {
   return <BlogsListClient initialBlogs={blogs} categories={categories} />
 }
 
-// Generate static params for SSG (optional)
-export async function generateStaticParams() {
-  // You can implement pagination here if needed
-  return []
-}
+// // Generate static params for SSG (optional)
+// export async function generateStaticParams() {
+//   // You can implement pagination here if needed
+//   return []
+// }

@@ -36,11 +36,11 @@ export const CurriculumClient: React.FC<{
     setMounted(true)
   }, [])
 
+  // Show nothing until mounted to prevent hydration mismatch
   if (!mounted) {
     return null
   }
 
-  // Update the handleLessonClick function
   const handleLessonClick = (lesson: Lesson) => {
     if (lesson.isFree && lesson.videoUrl && lesson.type === 'video') {
       if (!user) {
@@ -65,10 +65,6 @@ export const CurriculumClient: React.FC<{
     return module.lessons?.length || 0
   }
 
-  //Get total duration should do the following
-  // 1. Check if module.lessons exists
-  // 2. If not, return '0 min'
-  // 3. If it does, reduce the lessons to get the total duration in Hours, minutes, second, Lesson duration is coming as seconds
   const getTotalDuration = (module: Module) => {
     if (!module.lessons) return '0 min'
     const totalSeconds = module.lessons.reduce(
@@ -96,9 +92,6 @@ export const CurriculumClient: React.FC<{
   return (
     <div className="mt-3 space-y-4">
       <div className="mb-6">
-        {/* <h2 className="text-3xl font-bold tracking-tight mb-6">
-          Course Curriculum
-        </h2> */}
         <p className="text-muted-foreground">
           {modules.length} modules •{' '}
           {modules.reduce(

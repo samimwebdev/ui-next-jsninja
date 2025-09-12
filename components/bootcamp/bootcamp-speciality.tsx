@@ -6,7 +6,9 @@ import {
   Briefcase,
 } from 'lucide-react'
 import { BootcampSpecialityContentSection } from '@/types/bootcamp-page-types'
-import { SpecialityClientWrapper } from './bootcamp-speciality-client'
+import { SpecialityLazy } from './bootcamp-speciality-lazy'
+import { Suspense } from 'react'
+import { SpecialitySkeleton } from './bootcamp-speciality-lazy'
 
 // Default icons mapping for fallback
 const getDefaultIcon = (index: number) => {
@@ -52,8 +54,10 @@ export const BootcampSpeciality: React.FC<{
         </p>
       </section>
 
-      {/* Pass processed data to client component for animations */}
-      <SpecialityClientWrapper sections={sections} />
+      {/* Lazy-loaded animated speciality component */}
+      <Suspense fallback={<SpecialitySkeleton />}>
+        <SpecialityLazy sections={sections} />
+      </Suspense>
     </main>
   )
 }
