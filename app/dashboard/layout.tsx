@@ -1,11 +1,17 @@
 import type React from 'react'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
+import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
+import { getUserWithProfile } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+// Force dynamic rendering for all dashboard routes
+export const dynamic = 'force-dynamic'
 
 const sidebarNavItems = [
   {
     title: 'Profile',
-    href: '/dashboard',
+    href: '/dashboard/profile',
   },
   {
     title: 'Orders',
@@ -37,27 +43,43 @@ const sidebarNavItems = [
   },
 ]
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  // Check authentication
+  const user = await getUserWithProfile()
+
+  if (!user) {
+    redirect('/login?redirect=/dashboard')
+  }
   return (
-    <div className="flex min-h-screen flex-col bg-gray-100 dark:bg-gray-900 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <UserProfile />
-      <div className="container flex-1 items-start py-8 md:grid md:grid-cols-[240px_minmax(0,1fr)] md:gap-10">
-        <aside className="fixed top-14 z-30 -ml-2 hidden h-[calc(100vh-3.5rem)] w-full shrink-0 overflow-y-auto md:sticky md:block">
-          <div className="py-6 pr-6 lg:py-8">
-            <SidebarNav items={sidebarNavItems} />
-          </div>
-        </aside>
-        <main className="flex w-full flex-col overflow-hidden">
-          <div className="flex-1 space-y-4 p-8 pt-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <FlashMessageHandler />
+
+      {/* User Profile Header */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <UserProfile />
+      </div>
+
+      {/* Main Dashboard Content */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 pb-8">
+          {/* Sidebar */}
+          <aside className="md:sticky md:top-8 md:h-fit">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+              <SidebarNav items={sidebarNavItems} />
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <main className="min-w-0 flex-1">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
               {children}
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   )

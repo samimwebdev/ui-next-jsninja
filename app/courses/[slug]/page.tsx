@@ -1,219 +1,290 @@
-'use client'
-
-import { CourseTabs } from '@/components/course/course-tabs'
-import { CourseContent } from '@/components/course/course-content'
-import { Overview } from '@/components/course/course-overview'
-import { ProjectShowcase } from '@/components/course/project-showcase'
-import { ReviewSlider } from '@/components/course/review-slider'
-import { CourseAuthor } from '@/components/course/course-author'
-import { FAQ } from '@/components/course/faq'
-import { CourseBundle } from '@/components/course/course-bundle'
+import { getCourseData } from '@/lib/course'
+import {
+  getCourseContentSection,
+  getHighlightFeatures,
+} from '@/lib/course-utils'
+import { generateSEOMetadata } from '@/lib/seo'
+import { StructuredData } from '@/components/seo/structured-data'
 import { CourseHero } from '@/components/course/course-hero'
-import { CircleCheckBig } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { fadeInUp, cardVariants, iconVariants } from '@/lib/animation'
-import { useInView } from 'react-intersection-observer'
-import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { CourseTabs } from '@/components/course/course-tabs'
+import { Overview } from '@/components/course/course-overview'
+import { CourseCurriculum } from '@/components/course/course-curriculum'
+import { CourseAuthor } from '@/components/shared/course-author'
+import { ReviewSlider } from '@/components/course/review-slider'
+import { CourseFAQ } from '@/components/course/course-faq'
+import { ProjectShowcase } from '@/components/course/project-showcase'
+import { CourseBundle } from '@/components/course/course-bundle'
+import { CoursePriceSidebar } from '@/components/course/course-price-sidebar'
+import { AnimatedSection } from '@/components/shared/animated-section'
+import { notFound } from 'next/navigation'
+import { Curriculum } from '@/types/shared-types'
+import { CoursePageData } from '@/types/course-page-types'
+import { strapiFetch } from '@/lib/strapi'
+import { CourseTracking } from '@/components/course/course-tracking'
 
-export default function CourseDetailsPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const slug = searchParams.get('slug')
-  const [loaded, setLoaded] = useState(false)
+interface CoursePageProps {
+  params: Promise<{
+    slug: string
+  }>
+}
 
-  const handleEnrollClick = () => {
-    router.push(`/checkout?courseId=${slug}`) // Navigate to checkout page with courseId parameter
+// Generate static params for all course pages
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  try {
+    // Fetch all course slugs - data structure is different than expected
+    const response = await strapiFetch<{
+      data: {
+        course: Array<{
+          slug: string
+          title: string
+          isRegistrationEnabled?: boolean
+          courseType?: string
+        }>
+        bootcamp: Array<{
+          slug: string
+          title: string
+          isRegistrationEnabled?: boolean
+          courseType?: string
+        }>
+        courseBundle: Array<{
+          slug: string
+          title: string
+        }>
+      }
+    }>('/api/courses', {
+      next: {
+        revalidate: 3600, // Revalidate every hour
+      },
+    })
+
+    if (!response?.data?.course) {
+      console.warn('No course data found for static generation')
+      return []
+    }
+
+    // Filter and extract slugs from course array
+    const validCourses = response.data.course.filter((course) => {
+      const hasSlug = course.slug
+
+      if (!hasSlug) {
+        console.warn(`Course "${course.title || 'Unknown'}" missing slug`)
+        return false
+      }
+
+      return hasSlug
+    })
+
+    console.log(
+      `✅ Generating ${validCourses.length} course pages out of ${response.data.course.length} total`
+    )
+
+    return validCourses.map((course) => {
+      return {
+        slug: course.slug, // Direct access to slug property
+      }
+    })
+  } catch (error) {
+    console.error(
+      '❌ Error fetching course slugs for static generation:',
+      error
+    )
+    return []
+  }
+}
+
+// Helper function to sanitize curriculum data
+const sanitizeCurriculumData = (curriculum: Curriculum): Curriculum => {
+  if (!curriculum?.modules) return curriculum
+
+  const sanitizedModules = curriculum.modules.map((module) => ({
+    ...module,
+    lessons: module.lessons?.map((lesson) => ({
+      ...lesson,
+      // Remove videoUrl for non-free lessons
+      videoUrl: lesson.isFree ? lesson.videoUrl : undefined,
+    })),
+  }))
+
+  return {
+    ...curriculum,
+    modules: sanitizedModules,
+  }
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: CoursePageProps) {
+  const { slug } = await params
+  try {
+    const courseData = await getCourseData(slug)
+
+    return generateSEOMetadata(
+      courseData.baseContent?.seo,
+      {
+        title: courseData.baseContent?.title,
+      },
+      {
+        path: `/courses/${slug}`,
+        type: 'article',
+      }
+    )
+  } catch (error) {
+    console.error('❌ Error generating course metadata:', error)
+    return generateSEOMetadata(
+      undefined,
+      { title: 'Course Not Found' },
+      { path: `/courses/${slug}` }
+    )
+  }
+}
+
+// Server Component
+export default async function CoursePage({ params }: CoursePageProps) {
+  const { slug } = await params
+  console.log('🔥 Statically generating course page for:', slug)
+
+  let courseData: CoursePageData
+
+  try {
+    courseData = await getCourseData(slug)
+  } catch (error) {
+    console.error('❌ Failed to fetch course data:', error)
+    notFound()
   }
 
-  // Animation refs for scroll-triggered animations
-  const [overviewRef, overviewInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-  const [contentRef, contentInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-  const [authorRef, authorInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-  const [reviewsRef, reviewsInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-  const [faqRef, faqInView] = useInView({ triggerOnce: true, threshold: 0.1 })
-  const [projectRef, projectInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-  const [bundleRef, bundleInView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
+  // Extract section data
+  const heroData = getCourseContentSection(
+    courseData,
+    'hero-layout.hero-layout'
+  )
 
-  // Set loaded state after initial render for entrance animations
-  useEffect(() => {
-    setLoaded(true)
-  }, [])
+  const projectData = getCourseContentSection(
+    courseData,
+    'project-layout.project-layout'
+  )
+  const reviewData = getCourseContentSection(
+    courseData,
+    'review-layout.review-layout'
+  )
+  const authorData = getCourseContentSection(
+    courseData,
+    'author-layout.author-layout'
+  )
+  const courseBundleData = getCourseContentSection(
+    courseData,
+    'course-layout.course-bundle-layout'
+  )
+
+  const faqData = getCourseContentSection(courseData, 'faq-layout.faq-section')
+
+  // Sanitize curriculum data to remove video URLs for non-free lessons
+  const sanitizedCurriculum = courseData.baseContent?.curriculum
+    ? sanitizeCurriculumData(courseData.baseContent.curriculum)
+    : undefined
+
+  // Format data for components
+  const courseInfo = {
+    title: courseData.baseContent?.title || courseData.courseName,
+    slug: slug,
+    price: courseData.baseContent?.price || 0,
+    features: getHighlightFeatures(courseData),
+    courseType: courseData.baseContent?.courseType,
+    isRegistrationOpen: courseData.baseContent?.isRegistrationEnabled || false,
+  }
 
   return (
-    <div className="bg-background text-foreground">
-      <main className="container mx-auto px-4 max-w-screen-xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: loaded ? 1 : 0, y: loaded ? 0 : 20 }}
-          transition={{ duration: 0.5 }}
-        >
-          <CourseHero />
-        </motion.div>
+    <>
+      <StructuredData seoData={courseData.baseContent?.seo} />
+      <CourseTracking {...courseInfo} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: loaded ? 1 : 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
-              <CourseTabs />
-            </motion.div>
+      <div className="bg-background text-foreground">
+        <main className="container mx-auto px-4 max-w-screen-xl">
+          {/* Hero Section - Server Component with Animation Wrapper */}
+          {heroData && (
+            <AnimatedSection animation="fadeInUp" delay={0.1} className="mb-8">
+              <CourseHero data={heroData} courseInfo={courseInfo} />
+            </AnimatedSection>
+          )}
 
-            <motion.div
-              ref={overviewRef}
-              initial="hidden"
-              animate={overviewInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-            >
-              <Overview />
-            </motion.div>
-
-            <motion.div
-              ref={contentRef}
-              initial="hidden"
-              animate={contentInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-            >
-              <CourseContent />
-            </motion.div>
-
-            <motion.div
-              ref={authorRef}
-              initial="hidden"
-              animate={authorInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-            >
-              <CourseAuthor />
-            </motion.div>
-
-            <motion.div
-              ref={reviewsRef}
-              initial="hidden"
-              animate={reviewsInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-              id="reviews"
-              className="scroll-mt-20"
-            >
-              <ReviewSlider />
-            </motion.div>
-
-            <motion.div
-              ref={faqRef}
-              initial="hidden"
-              animate={faqInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-            >
-              <FAQ />
-            </motion.div>
-
-            <motion.div
-              ref={projectRef}
-              initial="hidden"
-              animate={projectInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-            >
-              <ProjectShowcase />
-            </motion.div>
-
-            <motion.div
-              ref={bundleRef}
-              initial="hidden"
-              animate={bundleInView ? 'visible' : 'hidden'}
-              variants={fadeInUp}
-              transition={{ duration: 0.5 }}
-            >
-              <CourseBundle />
-            </motion.div>
-          </div>
-
-          <div className="lg:col-span-1 space-y-6 order-1 md:order-1 lg:order-2">
-            <motion.div
-              className="sticky top-4 bg-card rounded-lg p-6 shadow-lg"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: loaded ? 1 : 0, scale: loaded ? 1 : 0.95 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              whileHover={{
-                boxShadow:
-                  '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <h2 className="text-2xl font-bold mb-4">Course Features</h2>
-              <ul className="space-y-3">
-                {[
-                  '150+ ঘন্টার কোর্স',
-                  'প্রজেক্ট ভিত্তিক',
-                  'লাইফটাইম এক্সেস',
-                  '৩ মাসের জন্য ১:১ সাপোর্ট',
-                ].map((feature, index) => (
-                  <motion.li
-                    key={index}
-                    className="flex items-center"
-                    initial="hidden"
-                    animate="visible"
-                    custom={index}
-                    variants={cardVariants}
-                  >
-                    <motion.span className="mr-2" variants={iconVariants}>
-                      <CircleCheckBig className="w-5 h-5 text-green-500" />
-                    </motion.span>
-                    {feature}
-                  </motion.li>
-                ))}
-              </ul>
-              <div className="mt-6">
-                <motion.div
-                  className="text-3xl font-bold mb-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8, duration: 0.3 }}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            {courseData && (
+              <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
+                {/* Course Tabs - Server Component with Animation */}
+                <AnimatedSection
+                  animation="fadeInUp"
+                  delay={0.2}
+                  className="mb-8"
                 >
-                  ৳ ৭৯৯৯
-                </motion.div>
+                  <CourseTabs data={courseData} />
+                </AnimatedSection>
 
-                <motion.div
-                  className="block w-full"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ delay: 0.8, duration: 0.3 }}
-                >
-                  <button
-                    className="w-full bg-[#E91E63] text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors"
-                    onClick={handleEnrollClick}
-                  >
-                    কোর্সে ভর্তি হন
-                  </button>
-                </motion.div>
+                {/* Overview Section */}
+                {courseData.overviewFeatures && (
+                  <AnimatedSection animation="fadeInUp" delay={0.3}>
+                    <Overview data={courseData.overviewFeatures} />
+                  </AnimatedSection>
+                )}
+
+                {/* Curriculum Section - Using sanitized data */}
+                {sanitizedCurriculum && (
+                  <AnimatedSection animation="fadeInUp" delay={0.4}>
+                    <CourseCurriculum data={sanitizedCurriculum} />
+                  </AnimatedSection>
+                )}
+
+                {/* Author Section */}
+                {authorData && (
+                  <AnimatedSection animation="fadeInUp" delay={0.5}>
+                    <CourseAuthor data={authorData} />
+                  </AnimatedSection>
+                )}
+
+                {/* Review Section */}
+                {reviewData && (
+                  <AnimatedSection animation="revealSection" delay={0.6}>
+                    <ReviewSlider data={reviewData} />
+                  </AnimatedSection>
+                )}
+
+                {/* FAQ Section */}
+                {faqData && (
+                  <AnimatedSection animation="fadeInUp" delay={0.7}>
+                    <CourseFAQ data={faqData} />
+                  </AnimatedSection>
+                )}
+
+                {/* Project Section */}
+                {projectData && (
+                  <AnimatedSection animation="scrollFadeIn" delay={0.8}>
+                    <ProjectShowcase data={projectData} />
+                  </AnimatedSection>
+                )}
+
+                {/* Course Bundle Section */}
+                {courseBundleData && (
+                  <AnimatedSection animation="fadeInUp" delay={0.9}>
+                    <CourseBundle
+                      data={courseBundleData}
+                      courseInfo={courseInfo}
+                    />
+                  </AnimatedSection>
+                )}
               </div>
-            </motion.div>
+            )}
+
+            {/* Sidebar - Client Component for Interactivity */}
+            <div className="lg:col-span-1 space-y-6 order-1 md:order-1 lg:order-2">
+              <AnimatedSection
+                animation="fadeInUp"
+                delay={0.3}
+                className="sticky top-4"
+              >
+                <CoursePriceSidebar courseInfo={courseInfo} />
+              </AnimatedSection>
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   )
 }

@@ -1,5 +1,5 @@
-'use client'
-import type { Resource } from './types/course'
+import type { Resource } from '@/types/course-view-types'
+import DynamicIcon from '../shared/DynamicIcon'
 
 interface ResourceListProps {
   resources: Resource[]
@@ -14,7 +14,15 @@ export function ResourceList({ resources }: ResourceListProps) {
           className="flex items-start gap-3 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
         >
           <div className="bg-primary/10 p-2 rounded-md text-primary">
-            <resource.icon className="h-5 w-5" />
+            {/* <resource.icon className="h-5 w-5" /> */}
+            {resource.resourceIcon && (
+              <DynamicIcon
+                icon={resource.resourceIcon}
+                className="h-5 w-5"
+                width={15}
+                height={15}
+              />
+            )}
           </div>
           <div className="flex-1">
             <h4 className="font-medium">{resource.title}</h4>

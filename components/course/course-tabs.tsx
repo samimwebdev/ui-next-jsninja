@@ -2,15 +2,17 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CoursePageData } from '@/types/course-page-types'
 
 const tabItems = [
   { id: 'overview', label: 'Overview' },
   { id: 'curriculum', label: 'Curriculum' },
   { id: 'instructor', label: 'Instructor' },
   { id: 'reviews', label: 'Reviews' },
+  { id: 'projects', label: 'Projects' },
 ]
 
-export function CourseTabs() {
+export const CourseTabs: React.FC<{ data: CoursePageData }> = ({ data }) => {
   const [activeTab, setActiveTab] = useState('overview')
 
   const handleTabChange = (value: string) => {
@@ -42,7 +44,7 @@ export function CourseTabs() {
         initial={{ width: '25%' }}
         animate={{
           width: `${
-            (tabItems.findIndex((item) => item.id === activeTab) + 1) * 25
+            (tabItems.findIndex((item) => item.id === activeTab) + 1) * 20
           }%`,
         }}
         transition={{ duration: 0.3 }}

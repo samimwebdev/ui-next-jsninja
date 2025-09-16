@@ -19,22 +19,45 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-import type { Lesson, Module } from './types/course'
+import type { Lesson, Module } from '@/types/course-view-types'
+import { useRouter, usePathname } from 'next/navigation'
 
 interface SidebarProps {
   modules: Module[]
-  currentLessonId: string
-  onLessonSelect: (moduleId: string, lesson: Lesson) => void
+  currentLessonId: string | null
+  currentModuleId: number | null
+  onLessonSelect: (moduleId: number, lesson: Lesson) => void
 }
 
 export function Sidebar({
   modules,
   currentLessonId,
-  onLessonSelect,
+  currentModuleId,
 }: SidebarProps) {
   const [search, setSearch] = React.useState('')
-  const [openModules, setOpenModules] = React.useState<string[]>(['m2'])
+  const [openModules, setOpenModules] = React.useState<number[]>([])
   const [filteredModules, setFilteredModules] = React.useState(modules)
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Auto-expand the module containing the current lesson
+  React.useEffect(() => {
+    if (currentModuleId && !openModules.includes(currentModuleId)) {
+      setOpenModules((prev) => {
+        if (!prev.includes(currentModuleId)) {
+          return [...prev, currentModuleId]
+        }
+        return prev
+      })
+    }
+  }, [currentModuleId, openModules])
+
+  // Initialize with the first module expanded if no current module
+  React.useEffect(() => {
+    if (modules.length > 0 && openModules.length === 0 && !currentModuleId) {
+      setOpenModules([modules[0].id])
+    }
+  }, [modules, openModules.length, currentModuleId])
 
   // Calculate progress
   const calculateProgress = () => {
@@ -76,17 +99,12 @@ export function Sidebar({
     const searchLower = search.toLowerCase()
     const filtered = modules
       .map((module) => {
-        // Check if module title matches
         const moduleMatches = module.title.toLowerCase().includes(searchLower)
-
-        // Filter lessons that match search
         const filteredLessons = module.lessons.filter((lesson) =>
           lesson.title.toLowerCase().includes(searchLower)
         )
 
-        // If module matches or has matching lessons, include it
         if (moduleMatches || filteredLessons.length > 0) {
-          // If module matches, return all lessons, otherwise only matching lessons
           return {
             ...module,
             lessons: moduleMatches ? module.lessons : filteredLessons,
@@ -99,7 +117,7 @@ export function Sidebar({
 
     setFilteredModules(filtered)
 
-    // Open modules that have matching content
+    // Auto-expand modules that have matching content
     const modulesToOpen = filtered.map((m) => m.id)
     setOpenModules((prev) => {
       const newOpen = [...new Set([...prev, ...modulesToOpen])]
@@ -107,7 +125,7 @@ export function Sidebar({
     })
   }, [search, modules])
 
-  const toggleModule = (moduleId: string) => {
+  const toggleModule = (moduleId: number) => {
     setOpenModules((prev) =>
       prev.includes(moduleId)
         ? prev.filter((id) => id !== moduleId)
@@ -115,8 +133,27 @@ export function Sidebar({
     )
   }
 
+  // Fixed lesson click handler
+  const handleLessonClick = (moduleId: number, lesson: Lesson) => {
+    // Extract slug from current pathname
+    const pathSegments = pathname.split('/')
+    const slugIndex = pathSegments.findIndex(
+      (segment) => segment === 'course-view'
+    )
+    const slug = slugIndex !== -1 ? pathSegments[slugIndex + 1] : null
+
+    if (slug) {
+      // Use the new route structure with moduleId
+      const newUrl = `/course-view/${slug}/modules/${moduleId}/lectures/${lesson.documentId}`
+
+      router.push(newUrl)
+    } else {
+      console.error('Could not extract slug from pathname:', pathname)
+    }
+  }
+
   return (
-    <div className="border-l bg-card">
+    <div className="border-l">
       {/* Search */}
       <div className="p-2 border-b">
         <div className="relative">
@@ -158,7 +195,11 @@ export function Sidebar({
               onOpenChange={() => toggleModule(module.id)}
               className="border-b"
             >
-              <CollapsibleTrigger className="flex w-full items-start justify-between py-5 px-6 hover:bg-accent transition-colors">
+              <CollapsibleTrigger
+                className={cn(
+                  'flex w-full items-start justify-between py-5 px-6  transition-colors'
+                )}
+              >
                 <div className="flex items-center gap-3">
                   {module.completed ? (
                     <CheckCircle className="h-6 w-6 text-emerald-500 flex-shrink-0 min-w-[24px] min-h-[24px] self-start" />
@@ -169,7 +210,11 @@ export function Sidebar({
                     <h3 className="font-medium text-base mb-1 break-words">
                       {module.title}
                     </h3>
-                    <p className="text-muted-foreground">{module.duration}</p>
+                    <p className="text-muted-foreground">
+                      {/* Format duration properly - assuming it's in seconds */}
+                      {Math.floor(module.duration / 60)}:
+                      {(module.duration % 60).toString().padStart(2, '0')}
+                    </p>
                   </div>
                 </div>
                 {openModules.includes(module.id) ? (
@@ -178,18 +223,20 @@ export function Sidebar({
                   <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent className="bg-accent/50">
+              <CollapsibleContent>
                 {module.lessons.map((lesson) => (
                   <Button
                     key={lesson.id}
                     variant="ghost"
                     className={cn(
-                      'w-full justify-start gap-3 py-4 px-6 font-normal hover:bg-accent pl-14 relative transition-all duration-200 h-auto',
-                      lesson.completed && 'text-emerald-500',
-                      currentLessonId === lesson.id &&
-                        "bg-primary/10 dark:bg-primary/20 border-l-4 border-primary font-medium shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-['']"
+                      'w-full justify-start gap-3 py-4 px-6 font-normal pl-14 relative transition-all duration-200 h-auto hover:bg-accent/10 hover:text-primary',
+                      lesson.completed &&
+                        'text-emerald-500 hover:text-emerald-500',
+                      currentLessonId === lesson.documentId &&
+                        currentModuleId === module.id &&
+                        'bg-primary/10 dark:bg-primary/20 border-l-4 border-primary font-medium shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-[""]'
                     )}
-                    onClick={() => onLessonSelect(module.id, lesson as Lesson)}
+                    onClick={() => handleLessonClick(module.id, lesson)}
                   >
                     <div className="self-start mt-1">
                       {lesson.completed ? (
