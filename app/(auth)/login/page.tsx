@@ -39,7 +39,6 @@ const Login = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectPath = searchParams.get('redirect') || '/dashboard' //
-  console.log({ redirectPath })
 
   const {
     register,
@@ -95,7 +94,6 @@ const Login = () => {
       // Small delay to let cache invalidation happen
       setTimeout(() => {
         if (redirectPath) {
-          console.log('Redirecting to:', redirectPath)
           window.location.href = redirectPath
         } else {
           router.push('/dashboard')

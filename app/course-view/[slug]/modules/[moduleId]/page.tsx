@@ -17,8 +17,6 @@ export default function ModulePage({
       const resolvedParams = await params
 
       if (!isLoading && courseData && modules.length > 0) {
-        console.log('ModulePage: Looking for module:', resolvedParams.moduleId)
-
         // Find the specific module
         const targetModule = modules.find(
           (module) => module.id.toString() === resolvedParams.moduleId
@@ -27,13 +25,6 @@ export default function ModulePage({
         if (targetModule && targetModule.lessons.length > 0) {
           // Navigate to the first lecture of this specific module
           const firstLesson = targetModule.lessons[0]
-
-          console.log('ModulePage: Redirecting to first lesson:', {
-            module: targetModule.title,
-            lesson: firstLesson.title,
-            moduleId: targetModule.id,
-            lectureId: firstLesson.documentId,
-          })
 
           router.replace(
             `/course-view/${resolvedParams.slug}/modules/${resolvedParams.moduleId}/lectures/${firstLesson.documentId}`

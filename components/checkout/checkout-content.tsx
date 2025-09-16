@@ -10,6 +10,8 @@ import { useSearchParams } from 'next/navigation'
 import { CheckoutError } from './checkout-error'
 import { CheckoutPageSkeleton } from './checkout-skeleton'
 import { CheckoutSummary } from './checkout-summary'
+// ✅ Import the new checkout tracking component
+import { CheckoutTracking } from './checkout-tracking'
 
 export function CheckoutContent() {
   const searchParams = useSearchParams()
@@ -58,8 +60,25 @@ export function CheckoutContent() {
     return <CheckoutError error={error} />
   }
 
+  // Get course data for tracking
+  const courseData = courseResponse?.data
+  const courseName = courseData?.title || 'Unknown Course'
+  const coursePrice = courseData?.price || 0
+
   return (
     <AuthGuard redirectTo="/login" fallback={<CheckoutPageSkeleton />}>
+      {/* ✅ Add Checkout Tracking */}
+      {user && courseData && courseSlug && (
+        <CheckoutTracking
+          courseSlug={courseSlug}
+          courseTitle={courseName}
+          coursePrice={coursePrice}
+          courseType={courseType || 'course'}
+          currentStep="course_info"
+          stepNumber={1}
+        />
+      )}
+
       {user && courseResponse?.data ? (
         <CheckoutSummary
           course={courseResponse.data}

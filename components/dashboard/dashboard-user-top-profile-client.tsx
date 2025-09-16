@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 function DashboardUserTopProfileClient() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['enrolledCourses'],
-    queryFn: fetchEnrolledCourses,
+    queryFn: () => fetchEnrolledCourses({ isPublicPage: false }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   })
@@ -38,8 +38,6 @@ function DashboardUserTopProfileClient() {
 
   const courseEnrolled = data?.data?.courses?.length || 0
   const bootcampEnrolled = data?.data?.bootcamps?.length || 0
-
-  console.log({ courseEnrolled, bootcampEnrolled })
 
   return (
     <div className="flex gap-4 mt-2">

@@ -207,7 +207,6 @@ export function usePusherNotifications({
         )
 
         if (existingNotification) {
-          console.log('Notification already exists, skipping duplicate')
           return oldData
         }
 
@@ -255,8 +254,6 @@ export function usePusherNotifications({
       // Subscribe to user channel
       const channelName = `user-${userDocumentId}`
       channelRef.current = pusherRef.current.subscribe(channelName)
-
-      console.log(`Subscribed to Pusher channel: ${channelName}`)
 
       // Handle course enrollment notifications
       channelRef.current.bind(
@@ -374,11 +371,11 @@ export function usePusherNotifications({
       // Handle connection state
       if (pusherRef.current.connection) {
         pusherRef.current.connection.bind('connected', () => {
-          console.log('Pusher connected')
+          console.info('Pusher connected')
         })
 
         pusherRef.current.connection.bind('disconnected', () => {
-          console.log('Pusher disconnected')
+          console.info('Pusher disconnected')
         })
 
         pusherRef.current.connection.bind('error', (error?: Error) => {
@@ -392,7 +389,6 @@ export function usePusherNotifications({
     // Cleanup function
     return () => {
       if (channelRef.current && pusherRef.current) {
-        console.log(`Unsubscribing from channel: user-${userDocumentId}`)
         channelRef.current.unbind_all()
         pusherRef.current.unsubscribe(`user-${userDocumentId}`)
         channelRef.current = null

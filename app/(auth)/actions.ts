@@ -204,8 +204,6 @@ export async function loginAction(
       }
     }
 
-    console.error('Login action error:', error)
-
     return {
       message: 'Login failed. Please check your credentials.',
       errors:

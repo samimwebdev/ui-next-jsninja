@@ -20,6 +20,7 @@ export interface PaymentMetadata {
   courseId: string
   userId: string
   courseType: string
+  courseSlug: string
   courseTitle: string
 }
 

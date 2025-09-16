@@ -89,8 +89,6 @@ export function useTextProgress({
         lessonDocumentId,
         payload
       )
-
-      console.log('✅ Text lesson completion sent successfully')
     } catch (error) {
       console.error('❌ Failed to send text completion:', error)
       completionSent.current = false
@@ -129,8 +127,6 @@ export function useTextProgress({
           lessonDocumentId,
           payload
         )
-
-        console.log('📊 Text progress update sent')
       } catch (error) {
         console.error('❌ Failed to send text progress update:', error)
       }
@@ -161,13 +157,11 @@ export function useTextProgress({
   useEffect(() => {
     // Skip all tracking if lesson is already completed
     if (isLessonComplete) {
-      console.log(
-        '📚 Text lesson already completed - skipping progress tracking'
-      )
+      // console.log(
+      //   '📚 Text lesson already completed - skipping progress tracking'
+      // )
       return
     }
-
-    console.log('🚀 Starting text progress tracking for incomplete lesson')
 
     // Reset state for new lesson
     isComplete.current = false

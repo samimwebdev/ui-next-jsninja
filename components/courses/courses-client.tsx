@@ -15,11 +15,14 @@ import {
 } from '@/components/ui/select'
 import { CourseCard } from '@/components/courses/course-card'
 import { CourseBundleCard } from '@/components/courses/course-bundle-card'
+
 import {
   FilterType,
   CourseItem,
   CourseBundleItem,
 } from '@/types/courses-page-types'
+import { event, fbEvent } from '@/lib/analytics' // ✅ Using your utilities
+import { CoursesListingTracking } from './courses-listing-tracking'
 
 interface CoursesClientProps {
   coursesData: {
@@ -150,8 +153,68 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
     return filtered
   }, [allItems, activeFilter, searchTerm, sortBy])
 
+  // Track course card Tracking
+  const handleCourseClick = async (course: CourseItem, position: number) => {
+    try {
+      const courseSlug = course.slug
+      const courseTitle = course.title
+      const coursePrice = course.price
+
+      // ✅ Using your event utility function
+      event({
+        action: 'select_item',
+        category: 'ecommerce',
+        label: courseSlug,
+        value: coursePrice,
+      })
+
+      // ✅ Using your fbEvent utility function
+      fbEvent('ViewContent', {
+        content_type: 'course',
+        content_ids: [courseSlug],
+        content_name: courseTitle,
+        value: coursePrice,
+        currency: 'USD',
+      })
+
+      // Server-side tracking
+      await fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_name: 'select_item',
+          event_type: 'both',
+          ga_parameters: {
+            item_list_id: 'courses_listing',
+            item_list_name: 'Courses Listing Page',
+            items: [
+              {
+                item_id: courseSlug,
+                item_name: courseTitle,
+                item_category: 'course',
+                item_list_position: position + 1,
+                price: coursePrice,
+              },
+            ],
+          },
+          fb_custom_data: {
+            content_type: 'course',
+            content_ids: [courseSlug],
+            content_name: courseTitle,
+            value: coursePrice,
+            currency: 'USD',
+          },
+        }),
+      })
+    } catch (error) {
+      console.error('Course click tracking error:', error)
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
+      <CoursesListingTracking coursesData={coursesData} />
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -183,7 +246,9 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
               key={option.value}
               variant={activeFilter === option.value ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setActiveFilter(option.value)}
+              onClick={() => {
+                setActiveFilter(option.value)
+              }}
               className="transition-all duration-200"
             >
               {option.label}
@@ -202,7 +267,9 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
             <Input
               placeholder="Search courses..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+              }}
               className="pl-10 w-full sm:w-64"
             />
           </div>
@@ -210,7 +277,9 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
           {/* Sort */}
           <Select
             value={sortBy}
-            onValueChange={(value: typeof sortBy) => setSortBy(value)}
+            onValueChange={(value: typeof sortBy) => {
+              setSortBy(value)
+            }}
           >
             <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Sort by" />
@@ -228,7 +297,15 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
             <Button
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => {
+                setViewMode('grid')
+                // ✅ Track view mode changes
+                event({
+                  action: 'view_mode_change',
+                  category: 'engagement',
+                  label: 'grid',
+                })
+              }}
               className="rounded-r-none"
             >
               <Grid className="h-4 w-4" />
@@ -236,7 +313,9 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
             <Button
               variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
-              onClick={() => setViewMode('list')}
+              onClick={() => {
+                setViewMode('list')
+              }}
               className="rounded-l-none"
             >
               <List className="h-4 w-4" />
@@ -279,6 +358,20 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: index * 0.05 }}
+              onClick={() => {
+                // ✅ Track item clicks for both courses and bundles
+                if (item.type !== 'courseBundle') {
+                  handleCourseClick(item as CourseItem, index)
+                } else {
+                  // Track bundle clicks
+                  event({
+                    action: 'select_bundle',
+                    category: 'ecommerce',
+                    label: item.slug,
+                    value: item.price,
+                  })
+                }
+              }}
             >
               {item.type === 'courseBundle' ? (
                 <CourseBundleCard
@@ -330,6 +423,12 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
               onClick={() => {
                 setSearchTerm('')
                 setActiveFilter('all')
+                // ✅ Track filter clearing
+                event({
+                  action: 'clear_filters',
+                  category: 'engagement',
+                  label: 'no_results',
+                })
               }}
             >
               Clear filters

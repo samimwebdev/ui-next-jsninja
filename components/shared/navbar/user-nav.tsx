@@ -23,7 +23,6 @@ interface UserNavProps {
 
 export function UserNav({ user, onLogout }: UserNavProps) {
   const profileImageUrl = getProfileImageUrl(user)
-  console.log({ profileImageUrl })
 
   if (!user) {
     return <Skeleton className="h-9 w-9 rounded-full" />

@@ -60,7 +60,6 @@ export async function checkUserSecurity(courseSlug: string): Promise<{
     if ('error' in securityResponse && securityResponse.error) {
       // Check for 404 (user not found - first time access)
       if (securityResponse.error.status === 404) {
-        console.log('User login record not found - first time access allowed')
         return {
           allowed: true,
           message: 'First time accessing this course. Welcome!',

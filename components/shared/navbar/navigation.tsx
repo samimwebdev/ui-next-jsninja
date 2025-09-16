@@ -33,7 +33,7 @@ export const Navigation = ({
     try {
       await logoutAction()
     } catch (err) {
-      console.log(err, 'Logout failed')
+      console.error(err, 'Logout failed')
     }
   }
 

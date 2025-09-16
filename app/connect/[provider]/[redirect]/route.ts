@@ -62,8 +62,6 @@ export async function GET(
       },
     })
 
-    console.log('Existing profile:', existingProfile)
-    
     // Only create profile if it doesn't exist
     if (!existingProfile.data || existingProfile.data.length === 0) {
       // Fetch user details from GitHub

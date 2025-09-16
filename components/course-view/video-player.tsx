@@ -92,7 +92,6 @@ export const VideoPlayer = ({
   const currentLesson = currentModule?.lessons.find(
     (l) => l.documentId === currentContent.lessonId
   )
-  console.log({ currentLesson })
 
   // Check if lesson is already completed
   const isLessonAlreadyCompleted = currentLesson?.completed || false
@@ -141,7 +140,6 @@ export const VideoPlayer = ({
 
   // Custom completion handler for video progress hook
   const handleVideoCompletion = (lessonDocumentId: string) => {
-    console.log('🎥 Video lesson completed via progress tracking')
     setIsVideoCompleted(true)
 
     // Call the original markLessonCompleted function

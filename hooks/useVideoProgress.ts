@@ -63,17 +63,14 @@ export function useVideoProgress(
     const lessonChanged = currentLessonRef.current !== lessonDocumentId
 
     if (lessonChanged) {
-      console.log(
-        `🔄 Lesson changed from ${currentLessonRef.current} to ${lessonDocumentId}`
-      )
       currentLessonRef.current = lessonDocumentId
     }
 
     // FIX: Reset seek state for new lesson OR new position
     if (lessonChanged || lastPosition > 0) {
-      console.log(
-        `🔄 Resetting seek state - lesson changed: ${lessonChanged}, lastPosition: ${lastPosition}`
-      )
+      // console.log(
+      //   `🔄 Resetting seek state - lesson changed: ${lessonChanged}, lastPosition: ${lastPosition}`
+      // )
       hasSeekToLastPosition.current = false
       seekAttempted.current = false // ← This is the key fix!
     }
@@ -81,15 +78,15 @@ export function useVideoProgress(
 
   // FIX: Simplified seek function without redundant checks
   const seekToLastPosition = useCallback(() => {
-    console.log('🔍 Seek attempt:', {
-      lessonId: lessonDocumentId,
-      lastPosition,
-      hasPlayer: !!playerRef.current,
-      isInitialized: isInitialized.current,
-      hasSeekToLastPosition: hasSeekToLastPosition.current,
-      seekAttempted: seekAttempted.current,
-      isLessonComplete,
-    })
+    // console.log('🔍 Seek attempt:', {
+    //   lessonId: lessonDocumentId,
+    //   lastPosition,
+    //   hasPlayer: !!playerRef.current,
+    //   isInitialized: isInitialized.current,
+    //   hasSeekToLastPosition: hasSeekToLastPosition.current,
+    //   seekAttempted: seekAttempted.current,
+    //   isLessonComplete,
+    // })
 
     if (
       !playerRef.current ||
@@ -104,18 +101,18 @@ export function useVideoProgress(
     }
 
     // FIX: Don't check seekAttempted here - just try to seek
-    console.log(
-      `🎯 Seeking to last position: ${lastPosition} seconds for lesson: ${lessonDocumentId}`
-    )
+    // console.log(
+    //   `🎯 Seeking to last position: ${lastPosition} seconds for lesson: ${lessonDocumentId}`
+    // )
 
     try {
       playerRef.current.setCurrentTime(lastPosition, (error) => {
         if (error) {
           console.error('❌ Error seeking to last position:', error)
         } else {
-          console.log(
-            `✅ Successfully seeked to ${lastPosition} seconds for lesson: ${lessonDocumentId}`
-          )
+          // console.log(
+          //   `✅ Successfully seeked to ${lastPosition} seconds for lesson: ${lessonDocumentId}`
+          // )
           hasSeekToLastPosition.current = true // Only set on success
           lastReportedTime.current = lastPosition
         }
@@ -188,7 +185,7 @@ export function useVideoProgress(
           finalProgressSent.current = true
         }
 
-        console.log('✅ Video progress sent successfully')
+        console.info('✅ Video progress sent successfully')
       } catch (error) {
         console.error('❌ Failed to send video progress:', error)
       }
@@ -259,10 +256,6 @@ export function useVideoProgress(
 
             player.getDuration((d) => {
               videoDuration.current = d
-              console.log(
-                `📏 Video duration: ${d} seconds for lesson: ${lessonDocumentId}`
-              )
-              console.log(`📍 Will seek to position: ${lastPosition} seconds`)
 
               // FIX: Always try to seek if we have a valid position
               if (lastPosition > 0 && lastPosition < d) {
@@ -305,13 +298,11 @@ export function useVideoProgress(
           })
 
           player.on('play', () => {
-            console.log('▶️ Video play event')
             isPlaying.current = true
             lastPlayTime.current = Date.now()
           })
 
           player.on('pause', () => {
-            console.log('⏸️ Video pause event')
             if (lastPlayTime.current !== null) {
               const now = Date.now()
               totalWatchTime.current += (now - lastPlayTime.current) / 1000
@@ -385,7 +376,7 @@ export function useVideoProgress(
       return
     }
 
-    console.log(`📍 Starting with last position: ${lastPosition} seconds`)
+    // console.log(`📍 Starting with last position: ${lastPosition} seconds`)
 
     // Reset ALL progress tracking state
     initializationAttempts.current = 0

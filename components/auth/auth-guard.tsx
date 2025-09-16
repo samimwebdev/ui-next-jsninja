@@ -21,13 +21,6 @@ export function AuthGuard({
   const [hasRedirected, setHasRedirected] = useState(false)
 
   useEffect(() => {
-    console.log(
-      user,
-      isLoading,
-      user,
-      hasRedirected,
-      'AuthGuard: User is authenticated'
-    )
     if (!isLoading && !user && !hasRedirected) {
       setHasRedirected(true)
       // Preserve current URL for redirect after login
@@ -35,10 +28,7 @@ export function AuthGuard({
       const loginUrl = `${redirectTo}?redirect=${encodeURIComponent(
         currentUrl
       )}`
-      console.log(
-        'AuthGuard: Redirecting to login with redirect URL:',
-        loginUrl
-      )
+
       router.push(loginUrl)
     }
   }, [user, isLoading, router, redirectTo, hasRedirected])

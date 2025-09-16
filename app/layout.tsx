@@ -10,9 +10,12 @@ import { getUser } from '@/lib/auth'
 import { VideoProvider } from '@/components/context/video-provider'
 import { strapiFetch } from '@/lib/strapi'
 import { Menu, SEOData, StrapiImage } from '@/types/shared-types'
-
 import ReactQueryProvider from '@/components/context/react-query-provider'
-// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Suspense } from 'react'
+
+// ✅ Import Analytics Components
+import { GoogleAnalytics } from '@/components/analytics/google-analytics'
+import { FacebookPixel } from '@/components/analytics/facebook-pixel'
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ['latin', 'bengali'],
@@ -34,13 +37,17 @@ export interface StrapiSettingData {
   logo?: StrapiImage
 }
 
-//Default Seo Metadata
+// Default Seo Metadata
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const { data: setting } = await strapiFetch<{ data: StrapiSettingData }>(
       '/api/setting?populate=*',
       {
         headers: { 'Content-Type': 'application/json' },
+        next: {
+          revalidate: 3600, // Cache for 1 hour
+          tags: ['settings', 'seo'],
+        },
       }
     )
     const seo = setting?.seo
@@ -106,7 +113,6 @@ export async function generateMetadata(): Promise<Metadata> {
     }
   } catch (e) {
     // fallback if Strapi fails
-    console.log(e)
     return {
       title: 'JavaScript Ninja - Learn Web Development',
       description:
@@ -131,6 +137,10 @@ export default async function RootLayout({
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
+      next: {
+        revalidate: 3600,
+        tags: ['menus'],
+      },
     }
   )
 
@@ -139,6 +149,10 @@ export default async function RootLayout({
     '/api/setting?populate=*',
     {
       headers: { 'Content-Type': 'application/json' },
+      next: {
+        revalidate: 3600,
+        tags: ['settings'],
+      },
     }
   )
   const logo = setting?.logo
@@ -148,12 +162,18 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        {/* ✅ Analytics Scripts */}
+        <Suspense fallback={null}>
+          <GoogleAnalytics />
+          <FacebookPixel />
+        </Suspense>
+      </head>
       <body
         className={`${hindSiliguri.className} ${hindSiliguri.variable} antialiased`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>
-          {/* <ReactQueryDevto  ols initialIsOpen={false} /> */}
           <AuthProvider user={currentUser}>
             <ThemeProvider
               attribute="class"

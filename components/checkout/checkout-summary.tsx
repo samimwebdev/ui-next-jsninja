@@ -98,7 +98,6 @@ export function CheckoutSummary({
     if (!baseContent) return false
 
     if (Array.isArray(baseContent)) {
-      console.log({ baseContent })
       return baseContent.some((content) => content.isRegistrationEnabled)
     }
 

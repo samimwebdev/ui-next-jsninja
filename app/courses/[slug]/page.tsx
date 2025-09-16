@@ -20,6 +20,7 @@ import { notFound } from 'next/navigation'
 import { Curriculum } from '@/types/shared-types'
 import { CoursePageData } from '@/types/course-page-types'
 import { strapiFetch } from '@/lib/strapi'
+import { CourseTracking } from '@/components/course/course-tracking'
 
 interface CoursePageProps {
   params: Promise<{
@@ -30,8 +31,6 @@ interface CoursePageProps {
 // Generate static params for all course pages
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   try {
-    console.log('🚀 Generating static params for courses...')
-
     // Fetch all course slugs - data structure is different than expected
     const response = await strapiFetch<{
       data: {
@@ -80,7 +79,6 @@ export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
     )
 
     return validCourses.map((course) => {
-      console.log(`📄 Static page for: ${course.slug} (${course.title})`)
       return {
         slug: course.slug, // Direct access to slug property
       }
@@ -117,7 +115,6 @@ const sanitizeCurriculumData = (curriculum: Curriculum): Curriculum => {
 export async function generateMetadata({ params }: CoursePageProps) {
   const { slug } = await params
   try {
-    console.log('🔍 Generating metadata for course:', slug)
     const courseData = await getCourseData(slug)
 
     return generateSEOMetadata(
@@ -197,6 +194,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
   return (
     <>
       <StructuredData seoData={courseData.baseContent?.seo} />
+      <CourseTracking {...courseInfo} />
 
       <div className="bg-background text-foreground">
         <main className="container mx-auto px-4 max-w-screen-xl">

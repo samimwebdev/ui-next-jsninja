@@ -150,7 +150,7 @@ export default function LeaderboardPage() {
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
     retry: (failureCount, error) => {
-      console.log('Leaderboard fetch error:', error)
+      console.error('Leaderboard fetch error:', error)
       // Don't retry if it's a "not available" error
       if (
         error instanceof Error &&
@@ -162,7 +162,6 @@ export default function LeaderboardPage() {
     },
   })
 
-  console.log({ leaderboardData })
   // Show courses loading state
   if (!courses.length && !coursesLoading) {
     return (
@@ -225,7 +224,6 @@ export default function LeaderboardPage() {
 
   const currentUserStats = leaderboardData?.data?.userScoreboard
   const leaderboard = leaderboardData?.data?.leaderboard || []
-  console.log({ leaderboardData })
 
   // Check if leaderboard is not available (API returned null data)
   const isLeaderboardNotAvailable =

@@ -121,8 +121,6 @@ export default function BootcampAssessment({
     setSubmissionError(null)
 
     try {
-      console.log('Client: Submitting quiz to server action')
-
       // Prepare the submission data with option IDs
       const submissionData = {
         answers: questions.map((question, index) => ({
@@ -142,7 +140,6 @@ export default function BootcampAssessment({
         setSubmissionResults(result.data)
         setShowResults(true)
         setIsQuizStarted(false)
-        console.log('Client: Quiz submitted successfully')
       } else {
         // Handle server action error
         setSubmissionError(result.error || 'Failed to submit quiz')

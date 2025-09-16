@@ -101,12 +101,12 @@ export default function CourseViewLayoutWrapper({
       lessonId: string
     ): Promise<number> => {
       if (!userProgress) {
-        console.log('❌ No user progress available')
+        console.info('❌ No user progress available')
         return 0
       }
 
       try {
-        console.log(`🔍 Fetching fresh position for lesson ${lessonId}`)
+        // console.log(`🔍 Fetching fresh position for lesson ${lessonId}`)
 
         const foundLessonLastPosition = await trackExistingWatchedLesson(
           userProgress?.user?.documentId,
@@ -212,8 +212,6 @@ export default function CourseViewLayoutWrapper({
 
       if (firstLesson) {
         const initializeFirstLesson = async () => {
-          console.log('🚀 Initializing first lesson with fresh position')
-
           // Fetch fresh position for first lesson
           const initialPosition = await fetchLessonPosition(
             courseData.documentId,
@@ -265,8 +263,7 @@ export default function CourseViewLayoutWrapper({
       )
 
       if (selectedLesson) {
-        console.log(`🎯 Selecting lesson: ${lesson.documentId}`)
-
+        // console.log(`🎯 Selecting lesson: ${lesson.documentId}`)
         // Set loading state
         setLoadingPosition(true)
 
@@ -306,7 +303,6 @@ export default function CourseViewLayoutWrapper({
           }
 
           setCurrentContent(newContent)
-          console.log(`✅ Content set with position: ${freshPosition}`)
         } catch (error) {
           console.error(
             '❌ Error fetching position during content select:',

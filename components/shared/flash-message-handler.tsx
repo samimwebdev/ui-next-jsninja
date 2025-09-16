@@ -19,7 +19,6 @@ export function FlashMessageHandler() {
     if (error) {
       // FIX: Filter out NEXT_REDIRECT messages
       if (error.includes('NEXT_REDIRECT') || error.includes('digest')) {
-        console.log('Ignoring NEXT_REDIRECT error message')
         cleanUpUrl('error')
         return
       }

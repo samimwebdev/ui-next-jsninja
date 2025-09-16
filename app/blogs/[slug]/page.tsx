@@ -116,8 +116,6 @@ async function RelatedBlogsWrapper({ slug }: { slug: string }) {
 // Generate static params for all blog pages
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   try {
-    console.log('🚀 Generating static params for blogs...')
-
     // Fetch all blog slugs for SSG
     const response = await strapiFetch<{
       data: Array<{
@@ -150,10 +148,6 @@ export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
 
       return hasSlug
     })
-
-    console.log(
-      `✅ Generating ${validBlogs.length} blog pages out of ${response.data.length} total`
-    )
 
     return validBlogs.map((blog) => {
       console.log(`📄 Static page for: ${blog.slug} (${blog.title})`)

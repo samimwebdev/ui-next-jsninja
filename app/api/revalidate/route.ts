@@ -29,16 +29,16 @@ export async function POST(request: NextRequest) {
   try {
     const body: StrapiWebhookBody = await request.json()
 
-    console.log('📬 Webhook payload received:', {
-      event: body.event,
-      model: body.model,
-      entry: {
-        id: body.entry?.id,
-        documentId: body.entry?.documentId,
-        slug: body.entry?.slug || body.entry?.baseContent?.slug,
-        title: body.entry?.title || body.entry?.baseContent?.title,
-      },
-    })
+    // console.log('📬 Webhook payload received:', {
+    //   event: body.event,
+    //   model: body.model,
+    //   entry: {
+    //     id: body.entry?.id,
+    //     documentId: body.entry?.documentId,
+    //     slug: body.entry?.slug || body.entry?.baseContent?.slug,
+    //     title: body.entry?.title || body.entry?.baseContent?.title,
+    //   },
+    // })
 
     // ✅ Verify webhook secret for security
     const secret = request.headers.get('x-strapi-signature')
@@ -109,11 +109,11 @@ export async function POST(request: NextRequest) {
     // ✅ Add a small delay to ensure all revalidations complete
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    console.log('✅ Revalidation completed:', {
-      paths: revalidatedPaths,
-      tags: revalidatedTags,
-      timestamp: new Date().toISOString(),
-    })
+    // console.log('✅ Revalidation completed:', {
+    //   paths: revalidatedPaths,
+    //   tags: revalidatedTags,
+    //   timestamp: new Date().toISOString(),
+    // })
 
     return NextResponse.json({
       revalidated: true,
@@ -139,10 +139,6 @@ async function handleCourseBaseRevalidation(
 ) {
   const { entry } = body
   const slug = entry?.baseContent?.slug || entry?.slug
-
-  console.log(
-    `🔄 Processing course-base revalidation for: ${slug || entry.documentId}`
-  )
 
   // ✅ Since course-base is shared, revalidate BOTH course and bootcamp paths
   if (slug) {
@@ -186,10 +182,6 @@ async function handleCourseBaseRevalidation(
       revalidatedPaths.push(path)
     }
   })
-
-  console.log(
-    `✅ Course-base revalidation completed for: ${slug || entry.documentId}`
-  )
 }
 
 // 🎯 Enhanced Course Revalidation (with duplicate prevention)
@@ -200,10 +192,6 @@ async function handleCourseRevalidation(
 ) {
   const { entry } = body
   const slug = entry?.baseContent?.slug || entry?.slug
-
-  console.log(
-    `🎯 Processing course revalidation for: ${slug || entry.documentId}`
-  )
 
   // Revalidate course-specific pages with duplicate check
   if (slug && !revalidatedPaths.includes(`/courses/${slug}`)) {
@@ -230,10 +218,6 @@ async function handleCourseRevalidation(
     revalidatePath('/courses', 'page')
     revalidatedPaths.push('/courses')
   }
-
-  console.log(
-    `✅ Course revalidation completed for: ${slug || entry.documentId}`
-  )
 }
 
 // 🏕️ Enhanced Bootcamp Revalidation (with duplicate prevention)
@@ -244,10 +228,6 @@ async function handleBootcampRevalidation(
 ) {
   const { entry } = body
   const slug = entry.baseContent?.slug || entry?.slug
-
-  console.log(
-    `🏕️ Processing bootcamp revalidation for: ${slug || entry.documentId}`
-  )
 
   // Revalidate bootcamp-specific pages with duplicate check
   if (slug && !revalidatedPaths.includes(`/bootcamps/${slug}`)) {
@@ -274,10 +254,6 @@ async function handleBootcampRevalidation(
     revalidatePath('/courses', 'page')
     revalidatedPaths.push('/courses')
   }
-
-  console.log(
-    `✅ Bootcamp revalidation completed for: ${slug || entry.documentId}`
-  )
 }
 
 // 📝 Enhanced Blog Revalidation (with duplicate prevention)
@@ -288,10 +264,6 @@ async function handleBlogRevalidation(
 ) {
   const { entry } = body
   const slug = entry?.slug
-
-  console.log(
-    `📝 Processing blog revalidation for: ${slug || entry.documentId}`
-  )
 
   if (slug && !revalidatedPaths.includes(`/blogs/${slug}`)) {
     revalidatePath(`/blogs/${slug}`, 'page')
@@ -317,8 +289,6 @@ async function handleBlogRevalidation(
     revalidatePath('/blogs', 'page')
     revalidatedPaths.push('/blogs')
   }
-
-  console.log(`✅ Blog revalidation completed for: ${slug || entry.documentId}`)
 }
 
 // 🏠 Enhanced Home Page Revalidation (with duplicate prevention)
@@ -327,8 +297,6 @@ async function handleHomeRevalidation(
   revalidatedPaths: string[],
   revalidatedTags: string[]
 ) {
-  console.log('🏠 Processing home page revalidation')
-
   // Force complete homepage revalidation (with duplicate check)
   if (!revalidatedPaths.includes('/')) {
     revalidatePath('/', 'page')
@@ -342,8 +310,6 @@ async function handleHomeRevalidation(
       revalidatedTags.push(tag)
     }
   })
-
-  console.log('✅ Home page revalidation completed')
 }
 
 // 📦 Enhanced Course Bundle Revalidation (with duplicate prevention)
@@ -354,10 +320,6 @@ async function handleCourseBundleRevalidation(
 ) {
   const { entry } = body
   const slug = entry.slug
-
-  console.log(
-    `📦 Processing course bundle revalidation for: ${slug || entry.documentId}`
-  )
 
   if (slug && !revalidatedPaths.includes(`/bundles/${slug}`)) {
     revalidatePath(`/bundles/${slug}`, 'page')
@@ -373,10 +335,6 @@ async function handleCourseBundleRevalidation(
     revalidateTag('course-bundle')
     revalidatedTags.push('course-bundle')
   }
-
-  console.log(
-    `✅ Course bundle revalidation completed for: ${slug || entry.documentId}`
-  )
 }
 
 // 🏷️ Enhanced Category Revalidation (with duplicate prevention)

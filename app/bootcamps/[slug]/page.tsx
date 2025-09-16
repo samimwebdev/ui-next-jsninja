@@ -21,6 +21,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { PromoVideosSkeleton } from '@/components/bootcamp/promo-videos/promo-videos-lazy'
 import { strapiFetch } from '@/lib/strapi'
+import { CourseTracking } from '@/components/course/course-tracking'
 
 interface BootcampPageProps {
   params: Promise<{
@@ -71,7 +72,6 @@ export async function generateMetadata({ params }: BootcampPageProps) {
     let bootcampData: BootcampPageData
     try {
       bootcampData = await getBootcampData(slug)
-      console.log('🔥 Generating metadata for:', slug)
     } catch (error) {
       console.error('Error fetching bootcamp data for metadata:', error)
       notFound()
@@ -170,6 +170,7 @@ export default async function BootcampPage({
 
   return (
     <>
+      <CourseTracking {...courseInfo} />
       {heroData && (
         <BootcampHero
           data={heroData}
