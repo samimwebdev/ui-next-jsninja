@@ -107,6 +107,7 @@ const SignUp = () => {
   const handlePasswordChange = async (
     evt: React.ChangeEvent<HTMLInputElement>
   ) => {
+    console.info('Password changed', evt)
     // Trigger validation for confirm password when password changes
     if (touchedFields.confirmPassword) {
       await trigger('confirmPassword')
@@ -148,7 +149,7 @@ const SignUp = () => {
                 Already have an account?{' '}
                 <Link
                   href="/login"
-                  className="underline text-primary hover:text-primary font-medium"
+                  className="underline text-primary text-link-light hover:text-ninja-orange dark:text-link-dark font-medium"
                 >
                   Sign in
                 </Link>
@@ -381,7 +382,7 @@ const SignUp = () => {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-gradient-ninja-primary hover:bg-gradient-ninja-reverse text-slate-900 font-semibold py-2.5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Creating Account...' : 'Create an account'}

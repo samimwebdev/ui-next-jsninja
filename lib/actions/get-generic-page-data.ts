@@ -11,7 +11,7 @@ export async function getPageData(slug: string): Promise<PageResponse> {
 
       next: {
         revalidate: 3600, // Revalidate every hour
-        tags: ['pages'], // Optional: cache tags for better cache management
+        tags: ['pages', `page-${slug}`], // Optional: cache tags for better cache management
       },
     })
     return data

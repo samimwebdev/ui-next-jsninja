@@ -1,13 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  Clock,
-  DollarSign,
-  Sparkles,
-  CheckCircle2,
-  ExternalLink,
-} from 'lucide-react'
+import { Clock, Sparkles, CheckCircle2, ExternalLink } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -220,9 +214,10 @@ export const CourseBundle: React.FC<{
                 >
                   <Button
                     size="lg"
-                    className="w-full gap-2 bg-primary hover:bg-primary/90 transition-colors mt-4"
+                    // className="w-full gap-2 bg-primary hover:bg-primary/90 transition-colors mt-4"
+                    className="w-full gap-2 btn-ninja-primary text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                   >
-                    <DollarSign className="w-4 h-4" />
+                    {/* <DollarSign className="w-4 h-4" /> */}
                     Enroll Now
                   </Button>
                 </Link>

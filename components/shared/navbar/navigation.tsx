@@ -13,6 +13,8 @@ import { logoutAction } from '@/app/(auth)/actions'
 import { MenuItem, StrapiImage } from '@/types/shared-types'
 import Image from 'next/image'
 import { useCurrentUser } from '@/hooks/use-current-user'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRouter, usePathname } from 'next/navigation' // ✅ Add usePathname
 
 export const Navigation = ({
   menuItems,
@@ -21,6 +23,9 @@ export const Navigation = ({
   menuItems: MenuItem[]
   logo?: StrapiImage
 }) => {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const pathname = usePathname() // ✅ Get current pathname
   const { data: currentUser, isLoading } = useCurrentUser()
   const [mounted, setMounted] = useState(false)
   const [logoLoaded, setLogoLoaded] = useState(false)
@@ -31,14 +36,41 @@ export const Navigation = ({
 
   const logout = async () => {
     try {
+      // ✅ Clear all user-related queries first
+      await queryClient.cancelQueries({ queryKey: ['currentUser'] })
+      queryClient.removeQueries({ queryKey: ['currentUser'] })
+      queryClient.removeQueries({ queryKey: ['enrolledCourses'] })
+      queryClient.removeQueries({ queryKey: ['userProfile'] })
+      queryClient.removeQueries({ queryKey: ['notifications'] })
+
+      // ✅ Set currentUser to null immediately for UI feedback
+      queryClient.setQueryData(['currentUser'], null)
+
+      // ✅ Then perform the logout action
       await logoutAction()
+
+      // ✅ Clear all caches after logout
+      queryClient.clear()
+
+      // ✅ Redirect to login page
+      router.push('/login')
+
+      console.log('Logout successful')
     } catch (err) {
-      console.error(err, 'Logout failed')
+      console.error('Logout failed:', err)
+      // ✅ Even if logout action fails, clear the cache
+      queryClient.clear()
+      router.push('/login')
     }
   }
 
   const isLoggedIn = mounted && !isLoading && !!currentUser
+
   const shouldShowSkeleton = !mounted || isLoading
+
+  //  Check if current page is login or register
+  const isLoginPage = pathname === '/login'
+  const isRegisterPage = pathname === '/register'
 
   return (
     <div className="bg-muted">
@@ -50,8 +82,8 @@ export const Navigation = ({
               <div className="relative w-[150px] h-[100px]">
                 {/* Always show placeholder first to prevent layout shift */}
                 <Image
-                  width={150}
-                  height={70}
+                  // width={150}
+                  // height={70}
                   src="/logo.png"
                   alt="Javascript Ninja"
                   className={`object-contain transition-opacity duration-300 ${
@@ -59,14 +91,16 @@ export const Navigation = ({
                       ? 'opacity-0'
                       : 'opacity-100'
                   }`}
+                  fill // ✅ Add this
                   priority
                 />
 
                 {/* API Logo - overlay on top when loaded */}
                 {logo?.formats?.thumbnail && (
                   <Image
-                    width={150}
-                    height={70}
+                    // width={150}
+                    // height={70}
+                    fill
                     src={logo.formats.thumbnail.url}
                     alt={logo.alternativeText || 'Logo'}
                     className={`absolute inset-0 object-contain transition-opacity duration-300 ${
@@ -74,6 +108,7 @@ export const Navigation = ({
                     }`}
                     onLoad={() => setLogoLoaded(true)}
                     onError={() => setLogoLoaded(false)}
+                    // style={{ width: 'auto', height: '70px' }} // ✅ Add this
                     priority
                   />
                 )}
@@ -115,16 +150,32 @@ export const Navigation = ({
             ) : (
               // Logged out state
               <div className="flex items-center gap-3">
+                {/* ✅ Enhanced Sign In Button with active state */}
                 <Button
-                  variant="outline"
-                  className="hidden sm:inline-flex h-10"
+                  variant={isLoginPage ? 'default' : 'outline'}
+                  className={`hidden sm:inline-flex h-10 transition-colors ${
+                    isLoginPage
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  }`}
                   asChild
                 >
-                  <Link href="/login">Sign In</Link>
+                  <Link href="/login">Login</Link>
                 </Button>
-                <Button className="h-10" asChild>
-                  <Link href="/register">Sign Up</Link>
+
+                {/* ✅ Enhanced Sign Up Button with active state */}
+                <Button
+                  variant={isRegisterPage ? 'default' : 'outline'}
+                  className={`h-10 transition-colors ${
+                    isRegisterPage
+                      ? 'bg-primary/90 text-primary-foreground shadow-lg ring-2 ring-primary/20'
+                      : 'hover:bg-accent hover:text-accent-foreground'
+                  }`}
+                  asChild
+                >
+                  <Link href="/register">Register</Link>
                 </Button>
+
                 <ThemeSwitcher />
                 <div className="md:hidden">
                   <NavigationSheet

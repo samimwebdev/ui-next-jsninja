@@ -71,6 +71,7 @@ export function VideoPlayer({
           <div className="w-full h-full bg-gray-900">
             {thumbnail ? (
               <Image
+                priority
                 src={thumbnail}
                 alt="Video thumbnail"
                 width={600}

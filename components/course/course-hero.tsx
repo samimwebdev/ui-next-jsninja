@@ -36,7 +36,7 @@ export function CourseHero({ data, courseInfo }: CourseHeroProps) {
             {shortLabel}
           </Badge>
 
-          <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight bg-">
+          <h1 className="mt-6 max-w-[500px] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight bg-">
             {title}
           </h1>
 

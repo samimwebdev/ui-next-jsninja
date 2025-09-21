@@ -283,7 +283,7 @@ export const CourseBundleCard: React.FC<CourseBundleCardProps> = ({
                 <Link
                   key={course.id}
                   href={getCourseLink(course)}
-                  className="block text-xs text-primary hover:text-primary/80 transition-colors truncate"
+                  className="block text-xs text-primary text-ninja-gold-light dark:text-ninja-gold-dark transition-colors truncate"
                 >
                   • {course.title}
                 </Link>

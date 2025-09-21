@@ -45,12 +45,14 @@ export function CTAButtons({
     <div className={`flex items-center gap-4 ${className}`}>
       <Button
         size={size}
-        className="rounded-full text-base"
+        className="rounded-full text-base btn-ninja-primary"
+        // className="btn-ninja-primary  text-white rounded-full hover:bg-[#D81B60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-none"
         onClick={handleClick}
         variant={primaryButtonVariant}
         disabled={isPrimaryBtnDisabled}
       >
-        {primaryLabel} <ArrowUpRight className="!h-5 !w-5" />
+        <ArrowUpRight className="!h-5 !w-5" />
+        {primaryLabel}
       </Button>
       {isSecondaryBtn && (
         <Button

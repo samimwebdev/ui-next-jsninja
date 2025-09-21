@@ -116,7 +116,7 @@ export async function registerAction(
   }
 }
 export async function githubAuthAction() {
-  const githubAuthUrl = `${process.env.STRAPI_URL}/api/connect/github`
+  const githubAuthUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/connect/github`
   redirect(githubAuthUrl)
 }
 

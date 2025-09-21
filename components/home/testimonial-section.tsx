@@ -120,8 +120,11 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
   const isMobile = useMediaQuery()
 
   // Use the provided data or fallback to empty array
-  const reviews =
-    reviewSectionData?.reviews?.length > 0 ? reviewSectionData.reviews : []
+  const reviews = useMemo(
+    () =>
+      reviewSectionData?.reviews?.length > 0 ? reviewSectionData.reviews : [],
+    [reviewSectionData]
+  )
 
   const next = useCallback(() => {
     if (reviews.length === 0) return

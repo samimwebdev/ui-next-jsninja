@@ -48,23 +48,6 @@ async function getHomeData(): Promise<HomePageData> {
   }
 }
 
-// Helper function to extract section data
-function getSectionData<T extends ComponentType>(
-  homeData: HomePageData,
-  componentType: T
-): ComponentDataMap[T] | undefined {
-  const sections = Array.isArray(homeData.homeSection)
-    ? homeData.homeSection
-    : homeData.homeSection
-    ? [homeData.homeSection]
-    : []
-
-  return sections.find(
-    (section): section is ComponentDataMap[T] =>
-      section.__component === componentType
-  ) as ComponentDataMap[T] | undefined
-}
-
 // Generate metadata for SEO
 export async function generateMetadata() {
   try {
@@ -84,6 +67,23 @@ export async function generateMetadata() {
     console.error('Error generating metadata:', error)
     return generateSEOMetadata() // Returns default metadata
   }
+}
+
+// Helper function to extract section data
+function getSectionData<T extends ComponentType>(
+  homeData: HomePageData,
+  componentType: T
+): ComponentDataMap[T] | undefined {
+  const sections = Array.isArray(homeData.homeSection)
+    ? homeData.homeSection
+    : homeData.homeSection
+    ? [homeData.homeSection]
+    : []
+
+  return sections.find(
+    (section): section is ComponentDataMap[T] =>
+      section.__component === componentType
+  ) as ComponentDataMap[T] | undefined
 }
 
 // Main Server Component with Suspense boundaries

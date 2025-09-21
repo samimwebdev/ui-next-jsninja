@@ -22,7 +22,6 @@ export const Footer = ({ menuItems, logo }: FooterProps) => {
                 <Image
                   src={logo.formats.thumbnail.url || logo.url}
                   alt={logo.alternativeText || 'Logo'}
-                  // className="h-8 w-auto"
                   width={200}
                   height={80}
                 />

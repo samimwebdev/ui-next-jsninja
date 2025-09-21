@@ -104,7 +104,6 @@ export default async function BootcampPage({
 }) {
   // Await params before using its properties
   const { slug } = await params
-  console.log('🔥 Statically generating bootcamp page for:', slug)
 
   const bootcampData = await getBootcampData(slug)
 
@@ -166,6 +165,11 @@ export default async function BootcampPage({
     price: bootcampData.baseContent?.price,
     courseType: bootcampData.baseContent?.courseType,
     isRegistrationOpen: bootcampData.baseContent?.isRegistrationEnabled ?? true,
+    isLiveRegistrationAvailable:
+      bootcampData.baseContent?.isLiveRegistrationAvailable,
+    isRecordedRegistrationAvailable:
+      bootcampData.baseContent?.isRecordedRegistrationAvailable,
+    liveBootcampPrice: bootcampData.baseContent?.liveBootcampPrice,
   }
 
   return (

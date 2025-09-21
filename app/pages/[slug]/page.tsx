@@ -105,7 +105,7 @@ export default async function GenericPage({ params }: PageProps) {
   }
 
   // Generate structured data JSON-LD with enhanced data
-  const structuredData = pageData.seo?.structuredData?.structuredData || {
+  const structuredData = pageData.seo?.structuredData || {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: pageData.title,

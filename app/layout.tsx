@@ -13,9 +13,10 @@ import { Menu, SEOData, StrapiImage } from '@/types/shared-types'
 import ReactQueryProvider from '@/components/context/react-query-provider'
 import { Suspense } from 'react'
 
-// ✅ Import Analytics Components
+// Import Analytics Components
 import { GoogleAnalytics } from '@/components/analytics/google-analytics'
 import { FacebookPixel } from '@/components/analytics/facebook-pixel'
+import { VercelAnalytics } from '@/components/analytics/vercel-analytics'
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ['latin', 'bengali'],
@@ -113,6 +114,7 @@ export async function generateMetadata(): Promise<Metadata> {
     }
   } catch (e) {
     // fallback if Strapi fails
+    console.log(e)
     return {
       title: 'JavaScript Ninja - Learn Web Development',
       description:
@@ -121,8 +123,8 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const headerMenuId = process.env.HEADER_MENU_ID || 'o7mp8egjwy3o0dympkh8sxhi'
-const footerMenuId = process.env.FOOTER_MENU_ID || 'f8utr9p5klcsyouxovemwail'
+const headerMenuSlug = process.env.HEADER_MENU_SLUG || 'header_navigation'
+const footerMenuSlug = process.env.FOOTER_MENU_SLUG || 'footer_navigation'
 
 export default async function RootLayout({
   children,
@@ -157,8 +159,8 @@ export default async function RootLayout({
   )
   const logo = setting?.logo
 
-  const headerMenu = menus.find((menu) => menu?.documentId === headerMenuId)
-  const footerMenu = menus.find((menu) => menu?.documentId === footerMenuId)
+  const headerMenu = menus.find((menu) => menu?.slug === headerMenuSlug)
+  const footerMenu = menus.find((menu) => menu?.slug === footerMenuSlug)
 
   return (
     <html lang="en">
@@ -173,6 +175,7 @@ export default async function RootLayout({
         className={`${hindSiliguri.className} ${hindSiliguri.variable} antialiased`}
         suppressHydrationWarning
       >
+        <VercelAnalytics />
         <ReactQueryProvider>
           <AuthProvider user={currentUser}>
             <ThemeProvider
