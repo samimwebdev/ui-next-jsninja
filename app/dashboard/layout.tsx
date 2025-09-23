@@ -4,6 +4,7 @@ import { UserProfile } from '@/components/dashboard/user-profile'
 import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
 import { getUserWithProfile } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import { EmailVerificationBanner } from '@/components/auth/email-verification-banner'
 
 // Force dynamic rendering for all dashboard routes
 export const dynamic = 'force-dynamic'
@@ -12,6 +13,10 @@ const sidebarNavItems = [
   {
     title: 'Profile',
     href: '/dashboard/profile',
+  },
+  {
+    title: 'Security',
+    href: '/dashboard/security',
   },
   {
     title: 'Orders',
@@ -57,6 +62,11 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <FlashMessageHandler />
+
+      {/* ✅ Email Verification Banner */}
+      {user && !user.confirmed && (
+        <EmailVerificationBanner userEmail={user.email} />
+      )}
 
       {/* User Profile Header */}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

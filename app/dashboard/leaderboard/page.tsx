@@ -161,9 +161,13 @@ export default function LeaderboardPage() {
       return failureCount < 2
     },
   })
-
+  console.log('courses:', courses, {
+    selectedCourseId,
+    coursesLoading,
+    coursesError,
+  })
   // Show courses loading state
-  if (!courses.length && !coursesLoading) {
+  if (!courses.length && coursesLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">

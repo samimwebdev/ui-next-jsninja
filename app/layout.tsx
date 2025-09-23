@@ -4,6 +4,7 @@ import { Hind_Siliguri } from 'next/font/google'
 import { ThemeProvider } from '@/components/context/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
+import { CookieConsent } from '@/components/shared/cookie-consent' // ✅ Import
 import { Toaster } from 'sonner'
 import AuthProvider from '@/components/context/AuthProvider'
 import { getUser } from '@/lib/auth'
@@ -185,9 +186,13 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               <Navigation menuItems={headerMenu?.items || []} logo={logo} />
+
               <Toaster position="top-right" richColors />
               <VideoProvider>{children}</VideoProvider>
               <Footer menuItems={footerMenu?.items || []} logo={logo} />
+
+              {/* ✅ Cookie Consent Popup */}
+              <CookieConsent />
             </ThemeProvider>
           </AuthProvider>
         </ReactQueryProvider>

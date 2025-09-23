@@ -6,12 +6,11 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Label } from '@/components/ui/label'
 import { Eye, EyeOff } from 'lucide-react'
-// import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { loginAction } from '../actions'
+import { loginAction, type FormState } from '../actions' // Import FormState from actions
 import { loginSchema } from '@/lib/validation'
 import { useQueryClient } from '@tanstack/react-query'
 import GitHubAuthButton from '@/components/shared/github-button'
@@ -22,18 +21,16 @@ type FormData = {
   password: string
 }
 
-type ActionState = {
-  message: string
-  errors: Record<string, string[]>
-  success: boolean
-}
-
+// Remove local ActionState type and use FormState from actions
 const Login = () => {
   const [state, formAction] = useActionState(loginAction, {
     message: '',
     errors: {},
     success: false,
-  } as ActionState)
+    requiresOTP: false,
+    userId: undefined,
+    userInfo: undefined,
+  } as FormState) // Use FormState instead of ActionState
 
   const queryClient = useQueryClient()
 
@@ -41,6 +38,7 @@ const Login = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectPath = searchParams.get('redirect') || '/dashboard'
+  const registrationMessage = searchParams.get('message')
 
   const {
     register,
@@ -48,12 +46,13 @@ const Login = () => {
     formState: { errors, isSubmitting },
     clearErrors,
     setError,
+    getValues,
   } = useForm<FormData>({
     resolver: yupResolver(loginSchema),
     mode: 'onBlur',
     defaultValues: {
-      identifier: 'pmakor@gmail.com',
-      password: 'sfazlu123',
+      identifier: '',
+      password: '',
     },
   })
 
@@ -86,7 +85,7 @@ const Login = () => {
     }
   }, [state, setError])
 
-  // Redirect after successful login
+  // Handle redirects
   useEffect(() => {
     if (state.success) {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] })
@@ -97,19 +96,36 @@ const Login = () => {
           router.push('/dashboard')
         }
       }, 200)
+    } else if (state.requiresOTP && state.userId) {
+      // Redirect to OTP verification with JWT
+      const email = getValues('identifier')
+      const twoFactorEnabled = state.userInfo?.twoFactorEnabled
+      router.push(
+        `/verify-otp?userId=${state.userId}&email=${encodeURIComponent(
+          email
+        )}&twoFactor=${twoFactorEnabled}`
+      )
     }
-  }, [state.success, router, redirectPath, queryClient])
+  }, [
+    state.success,
+    state.requiresOTP,
+    state.userId,
+    router,
+    redirectPath,
+    queryClient,
+    getValues,
+    state.userInfo,
+  ])
 
   return (
     <>
-      {/* ✅ Enhanced Hero Layout matching register page */}
       <div className="relative min-h-screen bg-gradient-to-bl from-slate-50 via-slate-100 to-slate-200 dark:from-background dark:via-muted dark:to-card">
         <div className="absolute inset-0 bg-gradient-to-r from-ninja-gold/20 via-ninja-orange/10 to-ninja-gold/15 dark:from-ninja-gold/10 dark:via-transparent dark:to-ninja-orange/10" />
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900/5 via-transparent to-slate-900/10 dark:from-transparent dark:to-transparent" />
 
         <div className="relative z-10 container px-4 sm:px-6 lg:px-8 py-12 max-w-screen-xl mx-auto">
           <div className="grid items-center lg:grid-cols-2 gap-8 lg:gap-12 min-h-[calc(100vh-6rem)]">
-            {/* ✅ Left Side - Welcome Content */}
+            {/* Left Side - Welcome Content */}
             <div className="relative order-2 lg:order-1">
               <div className="absolute inset-0 -m-8 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-background/80 dark:via-background/60 dark:to-transparent backdrop-blur-sm rounded-3xl" />
 
@@ -118,7 +134,6 @@ const Login = () => {
                   Welcome Back
                 </p>
 
-                {/* Title */}
                 <div className="mt-6 md:mb-12 max-w-2xl">
                   <h1 className="mb-6 scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 dark:text-foreground leading-tight">
                     Continue your journey with{' '}
@@ -132,7 +147,6 @@ const Login = () => {
                   </p>
                 </div>
 
-                {/* Features List */}
                 <div className="hidden lg:block space-y-4">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-ninja-gold rounded-full"></div>
@@ -160,7 +174,6 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* Success Stories */}
                 <div className="hidden lg:block mt-8 bg-white/80 dark:bg-card/80 backdrop-blur-lg p-4 rounded-2xl border border-slate-200/60 dark:border-border/50 shadow-lg">
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
@@ -170,20 +183,12 @@ const Login = () => {
                         message="who have successfully advanced their careers"
                       />
                     </div>
-                    {/* <div>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-foreground">
-                        Join 2,000+ successful students
-                      </p>
-                      <p className="text-xs text-slate-600 dark:text-muted-foreground">
-                        Who have advanced their careers
-                      </p>
-                    </div> */}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* ✅ Right Side - Login Form */}
+            {/* Right Side - Login Form */}
             <div className="relative z-10 order-1 lg:order-2">
               <div className="w-full max-w-sm mx-auto bg-white/90 dark:bg-card/90 backdrop-blur-lg p-8 rounded-2xl border border-slate-200/60 dark:border-border/50 shadow-xl">
                 <div className="text-center mb-8">
@@ -212,12 +217,21 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* Success/Error Message */}
+                {/* Registration Success Message */}
+                {registrationMessage && (
+                  <div className="mb-4 p-3 rounded-lg text-sm text-center bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800">
+                    {registrationMessage}
+                  </div>
+                )}
+
+                {/* Login Message */}
                 {state.message && (
                   <div
                     className={`mb-4 p-3 rounded-lg text-sm text-center ${
                       state.success
                         ? 'bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800'
+                        : state.requiresOTP
+                        ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
                         : 'bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
                     }`}
                   >
@@ -318,7 +332,7 @@ const Login = () => {
                 {/* Footer Links */}
                 <div className="mt-6 space-y-4 text-center">
                   <Link
-                    href="/forgot-password"
+                    href="/auth/forgot-password"
                     className="text-sm text-ninja-gold-light dark:text-ninja-gold-dark hover:text-ninja-orange transition-colors font-medium"
                   >
                     Forgot your password?
@@ -326,7 +340,7 @@ const Login = () => {
                   <p className="text-sm text-slate-600 dark:text-muted-foreground">
                     Don&apos;t have an account?{' '}
                     <Link
-                      href="/register"
+                      href="/auth/register"
                       className="text-ninja-gold-light dark:text-ninja-gold-dark hover:text-ninja-orange transition-colors font-medium"
                     >
                       Create account

@@ -36,6 +36,9 @@ export async function strapiFetch<T>(
       ...rest,
     })
 
+    // console.log(await res.text())
+    console.log(res.status, path)
+
     if (!res.ok) {
       const errorData = await res.json()
 

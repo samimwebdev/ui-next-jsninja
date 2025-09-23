@@ -34,7 +34,6 @@ type PasswordStrength = {
 type FormData = {
   firstName: string
   lastName: string
-  username: string
   email: string
   password: string
   confirmPassword: string
@@ -96,7 +95,6 @@ const SignUp = () => {
       })
 
       // Call server action manually
-
       formAction(formData)
     } catch (err) {
       console.error('Submission error:', err)
@@ -113,6 +111,7 @@ const SignUp = () => {
       await trigger('confirmPassword')
     }
   }
+
   // Set errors from action state
   useEffect(() => {
     if (state?.errors && Object.keys(state.errors).length > 0) {
@@ -127,12 +126,12 @@ const SignUp = () => {
     }
   }, [state, setError])
 
-  // Redirect after successful registration
+  // Redirect after successful registration - NOW GOES TO LOGIN
   useEffect(() => {
     if (state.success) {
       const timer = setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
+        router.push('/login?message=Registration successful! Please sign in.')
+      }, 2000)
 
       return () => clearTimeout(timer)
     }
@@ -387,9 +386,6 @@ const SignUp = () => {
                 >
                   {isSubmitting ? 'Creating Account...' : 'Create an account'}
                 </Button>
-                {/* <Button variant="outline" className="w-full" type="button">
-                  Sign up with Github
-                </Button> */}
               </div>
             </form>
             <div className="w-full mt-4">
