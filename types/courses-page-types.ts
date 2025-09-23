@@ -21,6 +21,7 @@ export interface CourseItem {
   featureImage?: StrapiImage
   seo?: SEOData
   categories: Category[]
+  isRegistrationEnabled: boolean
 }
 
 export interface CourseBundleItem {

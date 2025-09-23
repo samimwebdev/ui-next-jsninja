@@ -9,6 +9,7 @@ import { getCleanText } from '@/lib/utils'
 import { CourseInfoType } from './cta'
 import { useRouter } from 'next/navigation'
 import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
+import { useScrollToSection } from '@/hooks/use-scroll-to-section'
 
 interface CTAClientWrapperProps {
   data: CallToActionContentSection
@@ -22,6 +23,7 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({
   isRegistrationOpen,
 }) => {
   const router = useRouter()
+  const { scrollToSection } = useScrollToSection()
   const { isEnrolled, checkEnrollment, checkAuthOnly } = useEnrollmentCheck()
 
   useEffect(() => {
@@ -30,22 +32,33 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({
   }, [courseInfo.slug, checkEnrollment, checkAuthOnly])
 
   const handleClick = async () => {
-    // Check enrollment status first
-    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
+    // Check enrollment and auth status first
     const enrolled = await checkEnrollment(courseInfo.slug)
     const auth = await checkAuthOnly()
-    if (!auth) {
-      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
+
+    // If user is enrolled, go to course view
+    if (enrolled) {
+      router.push(`/course-view/${courseInfo.slug}`)
       return
     }
 
-    if (enrolled) {
-      // User is enrolled, go to course
-      router.push(`/course-view/${courseInfo.slug}`)
-    } else {
-      // User not enrolled, go to checkout
-      router.push(enrollLink)
+    // If registration is closed, do nothing (button should be disabled)
+    if (!isRegistrationOpen) {
+      return
     }
+
+    // ✅ If user is authenticated and registration is open, scroll to pricing
+    if (auth) {
+      scrollToSection('bootcamp-pricing', 80)
+      return
+    }
+
+    // ✅ If user is not authenticated, redirect to login with return to pricing
+    const currentUrl = window.location.href
+    const loginUrl = `/login?redirect=${encodeURIComponent(
+      currentUrl
+    )}#bootcamp-pricing`
+    router.push(loginUrl)
   }
 
   // Create fallback icons with proper iconData
@@ -152,19 +165,24 @@ export const CTAClientWrapper: React.FC<CTAClientWrapperProps> = ({
           >
             <Button
               size="lg"
-              className={`w-full sm:w-auto px-12 py-7 ${'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80'} text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition duration-300 shadow-lg shadow-primary/25 relative overflow-hidden group rounded-full font-bold`}
+              // className={`w-full sm:w-auto px-12 py-7 ${'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80'} text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition duration-300 shadow-lg shadow-primary/25 relative overflow-hidden group rounded-full font-bold`}
+              className={`w-full btn-ninja-primary-large rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background shadow-lg shadow-primary/25 relative overflow-hidden group font-bold '' ${
+                buttonContent.disabled
+                  ? 'opacity-60 cursor-not-allowed'
+                  : 'hover:shadow-lg'
+              }`}
               onClick={handleClick}
               disabled={buttonContent.disabled}
             >
               <span className="absolute inset-0 w-full h-full bg-white/20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
               <span className="relative flex items-center justify-center gap-2">
-                {buttonContent.label}
                 <DynamicIcon
                   icon={buttonContent.icon}
-                  className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+                  className="w-5 h-5"
                   width={20}
                   height={20}
                 />
+                {buttonContent.label}
               </span>
             </Button>
           </motion.div>

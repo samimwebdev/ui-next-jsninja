@@ -74,8 +74,6 @@ export function CheckoutContent() {
           courseTitle={courseName}
           coursePrice={coursePrice}
           courseType={courseType || 'course'}
-          currentStep="course_info"
-          stepNumber={1}
         />
       )}
 

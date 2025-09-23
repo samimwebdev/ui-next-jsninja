@@ -55,7 +55,7 @@ export const BootcampHero = ({
           </AnimatedSection>
 
           <AnimatedSection animation="fadeInUp">
-            <h1 className="mt-6 max-w-[15ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
+            <h1 className="mt-6 max-w-[500px] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
               {title}
             </h1>
           </AnimatedSection>

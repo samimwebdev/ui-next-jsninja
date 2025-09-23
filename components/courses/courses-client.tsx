@@ -202,7 +202,7 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
             content_ids: [courseSlug],
             content_name: courseTitle,
             value: coursePrice,
-            currency: 'USD',
+            currency: 'BDT',
           },
         }),
       })

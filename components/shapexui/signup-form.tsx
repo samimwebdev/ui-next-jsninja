@@ -34,7 +34,6 @@ type PasswordStrength = {
 type FormData = {
   firstName: string
   lastName: string
-  username: string
   email: string
   password: string
   confirmPassword: string
@@ -96,7 +95,6 @@ const SignUp = () => {
       })
 
       // Call server action manually
-
       formAction(formData)
     } catch (err) {
       console.error('Submission error:', err)
@@ -107,11 +105,13 @@ const SignUp = () => {
   const handlePasswordChange = async (
     evt: React.ChangeEvent<HTMLInputElement>
   ) => {
+    console.info('Password changed', evt)
     // Trigger validation for confirm password when password changes
     if (touchedFields.confirmPassword) {
       await trigger('confirmPassword')
     }
   }
+
   // Set errors from action state
   useEffect(() => {
     if (state?.errors && Object.keys(state.errors).length > 0) {
@@ -126,12 +126,12 @@ const SignUp = () => {
     }
   }, [state, setError])
 
-  // Redirect after successful registration
+  // Redirect after successful registration - NOW GOES TO LOGIN
   useEffect(() => {
     if (state.success) {
       const timer = setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
+        router.push('/login?message=Registration successful! Please sign in.')
+      }, 2000)
 
       return () => clearTimeout(timer)
     }
@@ -148,7 +148,7 @@ const SignUp = () => {
                 Already have an account?{' '}
                 <Link
                   href="/login"
-                  className="underline text-primary hover:text-primary font-medium"
+                  className="underline text-primary text-link-light hover:text-ninja-orange dark:text-link-dark font-medium"
                 >
                   Sign in
                 </Link>
@@ -381,14 +381,11 @@ const SignUp = () => {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full bg-gradient-ninja-primary hover:bg-gradient-ninja-reverse text-slate-900 font-semibold py-2.5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Creating Account...' : 'Create an account'}
                 </Button>
-                {/* <Button variant="outline" className="w-full" type="button">
-                  Sign up with Github
-                </Button> */}
               </div>
             </form>
             <div className="w-full mt-4">

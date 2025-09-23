@@ -42,6 +42,9 @@ export interface BaseContent {
   startingFrom: string
   totalModules: number
   featureImage: StrapiImage
+  isLiveRegistrationAvailable: boolean
+  isRecordedRegistrationAvailable: boolean
+  liveBootcampPrice?: number
 }
 
 export type CourseType = 'course' | 'bootcamp' | 'workshop' | 'course-bundle'

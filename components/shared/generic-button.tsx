@@ -5,10 +5,14 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 import { CourseType } from '@/types/checkout-types'
+import { trackEnrollmentStart } from '../analytics/vercel-analytics'
 
 interface EnrollButtonProps {
   courseInfo: {
     slug: string
+    title: string
+    price: number
+
     courseType: CourseType
     isRegistrationOpen: boolean
   }
@@ -49,6 +53,12 @@ export default function GenericButton({
       // User is enrolled, go to course
       router.push(`/course-view/${courseInfo.slug}`)
     } else {
+      trackEnrollmentStart({
+        slug: courseInfo.slug,
+        title: courseInfo.title,
+        price: courseInfo.price,
+        courseType: courseInfo.courseType,
+      })
       // User not enrolled, go to checkout
       router.push(enrollLink)
     }

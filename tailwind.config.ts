@@ -72,6 +72,24 @@ export default {
           'light-gold': 'hsl(42 90% 88%)',
         },
 
+        'ninja-gold': {
+          light: '#b45309', // Darker for light mode
+          DEFAULT: '#f59e0b',
+          dark: '#fbbf24', // Lighter for dark mode
+        },
+        'ninja-orange': {
+          light: '#c2410c', // Darker for light mode
+          DEFAULT: '#f97316',
+          dark: '#fb923c', // Lighter for dark mode
+        },
+
+        // Or add amber variants for links
+        link: {
+          light: '#b45309', // Dark amber for light mode
+          DEFAULT: '#f59e0b',
+          dark: '#fbbf24', // Light gold for dark mode
+        },
+
         chart: {
           '1': 'hsl(var(--chart-1))',
           '2': 'hsl(var(--chart-2))',
@@ -193,6 +211,18 @@ export default {
           'linear-gradient(135deg, hsl(280 80% 70%) 0%, hsl(199 95% 58%) 100%)',
         'gradient-ninja-animated':
           'linear-gradient(45deg, hsl(42 100% 65%), hsl(18 100% 68%), hsl(199 95% 58%), hsl(270 80% 70%))',
+
+        // New gradients for authentication and hero sections
+        'gradient-auth-light':
+          'linear-gradient(135deg, hsl(0 0% 98%) 0%, hsl(240 5% 96%) 30%, hsl(42 100% 95%) 100%)',
+        'gradient-auth-dark':
+          'linear-gradient(135deg, hsl(220 13% 9%) 0%, hsl(215 28% 12%) 30%, hsl(42 50% 15%) 100%)',
+        'gradient-auth-light-enhanced':
+          'linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(220 30% 95%) 25%, hsl(42 80% 92%) 75%, hsl(18 60% 90%) 100%)',
+        'gradient-auth-dark-enhanced':
+          'linear-gradient(135deg, hsl(222 84% 5%) 0%, hsl(220 13% 9%) 25%, hsl(215 28% 12%) 75%, hsl(42 20% 8%) 100%)',
+        'gradient-hero-overlay':
+          'linear-gradient(135deg, transparent 0%, hsl(var(--primary) / 0.05) 50%, transparent 100%)',
       },
 
       // Box shadows for glow effects
@@ -308,7 +338,20 @@ export default {
           color: 'hsl(215 32% 15%)',
           fontWeight: '600',
           padding: '0.75rem 1.5rem',
-          borderRadius: '0.5rem',
+          borderRadius: '9999px',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'scale(1.05)',
+            boxShadow: '0 0 20px hsl(42 100% 65% / 0.5)',
+          },
+        },
+        '.btn-ninja-primary-large': {
+          background:
+            'linear-gradient(135deg, hsl(42 100% 65%) 0%, hsl(18 100% 68%) 100%)',
+          color: 'hsl(215 32% 15%)',
+          fontWeight: '600',
+          padding: '1.75rem 3rem',
+          borderRadius: '9999px',
           transition: 'all 0.3s ease',
           '&:hover': {
             transform: 'scale(1.05)',

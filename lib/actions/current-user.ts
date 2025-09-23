@@ -16,6 +16,9 @@ interface CurrentUserResponse {
 export const fetchCurrentUser = cache(
   async (): Promise<CurrentUserResponse> => {
     const token = await getAuthToken()
+    if (!token) {
+      throw new Error('Authentication required to fetch current user')
+    }
     const query = QueryString.stringify({
       populate: {
         profile: {
@@ -25,10 +28,6 @@ export const fetchCurrentUser = cache(
         },
       },
     })
-
-    if (!token) {
-      throw new Error('Authentication required to fetch current user')
-    }
 
     try {
       const data = await strapiFetch<CurrentUserResponse>(

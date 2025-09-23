@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useEnrollmentTracking } from '@/components/course/enrollment-tracking'
+import { trackPurchaseComplete } from '../analytics/vercel-analytics'
 // import { trackEnrollmentSuccess } from '@/lib/analytics' // ✅ Using enhanced utility
 
 interface PaymentSuccessTrackingProps {
@@ -32,6 +33,16 @@ export function PaymentSuccessTracking({
       const trackPaymentSuccess = async () => {
         try {
           const coursePrice = amount ? parseFloat(amount) : 0
+
+          // ✅ Track purchase completion on vercel analytics
+          trackPurchaseComplete({
+            courseSlug,
+            courseTitle,
+            coursePrice,
+            courseType: courseType || 'course',
+            paymentMethod: paymentMethod || 'unknown',
+            transactionId,
+          })
 
           // Track the enrollment using your utility
           await trackEnrollment({

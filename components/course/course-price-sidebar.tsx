@@ -17,7 +17,7 @@ interface CourseSidebarProps {
 export function CoursePriceSidebar({ courseInfo }: CourseSidebarProps) {
   const { price } = courseInfo
   return (
-    <div className="bg-card rounded-lg p-6 shadow-lg">
+    <div className="bg-card rounded-lg p-6 shadow-lg" id="course-pricing">
       <h2 className="text-2xl font-bold mb-4">Course Features</h2>
       <ul className="space-y-3">
         {courseInfo.features.map((feature, index) => (

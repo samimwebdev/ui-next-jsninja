@@ -10,6 +10,17 @@ export function useCurrentUser() {
     queryKey: ['currentUser'],
     queryFn: fetchCurrentUser,
     initialData: serverUser,
+    enabled: !!serverUser,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: (failureCount, error) => {
+      console.log({ error })
+      // Don't retry authentication errors
+      if (error?.message?.includes('Authentication required')) {
+        return false
+      }
+      return failureCount < 3
+    },
+    refetchOnWindowFocus: false, // Don't refetch on window focus to avoid unnecessary calls
+    refetchOnMount: 'always',
   })
 }

@@ -28,7 +28,7 @@ const SVGIcon = ({ svgString }: { svgString: string }) => {
 
   return (
     <div
-      className="mb-4 w-6 h-6 [&>svg]:w-full [&>svg]:h-full [&>svg]:text-slate-700 dark:[&>svg]:text-ninja-gold [&>svg]:fill-current [&>svg]:stroke-current"
+      className="mb-4 w-6 h-6 [&>svg]:w-full [&>svg]:h-full [&>svg]:text-ninja-gold-light dark:[&>svg]:text-ninja-gold-dark [&>svg]:fill-current [&>svg]:stroke-current"
       dangerouslySetInnerHTML={{ __html: fixedSvgString }}
     />
   )
@@ -145,7 +145,7 @@ const DynamicListItem = React.forwardRef<
           {...props}
         >
           {icon && (
-            <div className="mb-2">
+            <div className="mb-2 text-ninja-gold-light dark:text-ninja-gold-dark">
               <SVGIcon svgString={icon} />
             </div>
           )}
