@@ -16,6 +16,7 @@ export const BootcampPricing: React.FC<{
     isLiveRegistrationAvailable: boolean
     liveBootcampPrice?: number
     isRecordedRegistrationAvailable: boolean
+    endDate: string | null
   }
 }> = ({ data, courseInfo }) => {
   // Server-side HTML parsing using cheerio-like approach or regex
@@ -105,17 +106,19 @@ export const BootcampPricing: React.FC<{
                   ))}
                 </div>
 
-                {/* Client component for button interactions */}
-                <PricingClientWrapper
-                  packageData={{
-                    id: pkg.id,
-                    name: pkg.name,
-                    isPreferred: pkg.isPreferred,
-                    btn: pkg.btn,
-                    packageType: pkg.packageType,
-                  }}
-                  courseInfo={courseInfo}
-                />
+                <div className=" flex flex-col">
+                  {/* Client component for button interactions */}
+                  <PricingClientWrapper
+                    packageData={{
+                      id: pkg.id,
+                      name: pkg.name,
+                      isPreferred: pkg.isPreferred,
+                      btn: pkg.btn,
+                      packageType: pkg.packageType,
+                    }}
+                    courseInfo={courseInfo}
+                  />
+                </div>
               </Card>
             )
           })}

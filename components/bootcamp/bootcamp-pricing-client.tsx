@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 import { useEffect } from 'react'
 import { trackEnrollmentStart } from '../analytics/vercel-analytics'
+import { CountdownTimer } from '@/components/shared/countdown-timer' // Import the countdown timer
 
 interface PricingPackageData {
   id: number
@@ -32,7 +33,7 @@ interface PricingClientWrapperProps {
     isLiveRegistrationAvailable: boolean
     liveBootcampPrice?: number
     isRecordedRegistrationAvailable: boolean
-    // Add other course info fields as needed
+    endDate: string | null // Add endDate field
   }
 }
 
@@ -43,7 +44,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   const router = useRouter()
   const packageType = packageData.packageType
 
-  const { isRegistrationOpen, slug } = courseInfo
+  const { isRegistrationOpen, slug, endDate } = courseInfo
   const { isEnrolled, checkEnrollment, checkAuthOnly } = useEnrollmentCheck()
 
   useEffect(() => {
@@ -53,12 +54,12 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
 
   const handleClick = async () => {
     // Check enrollment status first
-    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
+    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}&packageType=${packageData.packageType}`
     const enrolled = await checkEnrollment(courseInfo.slug)
     const auth = await checkAuthOnly()
 
     if (!auth) {
-      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
+      router.push(`/auth/login?redirect=${encodeURIComponent(enrollLink)}`)
       return
     }
 
@@ -94,7 +95,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
         : '<path fill="currentColor" d="M19,7H18V6A6,6 0 0,0 6,6V7H5A3,3 0 0,0 2,10V20A3,3 0 0,0 5,23H19A3,3 0 0,0 22,20V10A3,3 0 0,0 19,7M8,6A4,4 0 0,1 16,6V7H8V6M20,20A1,1 0 0,1 19,21H5A1,1 0 0,1 4,20V10A1,1 0 0,1 5,9H19A1,1 0 0,1 20,10V20M10,16V14A2,2 0 0,1 14,14V16A1,1 0 0,1 13,17H11A1,1 0 0,1 10,16Z">',
   })
 
-  // ✅ Fixed button logic
   const getButtonContent = () => {
     // If user is already enrolled, show access button
     if (isEnrolled) {
@@ -114,7 +114,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // ✅ Handle Live Package
+    // Handle Live Package
     if (packageData.packageType === 'live') {
       if (!courseInfo.isLiveRegistrationAvailable) {
         return {
@@ -131,7 +131,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // ✅ Handle Recorded Package
+    // Handle Recorded Package
     if (packageData.packageType === 'record') {
       if (!courseInfo.isRecordedRegistrationAvailable) {
         return {
@@ -148,7 +148,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // ✅ Fallback for any other package types
+    // Fallback for any other package types
     return {
       label: packageData.btn?.btnLabel || 'Enroll Now',
       icon: packageData.btn?.btnIcon || createFallbackIcon('mdi:wallet'),
@@ -157,32 +157,54 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   }
 
   const buttonContent = getButtonContent()
-  console.log({ packageType })
+
+  // Check if countdown should be shown (only for active registrations)
+  const shouldShowCountdown =
+    !isEnrolled && isRegistrationOpen && !buttonContent.disabled && endDate
 
   return (
-    <Button
-      size="lg"
-      className={`${
-        packageType === 'live' &&
-        'btn-ninja-primary hover:btn-ninja-primary-hover'
-      } w-full py-3 px-6 transition-colors disabled:cursor-not-allowed ${
-        buttonContent.disabled
-          ? 'opacity-60 cursor-not-allowed'
-          : 'hover:scale-[1.02] hover:shadow-lg'
-      }`}
-      variant={packageData.isPreferred ? 'default' : 'outline'}
-      onClick={handleClick}
-      disabled={buttonContent.disabled}
-    >
-      {buttonContent.icon && (
-        <DynamicIcon
-          icon={buttonContent.icon}
-          className="mr-2 h-4 w-4"
-          width={16}
-          height={16}
+    <>
+      {/* Countdown Timer - only show if registration is active and user is not enrolled */}
+      {shouldShowCountdown && (
+        <CountdownTimer
+          endDate={endDate}
+          title={
+            packageType === 'live'
+              ? 'Live Session Starts Soon!'
+              : 'Limited Time Offer!'
+          }
+          subtitle={
+            packageType === 'live'
+              ? 'Registration closes in:'
+              : 'Enrollment ends in:'
+          }
         />
       )}
-      {buttonContent.label || `Enroll Now - ${packageData.name}`}
-    </Button>
+
+      {/* Enroll Button */}
+      <Button
+        size="lg"
+        className={`${
+          packageType === 'live' && 'btn-ninja-primary'
+        } w-full py-3 px-6 transition-colors disabled:cursor-not-allowed mt-auto ${
+          buttonContent.disabled
+            ? 'opacity-60 cursor-not-allowed'
+            : 'hover:scale-[1.02] hover:shadow-lg'
+        } ${shouldShowCountdown ? 'animate-pulse-glow' : ''}`}
+        variant={packageData.isPreferred ? 'default' : 'outline'}
+        onClick={handleClick}
+        disabled={buttonContent.disabled}
+      >
+        {buttonContent.icon && (
+          <DynamicIcon
+            icon={buttonContent.icon}
+            className="mr-2 h-4 w-4"
+            width={16}
+            height={16}
+          />
+        )}
+        {buttonContent.label || `Enroll Now - ${packageData.name}`}
+      </Button>
+    </>
   )
 }

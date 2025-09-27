@@ -4,7 +4,8 @@ import { Hind_Siliguri } from 'next/font/google'
 import { ThemeProvider } from '@/components/context/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
-import { CookieConsent } from '@/components/shared/cookie-consent' // ✅ Import
+import { CookieConsent } from '@/components/shared/cookie-consent'
+import { PromotionProvider } from '@/components/shared/promotion-provider' // New import
 import { Toaster } from 'sonner'
 import AuthProvider from '@/components/context/AuthProvider'
 import { getUser } from '@/lib/auth'
@@ -18,6 +19,7 @@ import { Suspense } from 'react'
 import { GoogleAnalytics } from '@/components/analytics/google-analytics'
 import { FacebookPixel } from '@/components/analytics/facebook-pixel'
 import { VercelAnalytics } from '@/components/analytics/vercel-analytics'
+import { getPromotionData } from '@/lib/actions/promotion-actions'
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ['latin', 'bengali'],
@@ -133,6 +135,8 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const currentUser = await getUser()
+  // Fetch promotion data
+  const promotionData = await getPromotionData()
 
   // Fetch menus
   const { data: menus } = await strapiFetch<{ data: Menu[] }>(
@@ -185,14 +189,17 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <Navigation menuItems={headerMenu?.items || []} logo={logo} />
+              {/* Add PromotionProvider to manage promotions */}
+              <PromotionProvider promotionData={promotionData}>
+                <Navigation menuItems={headerMenu?.items || []} logo={logo} />
 
-              <Toaster position="top-right" richColors />
-              <VideoProvider>{children}</VideoProvider>
-              <Footer menuItems={footerMenu?.items || []} logo={logo} />
+                <Toaster position="top-right" richColors />
+                <VideoProvider>{children}</VideoProvider>
+                <Footer menuItems={footerMenu?.items || []} logo={logo} />
 
-              {/* ✅ Cookie Consent Popup */}
-              <CookieConsent />
+                {/* ✅ Cookie Consent Popup */}
+                <CookieConsent />
+              </PromotionProvider>
             </ThemeProvider>
           </AuthProvider>
         </ReactQueryProvider>

@@ -92,6 +92,10 @@ export async function POST(request: NextRequest) {
     const revalidatedTags: string[] = []
 
     switch (body.model) {
+      case 'promotion':
+        // Promotions affect multiple pages, so broad revalidation
+        revalidateTag('promotion')
+        break
       case 'course':
         await handleCourseRevalidation(body, revalidatedPaths, revalidatedTags)
         break

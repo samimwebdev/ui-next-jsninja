@@ -170,6 +170,7 @@ export default async function BootcampPage({
     isRecordedRegistrationAvailable:
       bootcampData.baseContent?.isRecordedRegistrationAvailable,
     liveBootcampPrice: bootcampData.baseContent?.liveBootcampPrice,
+    endDate: bootcampData.baseContent?.endDate,
   }
 
   return (

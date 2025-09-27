@@ -228,6 +228,7 @@ export interface CourseBase {
   totalStudents: number
   averageRating: number
   isRegistrationEnabled: boolean
+  endDate?: string | null
   totalLessons: number
   totalModules: number | null
   shortDescription: string

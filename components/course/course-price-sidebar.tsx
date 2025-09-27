@@ -11,6 +11,7 @@ interface CourseSidebarProps {
     features: string[]
     slug: string
     isRegistrationOpen: boolean
+    endDate: string | null
   }
 }
 
@@ -22,7 +23,7 @@ export function CoursePriceSidebar({ courseInfo }: CourseSidebarProps) {
       <ul className="space-y-3">
         {courseInfo.features.map((feature, index) => (
           <li key={index} className="flex items-center">
-            <CircleCheckBig className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
+            <CircleCheckBig className="w-5 h-5 mr-1 text-ninja-gold-light dark:text-ninja-gold-dark flex-shrink-0" />
             <span className="text-sm">{feature}</span>
           </li>
         ))}

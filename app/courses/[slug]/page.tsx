@@ -189,6 +189,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     features: getHighlightFeatures(courseData),
     courseType: courseData.baseContent?.courseType,
     isRegistrationOpen: courseData.baseContent?.isRegistrationEnabled || false,
+    endDate: courseData.baseContent?.endDate || null,
   }
 
   return (

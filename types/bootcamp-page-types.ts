@@ -319,6 +319,7 @@ export interface BootcampPageData {
     isLiveRegistrationAvailable: boolean
     isRecordedRegistrationAvailable: boolean
     liveBootcampPrice?: number
+    endDate: string | null
   }
   assessmentQuiz: AssessmentQuiz
   contentBlock: BootcampContentSection[]

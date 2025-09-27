@@ -38,16 +38,17 @@ const ReviewCard = ({
 }) => (
   <Card
     className={cn(
-      'h-full transition-transform duration-300',
+      // Set fixed height and ensure all cards have same baseline height
+      'transition-transform duration-300 flex flex-col',
       isMobile
-        ? 'scale-100'
+        ? 'scale-100 h-72'
         : isCurrent
-        ? 'bg-gray-50 scale-110 text-black'
-        : 'scale-90'
+        ? 'bg-muted/50 scale-110 shadow-lg border-primary/20 h-72'
+        : 'scale-90 h-72'
     )}
   >
-    <CardContent className="p-6">
-      <div className="flex items-center gap-4 mb-4">
+    <CardContent className="p-6 flex flex-col h-full">
+      <div className="flex items-center gap-4 mb-4 flex-shrink-0">
         <Avatar className="size-14">
           <AvatarImage
             src={
@@ -63,15 +64,23 @@ const ReviewCard = ({
               .join('')}
           </AvatarFallback>
         </Avatar>
-        <div>
-          <h3 className="font-semibold">{review.reviewerName}</h3>
-          <p className="text-gray-600 text-sm">{review?.course?.title}</p>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold text-foreground truncate">
+            {review.reviewerName}
+          </h3>
+          <p className="text-muted-foreground text-sm truncate">
+            {review?.course?.title}
+          </p>
         </div>
       </div>
-      <p
-        className="text-gray-600 text-sm"
-        dangerouslySetInnerHTML={{ __html: review.reviewDetails }}
-      />
+
+      {/* Use flex-1 to fill remaining space and add scrolling for long content */}
+      <div className="flex-1 overflow-hidden">
+        <p
+          className="text-muted-foreground text-sm leading-relaxed line-clamp-6"
+          dangerouslySetInnerHTML={{ __html: review.reviewDetails }}
+        />
+      </div>
     </CardContent>
   </Card>
 )
@@ -97,7 +106,7 @@ const NavigationControls = ({
     >
       <ChevronLeft className="h-4 w-4" />
     </Button>
-    <span className="text-sm text-gray-500">
+    <span className="text-sm text-muted-foreground">
       {currentIndex + 1} / {totalItems}
     </span>
     <Button
@@ -145,7 +154,7 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
       return [reviews[currentIndex]]
     }
 
-    // Always show 3 reviews: previous, current, next (like original)
+    // Always show 3 reviews: previous, current, next
     return [
       reviews[(currentIndex - 1 + reviews.length) % reviews.length],
       reviews[currentIndex],
@@ -162,10 +171,10 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
   if (reviews.length === 0) {
     return (
       <section className="px-4 py-6" aria-label="Customer reviews">
-        <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto text-foreground">
           {reviewSectionData.title || 'Customer Reviews'}
         </h1>
-        <p className="text-center text-gray-500">
+        <p className="text-center text-muted-foreground">
           No reviews available at the moment.
         </p>
       </section>
@@ -174,34 +183,39 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
 
   return (
     <section className="px-4 py-6" aria-label="Customer reviews">
-      <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto">
+      <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto text-foreground">
         {reviewSectionData.title || 'Customer Reviews'}
       </h1>
 
       <div className="relative max-w-6xl mx-auto">
-        <div
-          className={cn(
-            'flex items-center h-72 overflow-hidden',
-            isMobile ? 'gap-0' : 'gap-4'
-          )}
-        >
-          <AnimatePresence initial={false} custom={direction}>
-            {visibleReviews.map((review, idx) => (
-              <motion.div
-                key={review.id}
-                className="flex-1"
-                initial={{ opacity: 0, x: direction > 0 ? 200 : -200 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ReviewCard
-                  review={review}
-                  isCurrent={!isMobile && idx === 1}
-                  isMobile={isMobile}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+        {/* Fixed height container to ensure consistent alignment */}
+        <div className="flex items-center justify-center h-80 overflow-hidden">
+          <div
+            className={cn(
+              'flex items-center w-full',
+              isMobile ? 'gap-0 justify-center' : 'gap-4 justify-center'
+            )}
+          >
+            <AnimatePresence initial={false} custom={direction}>
+              {visibleReviews.map((review, idx) => (
+                <motion.div
+                  key={review.id}
+                  className="flex-1 flex justify-center"
+                  initial={{ opacity: 0, x: direction > 0 ? 200 : -200 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="w-full max-w-sm">
+                    <ReviewCard
+                      review={review}
+                      isCurrent={!isMobile && idx === 1}
+                      isMobile={isMobile}
+                    />
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
 
         <NavigationControls
