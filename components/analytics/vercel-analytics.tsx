@@ -145,6 +145,7 @@ export const trackPurchaseComplete = (purchaseData: {
 export function VercelAnalytics() {
   return (
     <Analytics
+      mode="production"
       beforeSend={(event) => {
         // Example: Filter out certain events if needed
         if (
