@@ -29,6 +29,8 @@ interface CoursePageProps {
   }>
 }
 
+// export const dynamic = 'force-static' // Ensure the page is server-side rendered on each request
+// export const revalidate = 3600 // Revalidate every hour
 // Generate static params for all course pages
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   try {
@@ -156,6 +158,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
   try {
     courseData = await getCourseData(slug)
+
     if (!courseData) {
       console.error('❌ No course data found, rendering 404')
       return <CourseNotFound courseType="course" />
