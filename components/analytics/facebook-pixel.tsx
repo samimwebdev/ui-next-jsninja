@@ -35,9 +35,7 @@ export function FacebookPixel({ pixelId }: FacebookPixelProps) {
   }
 
   // Only load in production or when explicitly enabled
-  const shouldLoad =
-    process.env.NODE_ENV === 'production' ||
-    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true'
+  const shouldLoad = process.env.NODE_ENV === 'production'
 
   if (!shouldLoad) {
     return null
