@@ -1,3 +1,4 @@
+import { CourseType } from './checkout-types'
 import {
   StrapiImage,
   StrapiIcon,
@@ -32,7 +33,30 @@ export interface Course {
     featureImage?: StrapiImage
     categories: Category[]
     browseCoursesBtn?: ButtonType
+    actualPrice?: number | null
   }
+}
+
+export interface CourseBase {
+  id: number
+  documentId: string
+  title: string
+  shortDescription: string
+  longDescription: string
+  isRegistrationEnabled: boolean
+  startingFrom?: string
+  slug: string
+  price: number
+  level: string
+  totalStudents: number
+  averageRating: number
+  duration: number | string
+  totalLessons: number
+  courseType: CourseType
+  featureImage?: StrapiImage
+  categories: Category[]
+  browseCoursesBtn?: ButtonType
+  actualPrice?: number | null
 }
 
 export interface HeroSectionData {
@@ -42,7 +66,7 @@ export interface HeroSectionData {
   title: string
   shortDescription: string
   promoVideo: string
-  courses: Course
+  courses: CourseBase[]
 }
 
 export interface FeatureSectionData {

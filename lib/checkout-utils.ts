@@ -17,6 +17,15 @@ export function getTotalPrice(
       baseContent.reduce((total, course) => total + course.price, 0)
     )
   }
+
+  //also check if baseContent is bootcamp and isLIveRegistrationAvailable then get liveBootcampPrice otherwise get regular price
+  if (baseContent.courseType !== 'course') {
+    if (baseContent.isLiveRegistrationAvailable) {
+      return baseContent?.liveBootcampPrice || baseContent.price
+    } else if (baseContent.isRecordedRegistrationAvailable) {
+      return baseContent.price
+    }
+  }
   return baseContent.price
 }
 export function getCourseCount(

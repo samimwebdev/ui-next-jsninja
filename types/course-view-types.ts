@@ -1,3 +1,4 @@
+import { CourseType } from './checkout-types'
 import { StrapiIcon } from './shared-types'
 
 export interface CourseViewData {
@@ -7,6 +8,7 @@ export interface CourseViewData {
   description: string
   slug: string
   duration: number // Total course duration in seconds
+  CourseType: CourseType
   level: string
   curriculum: {
     totalDuration: number
@@ -269,6 +271,7 @@ export interface Module {
   title: string
   completed: boolean
   lessons: Lesson[]
+  releaseDate: Date | null // Add releaseDate here
 }
 
 // Add interfaces for the raw Strapi data (what comes from API)

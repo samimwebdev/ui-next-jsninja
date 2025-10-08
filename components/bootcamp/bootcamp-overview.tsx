@@ -26,7 +26,7 @@ const StaticSection: React.FC<{
                   icon={content.icon}
                   width={content.icon.width}
                   height={content.icon.height}
-                  className="h-6 w-6 text-primary"
+                  className="h-6 w-6 text-ninja-gold-dark"
                 />
               </div>
             )}

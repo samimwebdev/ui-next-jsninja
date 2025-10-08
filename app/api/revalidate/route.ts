@@ -19,26 +19,58 @@ interface StrapiWebhookBody {
     title?: string
     isRegistrationEnabled?: boolean
     featured?: boolean
-    publishedAt?: string
+    publishedAt?: string | null
     [key: string]: unknown
     baseContent?: CourseBase
   }
+}
+
+// ✅ Helper function to check if entry should trigger revalidation
+function shouldRevalidate(body: StrapiWebhookBody): boolean {
+  const { event, entry } = body
+
+  // ✅ Always revalidate on delete or unpublish (to remove from cache)
+  if (event === 'entry.delete' || event === 'entry.unpublish') {
+    console.log(`🔄 Revalidating due to ${event} event`)
+    return true
+  }
+
+  // ✅ For create, update, publish - check if entry is published
+  const isPublished = !!entry.publishedAt
+
+  if (!isPublished) {
+    console.log(
+      `⏭️ Skipping revalidation - entry not published (publishedAt: ${entry.publishedAt})`
+    )
+    return false
+  }
+
+  // ✅ For publish events, always revalidate
+  if (event === 'entry.publish') {
+    console.log('🔄 Revalidating due to publish event')
+    return true
+  }
+
+  // ✅ For create/update, check if it's published
+  console.log(`🔄 Revalidating published entry (event: ${event})`)
+  return true
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: StrapiWebhookBody = await request.json()
 
-    // console.log('📬 Webhook payload received:', {
-    //   event: body.event,
-    //   model: body.model,
-    //   entry: {
-    //     id: body.entry?.id,
-    //     documentId: body.entry?.documentId,
-    //     slug: body.entry?.slug || body.entry?.baseContent?.slug,
-    //     title: body.entry?.title || body.entry?.baseContent?.title,
-    //   },
-    // })
+    console.log('📬 Webhook payload received:', {
+      event: body.event,
+      model: body.model,
+      publishedAt: body.entry?.publishedAt,
+      entry: {
+        id: body.entry?.id,
+        documentId: body.entry?.documentId,
+        slug: body.entry?.slug || body.entry?.baseContent?.slug,
+        title: body.entry?.title || body.entry?.baseContent?.title,
+      },
+    })
 
     // ✅ Verify webhook secret for security
     const secret = request.headers.get('x-strapi-signature')
@@ -47,10 +79,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // ✅ Check if we should process this webhook
+    if (!shouldRevalidate(body)) {
+      return NextResponse.json({
+        revalidated: false,
+        reason: 'Entry not published - skipping revalidation',
+        timestamp: new Date().toISOString(),
+      })
+    }
+
     const revalidatedPaths: string[] = []
     const revalidatedTags: string[] = []
 
     switch (body.model) {
+      case 'promotion':
+        // Promotions affect multiple pages, so broad revalidation
+        revalidateTag('promotion')
+        break
       case 'course':
         await handleCourseRevalidation(body, revalidatedPaths, revalidatedTags)
         break
@@ -64,14 +109,23 @@ export async function POST(request: NextRequest) {
         break
 
       case 'course-base':
-        // ✅ FIXED: Use dedicated course-base handler to avoid duplicates
         await handleCourseBaseRevalidation(
           body,
           revalidatedPaths,
           revalidatedTags
         )
         break
-
+      // case 'module':
+      // case 'lecture':
+      //   // Modules and lectures affect the course page
+      //   //courseBase validation
+      //   //course validation
+      //   await handleModuleLectureRevalidation(
+      //     body,
+      //     revalidatedPaths,
+      //     revalidatedTags
+      //   )
+      //   break
       case 'blog':
         await handleBlogRevalidation(body, revalidatedPaths, revalidatedTags)
         break
@@ -96,11 +150,23 @@ export async function POST(request: NextRequest) {
         )
         break
 
+      case 'page':
+        await handlePageRevalidation(body, revalidatedPaths, revalidatedTags)
+        break
+
+      case 'menu':
+        await handleMenuRevalidation(body, revalidatedPaths, revalidatedTags)
+        break
+
+      case 'setting':
+        await handleSettingRevalidation(body, revalidatedPaths, revalidatedTags)
+        break
+
       default:
         console.log(`⚠️ Unhandled model: ${body.model}`)
     }
 
-    // ✅ Always revalidate homepage for any content change (with duplicate check)
+    // ✅ Only revalidate homepage for published content changes
     if (!revalidatedPaths.includes('/')) {
       revalidatePath('/', 'page')
       revalidatedPaths.push('/')
@@ -109,11 +175,14 @@ export async function POST(request: NextRequest) {
     // ✅ Add a small delay to ensure all revalidations complete
     await new Promise((resolve) => setTimeout(resolve, 100))
 
-    // console.log('✅ Revalidation completed:', {
-    //   paths: revalidatedPaths,
-    //   tags: revalidatedTags,
-    //   timestamp: new Date().toISOString(),
-    // })
+    console.log('✅ Revalidation completed:', {
+      event: body.event,
+      model: body.model,
+      publishedAt: body.entry.publishedAt,
+      paths: revalidatedPaths,
+      tags: revalidatedTags,
+      timestamp: new Date().toISOString(),
+    })
 
     return NextResponse.json({
       revalidated: true,
@@ -131,32 +200,67 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ✅ NEW: Dedicated Course Base Handler (prevents duplicates)
-async function handleCourseBaseRevalidation(
+// ✅ Enhanced handlers with publish status awareness
+async function handleCourseRevalidation(
   body: StrapiWebhookBody,
   revalidatedPaths: string[],
   revalidatedTags: string[]
 ) {
-  const { entry } = body
+  const { entry, event } = body
   const slug = entry?.baseContent?.slug || entry?.slug
 
-  // ✅ Since course-base is shared, revalidate BOTH course and bootcamp paths
+  console.log(`🎯 Processing course revalidation: ${slug} (${event})`)
+
   if (slug) {
-    // Add paths only if not already present
+    // ✅ For unpublish/delete, remove from cache
+    if (event === 'entry.unpublish' || event === 'entry.delete') {
+      console.log(`🗑️ Removing course from cache: ${slug}`)
+    }
+
     if (!revalidatedPaths.includes(`/courses/${slug}`)) {
       revalidatePath(`/courses/${slug}`, 'page')
       revalidatedPaths.push(`/courses/${slug}`)
     }
 
-    if (!revalidatedPaths.includes(`/bootcamps/${slug}`)) {
-      revalidatePath(`/bootcamps/${slug}`, 'page')
-      revalidatedPaths.push(`/bootcamps/${slug}`)
-    }
-
-    // Add tags only if not already present
     if (!revalidatedTags.includes(`course-${slug}`)) {
       revalidateTag(`course-${slug}`)
       revalidatedTags.push(`course-${slug}`)
+    }
+  }
+
+  // Revalidate course lists (to update/remove from listings)
+  const courseTags = ['courses', 'course-page', 'home-page']
+  courseTags.forEach((tag) => {
+    if (!revalidatedTags.includes(tag)) {
+      revalidateTag(tag)
+      revalidatedTags.push(tag)
+    }
+  })
+
+  if (!revalidatedPaths.includes('/courses')) {
+    revalidatePath('/courses', 'page')
+    revalidatedPaths.push('/courses')
+  }
+}
+
+async function handleBootcampRevalidation(
+  body: StrapiWebhookBody,
+  revalidatedPaths: string[],
+  revalidatedTags: string[]
+) {
+  const { entry, event } = body
+  const slug = entry.baseContent?.slug || entry?.slug
+
+  console.log(`🏕️ Processing bootcamp revalidation: ${slug} (${event})`)
+
+  if (slug) {
+    if (event === 'entry.unpublish' || event === 'entry.delete') {
+      console.log(`🗑️ Removing bootcamp from cache: ${slug}`)
+    }
+
+    if (!revalidatedPaths.includes(`/bootcamps/${slug}`)) {
+      revalidatePath(`/bootcamps/${slug}`, 'page')
+      revalidatedPaths.push(`/bootcamps/${slug}`)
     }
 
     if (!revalidatedTags.includes(`bootcamp-${slug}`)) {
@@ -165,7 +269,127 @@ async function handleCourseBaseRevalidation(
     }
   }
 
-  // ✅ Revalidate shared tags (with duplicate checks)
+  const bootcampTags = ['courses', 'course-page', 'home-page']
+  bootcampTags.forEach((tag) => {
+    if (!revalidatedTags.includes(tag)) {
+      revalidateTag(tag)
+      revalidatedTags.push(tag)
+    }
+  })
+
+  if (!revalidatedPaths.includes('/courses')) {
+    revalidatePath('/courses', 'page')
+    revalidatedPaths.push('/courses')
+  }
+}
+
+async function handleBlogRevalidation(
+  body: StrapiWebhookBody,
+  revalidatedPaths: string[],
+  revalidatedTags: string[]
+) {
+  const { entry, event } = body
+  const slug = entry?.slug
+
+  console.log(`📝 Processing blog revalidation: ${slug} (${event})`)
+
+  if (slug) {
+    if (event === 'entry.unpublish' || event === 'entry.delete') {
+      console.log(`🗑️ Removing blog from cache: ${slug}`)
+    }
+
+    if (!revalidatedPaths.includes(`/blogs/${slug}`)) {
+      revalidatePath(`/blogs/${slug}`, 'page')
+      revalidatedPaths.push(`/blogs/${slug}`)
+    }
+
+    if (!revalidatedTags.includes(`blog-${slug}`)) {
+      revalidateTag(`blog-${slug}`)
+      revalidatedTags.push(`blog-${slug}`)
+    }
+  }
+
+  const blogTags = ['blogs', 'blogs-list', 'related-blogs']
+  blogTags.forEach((tag) => {
+    if (!revalidatedTags.includes(tag)) {
+      revalidateTag(tag)
+      revalidatedTags.push(tag)
+    }
+  })
+
+  if (!revalidatedPaths.includes('/blogs')) {
+    revalidatePath('/blogs', 'page')
+    revalidatedPaths.push('/blogs')
+  }
+}
+
+async function handleSettingRevalidation(
+  body: StrapiWebhookBody,
+  revalidatedPaths: string[],
+  revalidatedTags: string[]
+) {
+  // ✅ Settings don't have publishedAt, always revalidate
+  console.log('🔄 Revalidating settings...')
+  revalidateTag('settings')
+  revalidateTag('seo')
+  revalidatedTags.push('settings', 'seo')
+}
+
+async function handlePageRevalidation(
+  body: StrapiWebhookBody,
+  revalidatedPaths: string[],
+  revalidatedTags: string[]
+) {
+  console.log('🔄 Revalidating page...')
+  const pageSlug = body.entry.slug || 'unknown-slug'
+  revalidatePath(`/pages/${pageSlug}`, 'page')
+  revalidateTag('pages')
+  revalidateTag(`page-${pageSlug}`)
+  revalidatedTags.push('pages', `page-${pageSlug}`)
+  revalidatedPaths.push(`/pages/${pageSlug}`)
+}
+
+// ✅ Keep other handlers unchanged but with enhanced logging
+async function handleCourseBaseRevalidation(
+  body: StrapiWebhookBody,
+  revalidatedPaths: string[],
+  revalidatedTags: string[]
+) {
+  const { entry, event } = body
+  const courseType = entry?.baseContent?.courseType
+  const slug = entry?.baseContent?.slug || entry?.slug
+
+  console.log(`📚 Processing course-base revalidation: ${slug} (${event})`)
+
+  if (slug) {
+    if (event === 'entry.unpublish' || event === 'entry.delete') {
+      console.log(`🗑️ Removing course-base from cache: ${slug}`)
+    }
+
+    // Revalidate both course and bootcamp paths since course-base is shared
+
+    if (courseType !== 'course') {
+      if (!revalidatedPaths.includes(`/bootcamps/${slug}`)) {
+        revalidatePath(`/bootcamps/${slug}`, 'page')
+        revalidatedPaths.push(`/bootcamps/${slug}`)
+      }
+      if (!revalidatedTags.includes(`bootcamp-${slug}`)) {
+        revalidateTag(`bootcamp-${slug}`)
+        revalidatedTags.push(`bootcamp-${slug}`)
+      }
+    } else {
+      if (!revalidatedPaths.includes(`/courses/${slug}`)) {
+        revalidatePath(`/courses/${slug}`, 'page')
+        revalidatedPaths.push(`/courses/${slug}`)
+      }
+
+      if (!revalidatedTags.includes(`course-${slug}`)) {
+        revalidateTag(`course-${slug}`)
+        revalidatedTags.push(`course-${slug}`)
+      }
+    }
+  }
+
   const sharedTags = ['courses', 'courses-page', 'home-page']
   sharedTags.forEach((tag) => {
     if (!revalidatedTags.includes(tag)) {
@@ -174,7 +398,6 @@ async function handleCourseBaseRevalidation(
     }
   })
 
-  // ✅ Revalidate shared paths (with duplicate checks)
   const sharedPaths = ['/courses', '/']
   sharedPaths.forEach((path) => {
     if (!revalidatedPaths.includes(path)) {
@@ -184,126 +407,28 @@ async function handleCourseBaseRevalidation(
   })
 }
 
-// 🎯 Enhanced Course Revalidation (with duplicate prevention)
-async function handleCourseRevalidation(
+// Keep other handlers as they are...
+async function handleMenuRevalidation(
   body: StrapiWebhookBody,
   revalidatedPaths: string[],
   revalidatedTags: string[]
 ) {
-  const { entry } = body
-  const slug = entry?.baseContent?.slug || entry?.slug
-
-  // Revalidate course-specific pages with duplicate check
-  if (slug && !revalidatedPaths.includes(`/courses/${slug}`)) {
-    revalidatePath(`/courses/${slug}`, 'page')
-    revalidatedPaths.push(`/courses/${slug}`)
-  }
-
-  if (slug && !revalidatedTags.includes(`course-${slug}`)) {
-    revalidateTag(`course-${slug}`)
-    revalidatedTags.push(`course-${slug}`)
-  }
-
-  // Revalidate course lists and related pages (with duplicate checks)
-  const courseTags = ['courses', 'course-page', 'home-page']
-  courseTags.forEach((tag) => {
-    if (!revalidatedTags.includes(tag)) {
-      revalidateTag(tag)
-      revalidatedTags.push(tag)
-    }
-  })
-
-  // Revalidate courses listing page (with duplicate check)
-  if (!revalidatedPaths.includes('/courses')) {
-    revalidatePath('/courses', 'page')
-    revalidatedPaths.push('/courses')
-  }
+  console.log('🔄 Revalidating menu...')
+  revalidateTag('menus')
+  revalidatedTags.push('menus')
 }
 
-// 🏕️ Enhanced Bootcamp Revalidation (with duplicate prevention)
-async function handleBootcampRevalidation(
-  body: StrapiWebhookBody,
-  revalidatedPaths: string[],
-  revalidatedTags: string[]
-) {
-  const { entry } = body
-  const slug = entry.baseContent?.slug || entry?.slug
-
-  // Revalidate bootcamp-specific pages with duplicate check
-  if (slug && !revalidatedPaths.includes(`/bootcamps/${slug}`)) {
-    revalidatePath(`/bootcamps/${slug}`, 'page')
-    revalidatedPaths.push(`/bootcamps/${slug}`)
-  }
-
-  if (slug && !revalidatedTags.includes(`bootcamp-${slug}`)) {
-    revalidateTag(`bootcamp-${slug}`)
-    revalidatedTags.push(`bootcamp-${slug}`)
-  }
-
-  // Revalidate bootcamp lists and home page (with duplicate checks)
-  const bootcampTags = ['courses', 'course-page', 'home-page']
-  bootcampTags.forEach((tag) => {
-    if (!revalidatedTags.includes(tag)) {
-      revalidateTag(tag)
-      revalidatedTags.push(tag)
-    }
-  })
-
-  // Revalidate courses listing page (with duplicate check)
-  if (!revalidatedPaths.includes('/courses')) {
-    revalidatePath('/courses', 'page')
-    revalidatedPaths.push('/courses')
-  }
-}
-
-// 📝 Enhanced Blog Revalidation (with duplicate prevention)
-async function handleBlogRevalidation(
-  body: StrapiWebhookBody,
-  revalidatedPaths: string[],
-  revalidatedTags: string[]
-) {
-  const { entry } = body
-  const slug = entry?.slug
-
-  if (slug && !revalidatedPaths.includes(`/blogs/${slug}`)) {
-    revalidatePath(`/blogs/${slug}`, 'page')
-    revalidatedPaths.push(`/blogs/${slug}`)
-  }
-
-  if (slug && !revalidatedTags.includes(`blog-${slug}`)) {
-    revalidateTag(`blog-${slug}`)
-    revalidatedTags.push(`blog-${slug}`)
-  }
-
-  // Revalidate blog lists and related content (with duplicate checks)
-  const blogTags = ['blogs', 'blogs-list', 'related-blogs']
-  blogTags.forEach((tag) => {
-    if (!revalidatedTags.includes(tag)) {
-      revalidateTag(tag)
-      revalidatedTags.push(tag)
-    }
-  })
-
-  // Revalidate blogs listing page (with duplicate check)
-  if (!revalidatedPaths.includes('/blogs')) {
-    revalidatePath('/blogs', 'page')
-    revalidatedPaths.push('/blogs')
-  }
-}
-
-// 🏠 Enhanced Home Page Revalidation (with duplicate prevention)
 async function handleHomeRevalidation(
   body: StrapiWebhookBody,
   revalidatedPaths: string[],
   revalidatedTags: string[]
 ) {
-  // Force complete homepage revalidation (with duplicate check)
   if (!revalidatedPaths.includes('/')) {
     revalidatePath('/', 'page')
     revalidatedPaths.push('/')
   }
 
-  const homeTags = ['home-page', 'courses', 'course-page']
+  const homeTags = ['home-page']
   homeTags.forEach((tag) => {
     if (!revalidatedTags.includes(tag)) {
       revalidateTag(tag)
@@ -312,23 +437,30 @@ async function handleHomeRevalidation(
   })
 }
 
-// 📦 Enhanced Course Bundle Revalidation (with duplicate prevention)
 async function handleCourseBundleRevalidation(
   body: StrapiWebhookBody,
   revalidatedPaths: string[],
   revalidatedTags: string[]
 ) {
-  const { entry } = body
+  const { entry, event } = body
   const slug = entry.slug
 
-  if (slug && !revalidatedPaths.includes(`/bundles/${slug}`)) {
-    revalidatePath(`/bundles/${slug}`, 'page')
-    revalidatedPaths.push(`/bundles/${slug}`)
-  }
+  console.log(`📦 Processing bundle revalidation: ${slug} (${event})`)
 
-  if (slug && !revalidatedTags.includes(`bundle-${slug}`)) {
-    revalidateTag(`bundle-${slug}`)
-    revalidatedTags.push(`bundle-${slug}`)
+  if (slug) {
+    if (event === 'entry.unpublish' || event === 'entry.delete') {
+      console.log(`🗑️ Removing bundle from cache: ${slug}`)
+    }
+
+    if (!revalidatedPaths.includes(`/bundles/${slug}`)) {
+      revalidatePath(`/bundles/${slug}`, 'page')
+      revalidatedPaths.push(`/bundles/${slug}`)
+    }
+
+    if (!revalidatedTags.includes(`bundle-${slug}`)) {
+      revalidateTag(`bundle-${slug}`)
+      revalidatedTags.push(`bundle-${slug}`)
+    }
   }
 
   if (!revalidatedTags.includes('course-bundle')) {
@@ -337,20 +469,21 @@ async function handleCourseBundleRevalidation(
   }
 }
 
-// 🏷️ Enhanced Category Revalidation (with duplicate prevention)
 async function handleCategoryRevalidation(
   body: StrapiWebhookBody,
   revalidatedPaths: string[],
   revalidatedTags: string[]
 ) {
-  const { entry } = body
+  const { entry, event } = body
   const slug = entry.baseContent?.slug || entry?.slug
 
-  console.log(
-    `🏷️ Processing category revalidation for: ${slug || entry.documentId}`
-  )
+  console.log(`🏷️ Processing category revalidation: ${slug} (${event})`)
 
-  // Categories affect multiple pages, so broad revalidation (with duplicate checks)
+  if (event === 'entry.unpublish' || event === 'entry.delete') {
+    console.log(`🗑️ Removing category from cache: ${slug}`)
+  }
+
+  // Categories affect multiple pages, so broad revalidation
   const categoryTags = ['courses', 'bootcamps', 'blogs', 'home-page']
   categoryTags.forEach((tag) => {
     if (!revalidatedTags.includes(tag)) {
@@ -359,7 +492,6 @@ async function handleCategoryRevalidation(
     }
   })
 
-  // Force revalidation of major pages (with duplicate checks)
   const categoryPaths = ['/', '/courses', '/blogs']
   categoryPaths.forEach((path) => {
     if (!revalidatedPaths.includes(path)) {
@@ -368,7 +500,5 @@ async function handleCategoryRevalidation(
     }
   })
 
-  console.log(
-    `✅ Category revalidation completed for: ${slug || entry.documentId}`
-  )
+  console.log(`✅ Category revalidation completed: ${slug}`)
 }

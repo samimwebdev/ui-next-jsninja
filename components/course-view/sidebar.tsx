@@ -21,18 +21,22 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import type { Lesson, Module } from '@/types/course-view-types'
 import { useRouter, usePathname } from 'next/navigation'
+import { ReleasedBadge } from '@/components/course/released-badge'
+import { isModuleReleased } from '@/lib/course-utils'
 
 interface SidebarProps {
   modules: Module[]
   currentLessonId: string | null
   currentModuleId: number | null
   onLessonSelect: (moduleId: number, lesson: Lesson) => void
+  courseType?: string
 }
 
 export function Sidebar({
   modules,
   currentLessonId,
   currentModuleId,
+  courseType,
 }: SidebarProps) {
   const [search, setSearch] = React.useState('')
   const [openModules, setOpenModules] = React.useState<number[]>([])
@@ -160,7 +164,7 @@ export function Sidebar({
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search in course"
-            className="pl-10 py-6 h-11 bg-background"
+            className="pl-10 py-6 h-11 bg-background focus:ring-2 focus:ring-ninja-gold focus:border-ninja-gold"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -188,78 +192,93 @@ export function Sidebar({
       {/* Modules List */}
       <div className="overflow-auto h-[calc(100vh-180px)]">
         {filteredModules.length > 0 ? (
-          filteredModules.map((module) => (
-            <Collapsible
-              key={module.id}
-              open={openModules.includes(module.id)}
-              onOpenChange={() => toggleModule(module.id)}
-              className="border-b"
-            >
-              <CollapsibleTrigger
-                className={cn(
-                  'flex w-full items-start justify-between py-5 px-6  transition-colors'
-                )}
+          filteredModules.map((module) => {
+            const isReleased = isModuleReleased(
+              module.releaseDate?.toString() || null
+            )
+
+            return (
+              <Collapsible
+                key={module.id}
+                open={openModules.includes(module.id)}
+                onOpenChange={() => toggleModule(module.id)}
+                className="border-b"
               >
-                <div className="flex items-center gap-3">
-                  {module.completed ? (
-                    <CheckCircle className="h-6 w-6 text-emerald-500 flex-shrink-0 min-w-[24px] min-h-[24px] self-start" />
-                  ) : (
-                    <Circle className="h-6 w-6" />
+                <CollapsibleTrigger
+                  className={cn(
+                    'flex w-full items-start justify-between py-5 px-6 transition-colors'
                   )}
-                  <div className="text-sm text-left w-full">
-                    <h3 className="font-medium text-base mb-1 break-words">
-                      {module.title}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {/* Format duration properly - assuming it's in seconds */}
-                      {Math.floor(module.duration / 60)}:
-                      {(module.duration % 60).toString().padStart(2, '0')}
-                    </p>
-                  </div>
-                </div>
-                {openModules.includes(module.id) ? (
-                  <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
-                )}
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                {module.lessons.map((lesson) => (
-                  <Button
-                    key={lesson.id}
-                    variant="ghost"
-                    className={cn(
-                      'w-full justify-start gap-3 py-4 px-6 font-normal pl-14 relative transition-all duration-200 h-auto hover:bg-accent/10 hover:text-primary',
-                      lesson.completed &&
-                        'text-emerald-500 hover:text-emerald-500',
-                      currentLessonId === lesson.documentId &&
-                        currentModuleId === module.id &&
-                        'bg-primary/10 dark:bg-primary/20 border-l-4 border-primary font-medium shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-[""]'
+                >
+                  <div className="flex items-center gap-3">
+                    {module.completed ? (
+                      <CheckCircle className="h-6 w-6 text-emerald-500 flex-shrink-0 min-w-[24px] min-h-[24px] self-start" />
+                    ) : (
+                      <Circle className="h-6 w-6" />
                     )}
-                    onClick={() => handleLessonClick(module.id, lesson)}
-                  >
-                    <div className="self-start mt-1">
-                      {lesson.completed ? (
-                        <CheckCircle className="!h-5 !w-5 shrink-0" />
-                      ) : lesson.type === 'video' ? (
-                        <Video className="!h-5 !w-5 shrink-0 text-muted-foreground" />
-                      ) : (
-                        <FileText className="!h-5 !w-5 shrink-0 text-muted-foreground" />
+                    <div className="text-sm text-left w-full">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium text-base break-words">
+                          {module.title}
+                        </h3>
+                      </div>
+                      {courseType === 'course' && (
+                        <div className="mb-1">
+                          <ReleasedBadge
+                            isReleased={isReleased}
+                            releaseDate={module.releaseDate}
+                          />
+                        </div>
                       )}
-                    </div>
-                    <div className="flex flex-col items-start gap-1 text-left overflow-hidden">
-                      <p className="text-sm leading-normal break-words">
-                        {lesson.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {lesson.duration}
+                      <p className="text-muted-foreground">
+                        {Math.floor(module.duration / 60)}:
+                        {(module.duration % 60).toString().padStart(2, '0')}
                       </p>
                     </div>
-                  </Button>
-                ))}
-              </CollapsibleContent>
-            </Collapsible>
-          ))
+                  </div>
+                  {openModules.includes(module.id) ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                  )}
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  {module.lessons.map((lesson) => (
+                    <Button
+                      key={lesson.id}
+                      variant="ghost"
+                      className={cn(
+                        'w-full justify-start gap-3 py-4 px-6 font-normal pl-14 relative transition-all duration-200 h-auto hover:bg-accent/10 hover:text-primary',
+                        lesson.completed &&
+                          'text-emerald-500 hover:text-emerald-500',
+                        currentLessonId === lesson.documentId &&
+                          currentModuleId === module.id &&
+                          'bg-primary/10 dark:bg-primary/20 border-l-4 border-primary font-medium shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary before:content-[""]'
+                      )}
+                      onClick={() => handleLessonClick(module.id, lesson)}
+                    >
+                      <div className="self-start mt-1">
+                        {lesson.completed ? (
+                          <CheckCircle className="!h-5 !w-5 shrink-0" />
+                        ) : lesson.type === 'video' ? (
+                          <Video className="!h-5 !w-5 shrink-0 text-muted-foreground" />
+                        ) : (
+                          <FileText className="!h-5 !w-5 shrink-0 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex flex-col items-start gap-1 text-left overflow-hidden">
+                        <p className="text-sm leading-normal break-words">
+                          {lesson.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {lesson.duration}
+                        </p>
+                      </div>
+                    </Button>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            )
+          })
         ) : (
           <div className="p-8 text-center">
             <p className="text-muted-foreground">

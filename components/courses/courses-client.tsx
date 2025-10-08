@@ -202,7 +202,7 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
             content_ids: [courseSlug],
             content_name: courseTitle,
             value: coursePrice,
-            currency: 'USD',
+            currency: 'BDT',
           },
         }),
       })
@@ -299,12 +299,6 @@ export const CoursesClient: React.FC<CoursesClientProps> = ({
               size="sm"
               onClick={() => {
                 setViewMode('grid')
-                // ✅ Track view mode changes
-                event({
-                  action: 'view_mode_change',
-                  category: 'engagement',
-                  label: 'grid',
-                })
               }}
               className="rounded-r-none"
             >

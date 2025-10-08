@@ -22,6 +22,7 @@ import { Suspense } from 'react'
 import { PromoVideosSkeleton } from '@/components/bootcamp/promo-videos/promo-videos-lazy'
 import { strapiFetch } from '@/lib/strapi'
 import { CourseTracking } from '@/components/course/course-tracking'
+import CourseNotFound from '@/components/shared/not-found'
 
 interface BootcampPageProps {
   params: Promise<{
@@ -104,10 +105,18 @@ export default async function BootcampPage({
 }) {
   // Await params before using its properties
   const { slug } = await params
-  console.log('🔥 Statically generating bootcamp page for:', slug)
+  let bootcampData: BootcampPageData
+  try {
+    bootcampData = await getBootcampData(slug)
 
-  const bootcampData = await getBootcampData(slug)
-
+    if (!bootcampData) {
+      console.error('❌ No bootcamp data found, rendering 404')
+      return <CourseNotFound courseType="bootcamp" />
+    }
+  } catch (error) {
+    console.error('Error fetching bootcamp data:', error)
+    return <CourseNotFound courseType="bootcamp" />
+  }
   // Extract content sections from contentBlock
   const overviewData = getBootcampContentSection(
     bootcampData,
@@ -166,6 +175,13 @@ export default async function BootcampPage({
     price: bootcampData.baseContent?.price,
     courseType: bootcampData.baseContent?.courseType,
     isRegistrationOpen: bootcampData.baseContent?.isRegistrationEnabled ?? true,
+    isLiveRegistrationAvailable:
+      bootcampData.baseContent?.isLiveRegistrationAvailable,
+    isRecordedRegistrationAvailable:
+      bootcampData.baseContent?.isRecordedRegistrationAvailable,
+    liveBootcampPrice: bootcampData.baseContent?.liveBootcampPrice,
+    endDate: bootcampData.baseContent?.endDate,
+    actualPrice: bootcampData.baseContent?.actualPrice || null,
   }
 
   return (

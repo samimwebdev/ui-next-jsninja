@@ -25,9 +25,9 @@ const DEFAULT_SEO_CONFIG: SEOConfig = {
   defaultTitle: 'JavaScript Ninja - Learn Web Development',
   defaultDescription:
     'Master modern web development with expert-led courses and tutorials.',
-  defaultImage: '/images/og-default.jpg',
+  defaultImage: '/images/logo.jpg',
   siteName: 'JavaScript Ninja',
-  siteUrl: 'https://javascriptninja.com',
+  siteUrl: 'https://javascript-ninja.com',
   twitterHandle: '@JavaScriptNinja',
   keywords: [
     'JavaScript',

@@ -19,8 +19,10 @@ export interface CourseItem {
   startingFrom?: string
   totalModules: number | null
   featureImage?: StrapiImage
+  actualPrice?: number | null
   seo?: SEOData
   categories: Category[]
+  isRegistrationEnabled: boolean
 }
 
 export interface CourseBundleItem {
@@ -37,6 +39,7 @@ export interface CourseBundleItem {
   helperText: string
   featureImage: StrapiImage | null
   courseBases: CourseItem[]
+  actualPrice?: number | null
 }
 
 export interface CoursesApiResponse {

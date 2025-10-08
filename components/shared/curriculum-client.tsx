@@ -16,8 +16,11 @@ import { toast } from 'sonner'
 import { useUser } from '../context/AuthProvider'
 import { Badge } from '@/components/ui/badge'
 import { Module } from '@/types/shared-types'
+import { ReleasedBadge } from '../course/released-badge'
+import { isModuleReleased } from '@/lib/course-utils'
 
 export const CurriculumClient: React.FC<{
+  courseType?: string
   modules: Array<{
     id: number
     documentId: string
@@ -25,12 +28,14 @@ export const CurriculumClient: React.FC<{
     duration: number
     title: string
     lessons: Lesson[]
+    releaseDate: Date | null
   }>
-}> = ({ modules }) => {
+}> = ({ modules, courseType }) => {
   const { openVideo } = useVideo()
   const user = useUser()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  console.log({ courseType })
 
   useEffect(() => {
     setMounted(true)
@@ -103,124 +108,135 @@ export const CurriculumClient: React.FC<{
       </div>
 
       <Accordion type="single" collapsible className="space-y-3">
-        {modules.map((module, moduleIndex) => (
-          <AccordionItem
-            key={module.id}
-            value={`module-${moduleIndex}`}
-            className="border border-border rounded-lg overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow"
-          >
-            <AccordionTrigger className="flex items-center justify-between px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors group">
-              <div className="flex items-center gap-4 text-left">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-ninja-gold text-ninja-navy flex items-center justify-center text-sm font-bold">
-                  {moduleIndex + 1}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg text-foreground group-hover:text-ninja-gold transition-colors">
-                    {module.title}
-                  </h3>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <PlayCircle className="h-4 w-4" />
-                      {getTotalLessons(module)} lessons
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {getTotalDuration(module)}
-                    </span>
-                    {getFreeLessonsCount(module) > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        {getFreeLessonsCount(module)} free
-                      </span>
-                    )}
+        {modules.map((module, moduleIndex) => {
+          const isReleased = isModuleReleased(
+            module.releaseDate?.toString() || null
+          )
+          return (
+            <AccordionItem
+              key={module.id}
+              value={`module-${moduleIndex}`}
+              className="border border-border rounded-lg overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow"
+            >
+              <AccordionTrigger className="flex items-center justify-between px-6 py-4 hover:no-underline hover:bg-muted/50 transition-colors group">
+                <div className="flex items-center gap-4 text-left">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-ninja-gold text-ninja-navy flex items-center justify-center text-sm font-bold">
+                    {moduleIndex + 1}
                   </div>
-                </div>
-              </div>
-            </AccordionTrigger>
-
-            <AccordionContent className="px-0 pb-0">
-              <div className="bg-muted/20 border-t">
-                {module.lessons?.map((lesson, lessonIndex) => (
-                  <div
-                    key={lesson.id}
-                    onClick={() => handleLessonClick(lesson)}
-                    className={`flex items-center justify-between px-6 py-4 border-b border-border/50 last:border-b-0 transition-all ${
-                      lesson.isFree &&
-                      lesson.videoUrl &&
-                      lesson.type === 'video'
-                        ? 'cursor-pointer hover:bg-ninja-gold/10 hover:border-ninja-gold/20 group'
-                        : 'cursor-default'
-                    }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                        {lessonIndex + 1}
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {lesson.type === 'video' ? (
-                          <PlayCircle
-                            className={`h-5 w-5 ${
-                              lesson.isFree
-                                ? 'text-ninja-gold group-hover:text-ninja-orange transition-colors'
-                                : 'text-muted-foreground'
-                            }`}
-                          />
-                        ) : (
-                          <FileText className="h-5 w-5 text-muted-foreground" />
-                        )}
-
-                        <div>
-                          <h4
-                            className={`font-medium transition-colors ${
-                              lesson.isFree
-                                ? 'text-foreground group-hover:text-primary dark:group-hover:text-ninja-gold'
-                                : 'text-muted-foreground'
-                            }`}
-                          >
-                            {lesson.title}
-                          </h4>
-                          {lesson.type === 'video' && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Video lesson
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div>
+                    <h3 className="font-semibold text-lg text-foreground group-hover:text-ninja-gold transition-colors">
+                      {module.title}
+                    </h3>
+                    {courseType === 'course' && (
+                      <ReleasedBadge
+                        isReleased={isReleased}
+                        releaseDate={module.releaseDate}
+                      />
+                    )}
+                    <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <PlayCircle className="h-4 w-4" />
+                        {getTotalLessons(module)} lessons
+                      </span>
+                      <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        <span>{formatDuration(lesson.duration)}</span>
-                      </div>
-
-                      {lesson.isFree ? (
-                        <Badge
-                          variant="secondary"
-                          className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800"
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          Free Preview
-                        </Badge>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Lock className="h-4 w-4 text-muted-foreground" />
-                          <Badge
-                            variant="outline"
-                            className="text-muted-foreground"
-                          >
-                            Premium
-                          </Badge>
-                        </div>
+                        {getTotalDuration(module)}
+                      </span>
+                      {getFreeLessonsCount(module) > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Eye className="h-4 w-4" />
+                          {getFreeLessonsCount(module)} free
+                        </span>
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+                </div>
+              </AccordionTrigger>
+
+              <AccordionContent className="px-0 pb-0">
+                <div className="bg-muted/20 border-t">
+                  {module.lessons?.map((lesson, lessonIndex) => (
+                    <div
+                      key={lesson.id}
+                      onClick={() => handleLessonClick(lesson)}
+                      className={`flex items-center justify-between px-6 py-4 border-b border-border/50 last:border-b-0 transition-all ${
+                        lesson.isFree &&
+                        lesson.videoUrl &&
+                        lesson.type === 'video'
+                          ? 'cursor-pointer hover:bg-ninja-gold/10 hover:border-ninja-gold/20 group'
+                          : 'cursor-default'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                          {lessonIndex + 1}
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          {lesson.type === 'video' ? (
+                            <PlayCircle
+                              className={`h-5 w-5 ${
+                                lesson.isFree
+                                  ? 'text-ninja-gold group-hover:text-ninja-orange transition-colors'
+                                  : 'text-muted-foreground'
+                              }`}
+                            />
+                          ) : (
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                          )}
+
+                          <div>
+                            <h4
+                              className={`font-medium transition-colors ${
+                                lesson.isFree
+                                  ? 'text-foreground group-hover:text-primary dark:group-hover:text-ninja-gold'
+                                  : 'text-muted-foreground'
+                              }`}
+                            >
+                              {lesson.title}
+                            </h4>
+                            {lesson.type === 'video' && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Video lesson
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>{formatDuration(lesson.duration)}</span>
+                        </div>
+
+                        {lesson.isFree ? (
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800"
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            Free Preview
+                          </Badge>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                            <Badge
+                              variant="outline"
+                              className="text-muted-foreground"
+                            >
+                              Premium
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
       </Accordion>
     </div>
   )

@@ -6,11 +6,15 @@ import { StrapiIcon } from '@/types/shared-types'
 import { useRouter } from 'next/navigation'
 import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 import { useEffect } from 'react'
+import { trackEnrollmentStart } from '../analytics/vercel-analytics'
+import { CountdownTimer } from '@/components/shared/countdown-timer' // Import the countdown timer
+import { formatPrice } from '@/lib/course-utils'
 
 interface PricingPackageData {
   id: number
   name: string
   isPreferred?: boolean | null
+  packageType: 'live' | 'record'
   btn?: {
     id: number
     btnIcon?: StrapiIcon
@@ -26,6 +30,12 @@ interface PricingClientWrapperProps {
     slug: string
     courseType: string
     isRegistrationOpen: boolean
+    price: number
+    isLiveRegistrationAvailable: boolean
+    liveBootcampPrice?: number
+    isRecordedRegistrationAvailable: boolean
+    endDate: string | null // Add endDate field
+    actualPrice?: number | null
   }
 }
 
@@ -34,8 +44,9 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   courseInfo,
 }) => {
   const router = useRouter()
+  const packageType = packageData.packageType
 
-  const { isRegistrationOpen, slug } = courseInfo
+  const { isRegistrationOpen, slug, endDate, price, actualPrice } = courseInfo
   const { isEnrolled, checkEnrollment, checkAuthOnly } = useEnrollmentCheck()
 
   useEffect(() => {
@@ -45,11 +56,12 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
 
   const handleClick = async () => {
     // Check enrollment status first
-    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}`
+    const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}&packageType=${packageData.packageType}`
     const enrolled = await checkEnrollment(courseInfo.slug)
     const auth = await checkAuthOnly()
+
     if (!auth) {
-      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
+      router.push(`/auth/login?redirect=${encodeURIComponent(enrollLink)}`)
       return
     }
 
@@ -57,6 +69,15 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       // User is enrolled, go to course
       router.push(`/course-view/${courseInfo.slug}`)
     } else {
+      // Use the discounted price for tracking
+      trackEnrollmentStart({
+        slug: courseInfo.slug,
+        title: courseInfo.title,
+        price: courseInfo.price, // This is now the discounted price
+        courseType: courseInfo.courseType,
+        packageType: packageData.packageType,
+      })
+
       // User not enrolled, go to checkout
       router.push(enrollLink)
     }
@@ -72,11 +93,13 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
         ? '<path fill="currentColor" d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M10,16.5V7.5L16,12">'
         : iconName === 'mdi:lock'
         ? '<path fill="currentColor" d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z">'
+        : iconName === 'mdi:wallet'
+        ? '<path fill="currentColor" d="M21,18V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H19A2,2 0 0,1 21,5V6H12C10.89,6 10,6.9 10,8V16A2,2 0 0,0 12,18H21M12,16H22V8H12V16M16,13.5A1.5,1.5 0 0,1 14.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,12A1.5,1.5 0 0,1 16,13.5Z">'
         : '<path fill="currentColor" d="M19,7H18V6A6,6 0 0,0 6,6V7H5A3,3 0 0,0 2,10V20A3,3 0 0,0 5,23H19A3,3 0 0,0 22,20V10A3,3 0 0,0 19,7M8,6A4,4 0 0,1 16,6V7H8V6M20,20A1,1 0 0,1 19,21H5A1,1 0 0,1 4,20V10A1,1 0 0,1 5,9H19A1,1 0 0,1 20,10V20M10,16V14A2,2 0 0,1 14,14V16A1,1 0 0,1 13,17H11A1,1 0 0,1 10,16Z">',
   })
 
-  // Determine button label and state
   const getButtonContent = () => {
+    // If user is already enrolled, show access button
     if (isEnrolled) {
       return {
         label: 'Access Course',
@@ -85,6 +108,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
+    // If general registration is closed, disable all packages
     if (!isRegistrationOpen) {
       return {
         label: 'Registration Closed',
@@ -93,6 +117,41 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
+    // Handle Live Package
+    if (packageData.packageType === 'live') {
+      if (!courseInfo.isLiveRegistrationAvailable) {
+        return {
+          label: 'Live Registration Unavailable',
+          icon: createFallbackIcon('mdi:lock'),
+          disabled: true,
+        }
+      } else {
+        return {
+          label: packageData.btn?.btnLabel || 'Enroll in Live Package',
+          icon: packageData.btn?.btnIcon || createFallbackIcon('mdi:wallet'),
+          disabled: false,
+        }
+      }
+    }
+
+    // Handle Recorded Package
+    if (packageData.packageType === 'record') {
+      if (!courseInfo.isRecordedRegistrationAvailable) {
+        return {
+          label: 'Recorded Registration Unavailable',
+          icon: createFallbackIcon('mdi:lock'),
+          disabled: true,
+        }
+      } else {
+        return {
+          label: packageData.btn?.btnLabel || 'Enroll in Recorded Package',
+          icon: packageData.btn?.btnIcon || createFallbackIcon('mdi:wallet'),
+          disabled: false,
+        }
+      }
+    }
+
+    // Fallback for any other package types
     return {
       label: packageData.btn?.btnLabel || 'Enroll Now',
       icon: packageData.btn?.btnIcon || createFallbackIcon('mdi:wallet'),
@@ -102,23 +161,85 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
 
   const buttonContent = getButtonContent()
 
+  // Check if countdown should be shown (only for active registrations)
+  const shouldShowCountdown =
+    !isEnrolled && isRegistrationOpen && !buttonContent.disabled && endDate
+
+  // Calculate discount percentage if actualPrice exists
+  const discountPercentage =
+    actualPrice && actualPrice > price
+      ? Math.round(((actualPrice - price) / actualPrice) * 100)
+      : null
+
   return (
-    <Button
-      size="lg"
-      className="w-full"
-      variant={packageData.isPreferred ? 'default' : 'outline'}
-      onClick={handleClick}
-      disabled={buttonContent.disabled}
-    >
-      {buttonContent.icon && (
-        <DynamicIcon
-          icon={buttonContent.icon}
-          className="mr-2 h-4 w-4"
-          width={16}
-          height={16}
+    <>
+      {/* Countdown Timer */}
+      {shouldShowCountdown && (
+        <CountdownTimer
+          endDate={endDate}
+          title={
+            packageType === 'live'
+              ? 'Live Session Starts Soon!'
+              : 'Limited Time Offer!'
+          }
+          subtitle={
+            packageType === 'live'
+              ? 'Registration closes in:'
+              : 'Enrollment ends in:'
+          }
         />
       )}
-      {buttonContent.label || `Enroll Now - ${packageData.name}`}
-    </Button>
+
+      {/* Price Display - IMPROVED CONSISTENCY */}
+      <div className="mb-6 text-center">
+        <div className="flex items-baseline justify-center gap-3 mb-2">
+          {/* Discounted Price (Current Price) */}
+          <span className="text-4xl font-bold text-ninja-gold">
+            {formatPrice(price)}
+          </span>
+
+          {/* Original Price (Crossed Out) - ALIGNED TO BASELINE */}
+          {actualPrice && actualPrice > price && (
+            <span className="text-xl text-gray-500 dark:text-gray-400 line-through">
+              {formatPrice(actualPrice)}
+            </span>
+          )}
+        </div>
+
+        {/* Discount Badge - IMPROVED SPACING */}
+        {discountPercentage && (
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
+            <span>Save {discountPercentage}%</span>
+          </div>
+        )}
+      </div>
+
+      {/* Enroll Button - IMPROVED ALIGNMENT */}
+      <Button
+        size="lg"
+        className={`${
+          packageType === 'live' && 'btn-ninja-primary'
+        } w-full py-3 px-6 transition-all duration-300 disabled:cursor-not-allowed mt-auto flex items-center justify-center gap-2 ${
+          buttonContent.disabled
+            ? 'opacity-60 cursor-not-allowed'
+            : 'hover:scale-[1.02] hover:shadow-lg'
+        } ${shouldShowCountdown ? 'animate-pulse-glow' : ''}`}
+        variant={packageData.isPreferred ? 'default' : 'outline'}
+        onClick={handleClick}
+        disabled={buttonContent.disabled}
+      >
+        {buttonContent.icon && (
+          <DynamicIcon
+            icon={buttonContent.icon}
+            className="h-5 w-5" // Slightly larger icon
+            width={20}
+            height={20}
+          />
+        )}
+        <span className="font-semibold">
+          {buttonContent.label || `Enroll Now - ${packageData.name}`}
+        </span>
+      </Button>
+    </>
   )
 }

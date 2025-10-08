@@ -42,6 +42,9 @@ export default function VideoModal({
     if (url.includes('vimeo.com')) {
       return 'vimeo'
     }
+    if (url.includes('gumlet.io') || url.includes('play.gumlet.io')) {
+      return 'gumlet'
+    }
     if (url.includes('iframe') || url.includes('embed')) {
       return 'iframe'
     }
@@ -70,6 +73,20 @@ export default function VideoModal({
         }
         return url
 
+      case 'gumlet':
+        // Check if it's already an embed URL or needs conversion
+        if (url.includes('play.gumlet.io/embed/')) {
+          // Add autoplay parameter to existing embed URL
+          const separator = url.includes('?') ? '&' : '?'
+          return `${url}${separator}autoplay=true`
+        }
+        // Extract video ID if it's a different Gumlet format
+        const gumletMatch = url.match(/gumlet\.io\/([^/?]+)/)
+        if (gumletMatch) {
+          return `https://play.gumlet.io/embed/${gumletMatch[1]}?autoplay=true`
+        }
+        return url
+
       case 'iframe':
         return url
 
@@ -91,11 +108,14 @@ export default function VideoModal({
       )
     }
 
+    // Use appropriate aspect ratio based on video type
+    const aspectRatio = videoType === 'gumlet' ? '24/13' : '16/9'
+
     return (
-      <div style={{ position: 'relative', aspectRatio: '24/13' }}>
+      <div style={{ position: 'relative', aspectRatio, width: '100%' }}>
         <iframe
           src={embedUrl}
-          className="w-full h-full"
+          loading="lazy"
           style={{
             border: 'none',
             position: 'absolute',
@@ -105,9 +125,11 @@ export default function VideoModal({
             width: '100%',
           }}
           frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;"
           allowFullScreen
-          title="Video Player"
+          title={
+            videoType === 'gumlet' ? 'Gumlet video player' : 'Video Player'
+          }
         />
       </div>
     )
@@ -120,7 +142,7 @@ export default function VideoModal({
     >
       <div
         ref={modalRef}
-        className="relative w-full max-w-4xl mx-4 aspect-video bg-black rounded-lg overflow-hidden"
+        className="relative w-full max-w-4xl mx-4 bg-black rounded-lg overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -136,15 +158,3 @@ export default function VideoModal({
     </div>
   )
 }
-
-// https://play.gumlet.io/embed/68936c007afab80a3ee00e03?background=false&autoplay=false&loop=false&disableControls=false
-
-// ;<div style="position:relative;aspect-ratio:24/13;">
-//   <iframe
-//     loading="lazy"
-//     title="Gumlet video player"
-//     src="https://play.gumlet.io/embed/68936c007afab80a3ee00e03?background=false&autoplay=false&loop=false&disableControls=false"
-//     style="border:none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
-//     allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen;"
-//   ></iframe>
-// </div>

@@ -104,7 +104,7 @@ export async function GET(
       console.log('Profile already exists, skipping creation')
     }
 
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard/courses', request.url))
   } catch (error) {
     console.error('GitHub auth callback error:', error)
     return NextResponse.redirect(new URL('/', request.url))

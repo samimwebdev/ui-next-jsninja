@@ -5,7 +5,9 @@ import { StepsLazy } from './steps-lazy'
 import { Suspense } from 'react'
 import { StepsClientSkeleton } from './steps-lazy'
 
-const Steps: React.FC<{ data: BootcampStepsContentSection }> = ({ data }) => {
+const BootcampSteps: React.FC<{ data: BootcampStepsContentSection }> = ({
+  data,
+}) => {
   const steps = data.stepSection.map((step, index) => ({
     id: index + 1,
     title: step.title,
@@ -52,4 +54,4 @@ const Steps: React.FC<{ data: BootcampStepsContentSection }> = ({ data }) => {
   )
 }
 
-export default Steps
+export default BootcampSteps

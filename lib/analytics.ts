@@ -1,17 +1,32 @@
 import CryptoJS from 'crypto-js'
 
-// Google Analytics
-export const GA_TRACKING_ID = process.env.NEXT_PUBLIC_GA_ID
-// Facebook Pixel
-export const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID
+// Dynamic tracking IDs - will be set from Strapi settings
+let dynamicGAId: string | null = null
+let dynamicFBPixelId: string | null = null
 
-export const pageview = (url: string) => {
-  if (typeof window !== 'undefined' && GA_TRACKING_ID) {
-    window.gtag('config', GA_TRACKING_ID, {
-      page_path: url,
-    })
-  }
+// Fallback to environment variables
+export const GA_TRACKING_ID =
+  dynamicGAId || process.env.NEXT_PUBLIC_GA_TRACKING_ID || ''
+
+export const FB_PIXEL_ID =
+  dynamicFBPixelId || process.env.NEXT_PUBLIC_FB_PIXEL_ID || ''
+
+// Functions to set dynamic IDs (call these from your layout after fetching settings)
+export const setGATrackingId = (id: string) => {
+  dynamicGAId = id
 }
+
+export const setFBPixelId = (id: string) => {
+  dynamicFBPixelId = id
+}
+
+// export const pageview = (url: string) => {
+//   if (typeof window !== 'undefined' && GA_TRACKING_ID) {
+//     window.gtag('config', GA_TRACKING_ID, {
+//       page_path: url,
+//     })
+//   }
+// }
 
 export const event = ({
   action,
@@ -37,11 +52,10 @@ export const event = ({
   }
 }
 
-export const fbPageView = () => {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', 'PageView')
-  }
-}
+// export const fbPageView = () => {
+//   if (typeof window !== 'undefined' && window.fbq) {
+//     window.fbq('track', 'PageView')
+//   }
 
 export const fbEvent = (eventName: string, parameters?: object) => {
   if (typeof window !== 'undefined' && window.fbq) {
@@ -55,18 +69,10 @@ export const trackCourseView = (
   courseTitle: string,
   coursePrice?: number
 ) => {
-  // Google Analytics
-  // event({
-  //   action: 'view_item',
-  //   category: 'ecommerce',
-  //   label: courseSlug,
-  //   value: coursePrice,
-  // })
-
   // Enhanced ecommerce event
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'view_item', {
-      currency: 'USD',
+      currency: 'BDT',
       value: coursePrice || 0,
       items: [
         {
@@ -85,7 +91,7 @@ export const trackCourseView = (
     content_ids: [courseSlug],
     content_name: courseTitle,
     value: coursePrice || 0,
-    currency: 'USD',
+    currency: 'BDT',
   })
 }
 
@@ -98,7 +104,7 @@ export const trackCourseEnrollment = (
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'purchase', {
       transaction_id: `course_${courseSlug}_${Date.now()}`,
-      currency: 'USD',
+      currency: 'BDT',
       value: price || 0,
       items: [
         {
@@ -118,7 +124,7 @@ export const trackCourseEnrollment = (
     content_ids: [courseSlug],
     content_name: courseTitle,
     value: price || 0,
-    currency: 'USD',
+    currency: 'BDT',
   })
 }
 
@@ -462,14 +468,6 @@ export const trackBeginCheckout = (
   coursePrice?: number,
   courseType?: string
 ) => {
-  // Google Analytics
-  // event({
-  //   action: 'begin_checkout',
-  //   category: 'ecommerce',
-  //   label: courseSlug,
-  //   value: coursePrice,
-  // })
-
   // Enhanced GA ecommerce event
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'begin_checkout', {

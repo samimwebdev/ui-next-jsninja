@@ -42,7 +42,7 @@ export function ProjectCard({
           <CardContent className="p-6">
             <div className="aspect-video relative rounded-lg overflow-hidden mb-4">
               <Image
-                src={image?.url || '/images/placeholder.svg'}
+                src={image?.formats?.small?.url || '/images/placeholder.svg'}
                 alt={title}
                 fill
                 className="object-cover w-full h-full"
@@ -76,7 +76,7 @@ export function ProjectCard({
         </DialogHeader>
         <div className="grid gap-4">
           <Image
-            src={image?.url || '/images/placeholder.svg'}
+            src={image?.formats?.medium?.url || '/images/placeholder.svg'}
             alt={title}
             width={600}
             height={338}

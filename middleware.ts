@@ -1,8 +1,20 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const protectedRoutes = ['/dashboard', '/profile', '/admin']
-const authRoutes = ['/login', '/register']
+const protectedRoutes = [
+  '/dashboard',
+  '/checkout',
+  '/admin',
+  '/course-view',
+  '/app-setup',
+  '/app-setup-success',
+]
+const authRoutes = [
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+]
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -22,9 +34,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect authenticated users from auth routes
+  // ✅ FIX: Redirect authenticated users from auth routes to /dashboard/courses
   if (isAuthRoute && token) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard/courses', request.url))
   }
 
   return NextResponse.next()

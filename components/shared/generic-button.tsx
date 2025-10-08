@@ -5,12 +5,18 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 import { CourseType } from '@/types/checkout-types'
+import { trackEnrollmentStart } from '../analytics/vercel-analytics'
+import { CountdownTimer } from './countdown-timer'
 
 interface EnrollButtonProps {
   courseInfo: {
     slug: string
+    title: string
+    price: number
+    actualPrice?: number | null
     courseType: CourseType
     isRegistrationOpen: boolean
+    endDate: string | null
   }
   label?: string
   className?: string
@@ -49,6 +55,12 @@ export default function GenericButton({
       // User is enrolled, go to course
       router.push(`/course-view/${courseInfo.slug}`)
     } else {
+      trackEnrollmentStart({
+        slug: courseInfo.slug,
+        title: courseInfo.title,
+        price: courseInfo.price,
+        courseType: courseInfo.courseType,
+      })
       // User not enrolled, go to checkout
       router.push(enrollLink)
     }
@@ -63,16 +75,32 @@ export default function GenericButton({
 
   const isDisabled =
     isLoading || (!courseInfo.isRegistrationOpen && isEnrolled !== true)
+  // Check if countdown should be shown (only for active registrations)
+  const shouldShowCountdown =
+    !isEnrolled &&
+    courseInfo.isRegistrationOpen &&
+    !isDisabled &&
+    courseInfo.endDate
 
   return (
-    <motion.button
-      className={`w-full btn-ninja-primary text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-      onClick={handleClick}
-      disabled={isDisabled}
-      whileHover={{ scale: isDisabled ? 1 : 1.02 }}
-      whileTap={{ scale: isDisabled ? 1 : 0.98 }}
-    >
-      {getButtonText()}
-    </motion.button>
+    <>
+      {shouldShowCountdown && (
+        <CountdownTimer
+          endDate={courseInfo?.endDate}
+          title="Limited Time Offer!"
+          subtitle="Enrollment ends in:"
+        />
+      )}
+
+      <motion.button
+        className={`w-full btn-ninja-primary text-white py-3 px-6 rounded-lg hover:bg-[#D81B60] transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        onClick={handleClick}
+        disabled={isDisabled}
+        whileHover={{ scale: isDisabled ? 1 : 1.02 }}
+        whileTap={{ scale: isDisabled ? 1 : 0.98 }}
+      >
+        {getButtonText()}
+      </motion.button>
+    </>
   )
 }

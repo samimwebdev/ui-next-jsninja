@@ -3,7 +3,6 @@
 import Script from 'next/script'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
-import { fbPageView, FB_PIXEL_ID } from '@/lib/analytics'
 import Image from 'next/image'
 
 declare global {
@@ -13,16 +12,23 @@ declare global {
   }
 }
 
-export function FacebookPixel() {
+interface FacebookPixelProps {
+  pixelId?: string
+}
+
+export function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  // Use dynamic pixelId or fallback to environment variable
+  const FB_PIXEL_ID = pixelId || process.env.NEXT_PUBLIC_FB_PIXEL_ID
+
   useEffect(() => {
     // Track page view on route change
-    if (pathname) {
-      fbPageView()
+    if (pathname && FB_PIXEL_ID && window.fbq) {
+      window.fbq('track', 'PageView')
     }
-  }, [pathname, searchParams])
+  }, [pathname, searchParams, FB_PIXEL_ID])
 
   if (!FB_PIXEL_ID) {
     return null

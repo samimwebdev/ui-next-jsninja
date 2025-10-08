@@ -26,7 +26,7 @@ interface CourseCardProps {
 // Helper function to format price
 const formatPrice = (price: number): string => {
   if (!price || price <= 0) return 'Free'
-  return `${price.toLocaleString()} BDT`
+  return `${price.toLocaleString()} Tk`
 }
 
 // Helper function to get course type styling - Updated for dark mode
@@ -68,6 +68,8 @@ export const CourseCard: React.FC<CourseCardProps> = ({
     return null
   }
 
+  const hasDiscount = course.actualPrice && course.actualPrice > course.price
+
   const safeCategories = course.categories || []
   const courseLink =
     course.courseType === 'bootcamp'
@@ -92,9 +94,16 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             />
             {/* Price Badge */}
             <div className="absolute top-3 left-3">
-              <Badge className="bg-primary text-primary-foreground font-semibold shadow-lg">
-                {formatPrice(course.price || 0)}
-              </Badge>
+              <div className="flex items-baseline gap-2">
+                <Badge className="bg-primary text-primary-foreground text-base font-bold px-3 py-1">
+                  {course.price.toLocaleString()} Tk
+                </Badge>
+                {hasDiscount && (
+                  <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full">
+                    {course.actualPrice?.toLocaleString()} Tk
+                  </span>
+                )}
+              </div>
             </div>
             {showType && course.courseType && (
               <div className="absolute top-3 right-3">
@@ -193,7 +202,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           <div className="relative h-48 overflow-hidden">
             <Image
               src={
-                course.featureImage?.formats?.medium?.url ||
+                course.featureImage?.formats?.small?.url ||
                 course.featureImage?.url ||
                 '/images/placeholder.svg'
               }
@@ -203,9 +212,17 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             />
             {/* Badges */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-              <Badge className="bg-primary text-primary-foreground font-semibold shadow-lg">
-                {formatPrice(course.price || 0)}
-              </Badge>
+              <div className="flex gap-2">
+                <Badge className="text-base bg-primary font-semibold text-primary-foreground shadow-lg px-2 py-1 rounded-full">
+                  {formatPrice(course.price || 0)}
+                </Badge>
+
+                {hasDiscount && (
+                  <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full">
+                    {formatPrice(course.actualPrice || 0)}
+                  </span>
+                )}
+              </div>
               <div className="flex flex-col gap-2">
                 {showType && course.courseType && (
                   <Badge

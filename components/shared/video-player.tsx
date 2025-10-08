@@ -28,7 +28,7 @@ export function VideoPlayer({
   const aspectClasses = {
     video: 'aspect-video',
     square: 'aspect-square',
-    wide: 'aspect-[21/9]',
+    wide: 'aspect-[24/13]',
   }
 
   // Determine video type
@@ -71,6 +71,7 @@ export function VideoPlayer({
           <div className="w-full h-full bg-gray-900">
             {thumbnail ? (
               <Image
+                priority
                 src={thumbnail}
                 alt="Video thumbnail"
                 width={600}

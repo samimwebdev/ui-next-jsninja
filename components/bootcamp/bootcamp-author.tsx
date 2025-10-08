@@ -62,7 +62,7 @@ export const BootcampAuthor: React.FC<{ data: AuthorContentSection }> = ({
                 <Avatar className="h-32 w-32 ring-4 ring-primary/20 shadow-xl">
                   <AvatarImage
                     src={
-                      instructor.profile?.image?.url ||
+                      instructor.profile?.image?.formats?.thumbnail?.url ||
                       instructor.profile?.imageUrl ||
                       ''
                     }

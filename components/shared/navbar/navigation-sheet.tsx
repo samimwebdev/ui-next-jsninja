@@ -80,11 +80,12 @@ export const NavigationSheet = ({
         <Link href="/" onClick={handleLinkClick}>
           {logo?.formats?.thumbnail ? (
             <Image
-              width={150}
-              height={70}
+              // width={150}
+              // height={70}
               src={logo.formats.thumbnail.url}
               alt={logo.alternativeText || 'Logo'}
               className="object-contain"
+              fill
             />
           ) : (
             <Logo />

@@ -28,23 +28,6 @@ export const registerSchema = yup.object({
       'Last name can only contain letters, spaces, hyphens, and apostrophes'
     ),
 
-  username: yup
-    .string()
-    .required('Username is required')
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be no more than 20 characters')
-    .matches(
-      /^[a-zA-Z0-9_-]+$/,
-      'Username can only contain letters, numbers, underscores, and hyphens'
-    )
-    .test(
-      'no-leading-number',
-      'Username cannot start with a number',
-      (value) => {
-        return value ? !/^[0-9]/.test(value) : true
-      }
-    ),
-
   email: yup
     .string()
     .required('Email is required')
@@ -112,6 +95,17 @@ export const profileUpdateSchema = yup.object({
     .string()
     .max(50, 'Address must be less than 50 characters')
     .optional(),
+})
+
+export const otpSchema = yup.object({
+  token: yup
+    .string()
+    .matches(/^[0-9]{6}$/, 'OTP must be exactly 6 digits')
+    .required('OTP is required'),
+})
+
+export const toggle2FASchema = yup.object({
+  enable: yup.boolean().required(),
 })
 
 export type ProfileUpdateFormData = yup.InferType<typeof profileUpdateSchema>

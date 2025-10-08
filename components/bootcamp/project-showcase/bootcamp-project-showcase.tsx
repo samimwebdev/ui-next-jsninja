@@ -38,7 +38,7 @@ export const BootcampProjectShowcase: React.FC<{
               className="bg-card rounded-lg overflow-hidden border"
             >
               <Image
-                src={project.image?.url || '/placeholder.svg'}
+                src={project.image?.formats?.small?.url || '/placeholder.svg'}
                 alt={project.title}
                 className="w-full h-[200px] object-cover"
                 width="300"

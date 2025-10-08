@@ -13,9 +13,17 @@ export const BootcampPricing: React.FC<{
     price: number
     courseType: string
     isRegistrationOpen: boolean
+    isLiveRegistrationAvailable: boolean
+    liveBootcampPrice?: number
+    isRecordedRegistrationAvailable: boolean
+    endDate: string | null
+    actualPrice?: number | null
   }
 }> = ({ data, courseInfo }) => {
   // Server-side HTML parsing using cheerio-like approach or regex
+
+  // const liveBootcampPrice = courseInfo.liveBootcampPrice
+  // const recordedBootcampPrice = courseInfo.price
 
   const parseChecklist = (htmlString: string) => {
     // Simple regex approach for server-side parsing
@@ -33,7 +41,7 @@ export const BootcampPricing: React.FC<{
   }
 
   return (
-    <section className="w-full py-16 bg-background">
+    <section id="bootcamp-pricing" className="w-full py-16 bg-background">
       <div className="container max-w-7xl mx-auto px-4 md:px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
@@ -78,14 +86,13 @@ export const BootcampPricing: React.FC<{
                   </div>
                 </div>
 
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <p className="text-3xl font-bold">
-                    ৳{pkg.price.toLocaleString()}
-                    <span className="text-lg text-muted-foreground font-normal">
-                      /course
-                    </span>
+                    {pkg.packageType === 'live'
+                      ? formatPrice(liveBootcampPrice)
+                      : formatPrice(recordedBootcampPrice)}
                   </p>
-                </div>
+                </div> */}
 
                 <div className="space-y-4 mb-8">
                   {features.map((feature, featureIndex) => (
@@ -96,16 +103,19 @@ export const BootcampPricing: React.FC<{
                   ))}
                 </div>
 
-                {/* Client component for button interactions */}
-                <PricingClientWrapper
-                  packageData={{
-                    id: pkg.id,
-                    name: pkg.name,
-                    isPreferred: pkg.isPreferred,
-                    btn: pkg.btn,
-                  }}
-                  courseInfo={courseInfo}
-                />
+                <div className=" flex flex-col">
+                  {/* Client component for button interactions */}
+                  <PricingClientWrapper
+                    packageData={{
+                      id: pkg.id,
+                      name: pkg.name,
+                      isPreferred: pkg.isPreferred,
+                      btn: pkg.btn,
+                      packageType: pkg.packageType,
+                    }}
+                    courseInfo={courseInfo}
+                  />
+                </div>
               </Card>
             )
           })}

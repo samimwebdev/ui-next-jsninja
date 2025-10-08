@@ -5,7 +5,7 @@ import Image from 'next/image'
 
 interface AnimatedAvatarsProps {
   avatarCount?: number
-  totalUsers: number
+  totalUsers: number | string
   message?: string
   avatarSize?: 'sm' | 'md' | 'lg'
   className?: string

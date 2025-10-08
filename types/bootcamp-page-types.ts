@@ -119,6 +119,7 @@ export interface Package {
   details: string
   price: number
   packageIcon: StrapiIcon | null
+  packageType: 'live' | 'record'
   btn: ButtonType
 }
 
@@ -291,6 +292,7 @@ export interface BootcampPageData {
         description?: string | null
         order: number
         duration: number
+        releaseDate: Date | null
         lessons: Array<{
           id: number
           documentId: string
@@ -315,6 +317,10 @@ export interface BootcampPageData {
     }
     contentSection: BootcampContentSection[]
     isRegistrationEnabled: boolean
+    isLiveRegistrationAvailable: boolean
+    isRecordedRegistrationAvailable: boolean
+    liveBootcampPrice?: number
+    endDate: string | null
   }
   assessmentQuiz: AssessmentQuiz
   contentBlock: BootcampContentSection[]

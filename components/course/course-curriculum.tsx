@@ -5,7 +5,8 @@ import { CourseCurriculumSkeleton } from './course-curriculum-skeleton'
 export const CourseCurriculum: React.FC<{
   data?: Curriculum
   isLoading?: boolean
-}> = ({ data, isLoading = false }) => {
+  courseType?: string
+}> = ({ data, isLoading = false, courseType }) => {
   const modules = data?.modules || []
   const title = data?.title || 'Course Curriculum'
 
@@ -32,7 +33,7 @@ export const CourseCurriculum: React.FC<{
       <h2 className="text-3xl font-bold tracking-tight text-ninja-gold">
         {title}
       </h2>
-      <CurriculumClient modules={modules} />
+      <CurriculumClient modules={modules} courseType={courseType} />
     </section>
   )
 }

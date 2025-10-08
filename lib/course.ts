@@ -13,12 +13,9 @@ export async function getCourseData(slug: string): Promise<CoursePageData> {
         headers: {
           'Content-Type': 'application/json',
         },
+        allowNotFound: true, // Handle 404s gracefully
       }
     )
-
-    if (!response?.data) {
-      throw new Error(`No course data found for slug: ${slug}`)
-    }
 
     return response.data
   } catch (error) {
