@@ -10,6 +10,7 @@ interface FooterProps {
 }
 
 export const Footer = ({ menuItems, logo }: FooterProps) => {
+  console.log(logo, 'Footer logo')
   return (
     <div className="flex flex-col">
       <div className="grow bg-muted" />
@@ -18,9 +19,9 @@ export const Footer = ({ menuItems, logo }: FooterProps) => {
           <div className="py-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-x-8 gap-y-10 px-6 xl:px-0">
             <div className="col-span-full xl:col-span-2">
               {/* Logo */}
-              {logo?.formats?.thumbnail ? (
+              {logo?.url ? (
                 <Image
-                  src={logo.formats.thumbnail.url || logo.url}
+                  src={logo.url}
                   alt={logo.alternativeText || 'Logo'}
                   width={200}
                   height={80}

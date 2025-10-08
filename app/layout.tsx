@@ -151,6 +151,8 @@ export default async function RootLayout({
     }
   )
 
+  console.log(setting, 'Site settings')
+
   // If maintenance mode is enabled, show maintenance page
   if (setting?.maintenanceMode && process.env.NODE_ENV === 'production') {
     return (

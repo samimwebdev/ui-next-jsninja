@@ -17,8 +17,6 @@ export function ReleasedBadge({
   className,
   variant = 'default',
 }: ReleasedBadgeProps) {
-  console.log('isReleased:', isReleased)
-  console.log('releaseDate:', releaseDate)
   if (variant === 'compact') {
     return (
       <Badge

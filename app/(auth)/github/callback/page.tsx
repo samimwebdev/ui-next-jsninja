@@ -55,6 +55,7 @@ export default function GitHubCallbackPage() {
           setTimeout(() => router.push('/login'), 3000)
         }
       } catch (error) {
+        console.log(error, 'GitHub callback processing error')
         setState({
           message: 'An unexpected error occurred',
           errors: { auth: ['Processing failed'] },
