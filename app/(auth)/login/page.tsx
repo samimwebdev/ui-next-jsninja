@@ -51,8 +51,9 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
     mode: 'onBlur',
     defaultValues: {
-      identifier: 'anothertest@gmail.com',
-      password: '1234abcdA@',
+      identifier:
+        process.env.NODE_ENV === 'development' ? 'anothertest@gmail.com' : '',
+      password: process.env.NODE_ENV === 'development' ? '1234abcdA@' : '',
     },
   })
 
