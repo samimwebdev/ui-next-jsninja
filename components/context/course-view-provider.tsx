@@ -194,6 +194,7 @@ export default function CourseViewLayoutWrapper({
         duration: module.duration,
         title: module.title,
         completed: isModuleCompleted,
+        releaseDate: module.releaseDate,
         lessons,
       }
     })
@@ -413,6 +414,7 @@ export default function CourseViewLayoutWrapper({
         currentLessonId={currentContent?.lessonId || null}
         currentModuleId={currentContent?.moduleId || null}
         onLessonSelect={handleContentSelect}
+        courseType={courseData?.CourseType || 'course'}
       />
     </CourseViewContext.Provider>
   )

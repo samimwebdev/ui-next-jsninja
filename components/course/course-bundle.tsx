@@ -119,7 +119,7 @@ export const CourseBundle: React.FC<{
                   <div className="overflow-hidden rounded-lg">
                     <Image
                       src={
-                        course.featureImage?.url ||
+                        course.featureImage?.formats?.medium?.url ||
                         'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?auto=format&fit=crop&q=80&w=2940'
                       }
                       alt={course.title}

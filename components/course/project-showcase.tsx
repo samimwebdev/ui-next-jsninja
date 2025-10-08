@@ -51,7 +51,7 @@ export const ProjectShowcase: React.FC<{ data: ProjectContentSection }> = ({
         {projectsData.slice(0, 6).map((project) => (
           <div key={project.id} className="bg-card rounded-lg overflow-hidden">
             <Image
-              src={project.image?.url || '/placeholder.svg'}
+              src={project.image?.formats?.small?.url || '/placeholder.svg'}
               alt={project.title}
               className="w-full h-[200px] object-cover"
               width="300"

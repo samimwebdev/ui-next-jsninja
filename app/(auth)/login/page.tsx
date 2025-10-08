@@ -37,7 +37,7 @@ const Login = () => {
   const [isVisible, setIsVisible] = React.useState<boolean>(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectPath = searchParams.get('redirect') || '/dashboard'
+  const redirectPath = searchParams.get('redirect') || '/dashboard/courses'
   const registrationMessage = searchParams.get('message')
 
   const {
@@ -51,8 +51,8 @@ const Login = () => {
     resolver: yupResolver(loginSchema),
     mode: 'onBlur',
     defaultValues: {
-      identifier: '',
-      password: '',
+      identifier: 'anothertest@gmail.com',
+      password: '1234abcdA@',
     },
   })
 
@@ -93,7 +93,7 @@ const Login = () => {
         if (redirectPath) {
           window.location.href = redirectPath
         } else {
-          router.push('/dashboard')
+          router.push('/dashboard/courses')
         }
       }, 200)
     } else if (state.requiresOTP && state.userId) {

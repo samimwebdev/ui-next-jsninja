@@ -8,6 +8,7 @@ import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 import { useEffect } from 'react'
 import { trackEnrollmentStart } from '../analytics/vercel-analytics'
 import { CountdownTimer } from '@/components/shared/countdown-timer' // Import the countdown timer
+import { formatPrice } from '@/lib/course-utils'
 
 interface PricingPackageData {
   id: number
@@ -34,6 +35,7 @@ interface PricingClientWrapperProps {
     liveBootcampPrice?: number
     isRecordedRegistrationAvailable: boolean
     endDate: string | null // Add endDate field
+    actualPrice?: number | null
   }
 }
 
@@ -44,7 +46,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   const router = useRouter()
   const packageType = packageData.packageType
 
-  const { isRegistrationOpen, slug, endDate } = courseInfo
+  const { isRegistrationOpen, slug, endDate, price, actualPrice } = courseInfo
   const { isEnrolled, checkEnrollment, checkAuthOnly } = useEnrollmentCheck()
 
   useEffect(() => {
@@ -67,10 +69,11 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       // User is enrolled, go to course
       router.push(`/course-view/${courseInfo.slug}`)
     } else {
+      // Use the discounted price for tracking
       trackEnrollmentStart({
         slug: courseInfo.slug,
         title: courseInfo.title,
-        price: courseInfo.price,
+        price: courseInfo.price, // This is now the discounted price
         courseType: courseInfo.courseType,
         packageType: packageData.packageType,
       })
@@ -162,9 +165,15 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   const shouldShowCountdown =
     !isEnrolled && isRegistrationOpen && !buttonContent.disabled && endDate
 
+  // Calculate discount percentage if actualPrice exists
+  const discountPercentage =
+    actualPrice && actualPrice > price
+      ? Math.round(((actualPrice - price) / actualPrice) * 100)
+      : null
+
   return (
     <>
-      {/* Countdown Timer - only show if registration is active and user is not enrolled */}
+      {/* Countdown Timer */}
       {shouldShowCountdown && (
         <CountdownTimer
           endDate={endDate}
@@ -181,12 +190,36 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
         />
       )}
 
-      {/* Enroll Button */}
+      {/* Price Display - IMPROVED CONSISTENCY */}
+      <div className="mb-6 text-center">
+        <div className="flex items-baseline justify-center gap-3 mb-2">
+          {/* Discounted Price (Current Price) */}
+          <span className="text-4xl font-bold text-ninja-gold">
+            {formatPrice(price)}
+          </span>
+
+          {/* Original Price (Crossed Out) - ALIGNED TO BASELINE */}
+          {actualPrice && actualPrice > price && (
+            <span className="text-xl text-gray-500 dark:text-gray-400 line-through">
+              {formatPrice(actualPrice)}
+            </span>
+          )}
+        </div>
+
+        {/* Discount Badge - IMPROVED SPACING */}
+        {discountPercentage && (
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
+            <span>Save {discountPercentage}%</span>
+          </div>
+        )}
+      </div>
+
+      {/* Enroll Button - IMPROVED ALIGNMENT */}
       <Button
         size="lg"
         className={`${
           packageType === 'live' && 'btn-ninja-primary'
-        } w-full py-3 px-6 transition-colors disabled:cursor-not-allowed mt-auto ${
+        } w-full py-3 px-6 transition-all duration-300 disabled:cursor-not-allowed mt-auto flex items-center justify-center gap-2 ${
           buttonContent.disabled
             ? 'opacity-60 cursor-not-allowed'
             : 'hover:scale-[1.02] hover:shadow-lg'
@@ -198,12 +231,14 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
         {buttonContent.icon && (
           <DynamicIcon
             icon={buttonContent.icon}
-            className="mr-2 h-4 w-4"
-            width={16}
-            height={16}
+            className="h-5 w-5" // Slightly larger icon
+            width={20}
+            height={20}
           />
         )}
-        {buttonContent.label || `Enroll Now - ${packageData.name}`}
+        <span className="font-semibold">
+          {buttonContent.label || `Enroll Now - ${packageData.name}`}
+        </span>
       </Button>
     </>
   )

@@ -35,7 +35,7 @@ export const CourseAuthor: React.FC<{ data: AuthorContentSection }> = ({
         <Avatar className="h-20 w-20">
           <AvatarImage
             src={
-              instructor.profile?.image?.url ||
+              instructor.profile?.image?.formats?.thumbnail?.url ||
               instructor.profile?.imageUrl ||
               ''
             }

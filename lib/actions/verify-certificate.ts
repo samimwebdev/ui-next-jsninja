@@ -24,6 +24,7 @@ export const verifyCertificate = cache(
           headers: {
             'Content-Type': 'application/json',
           },
+          allowNotFound: true,
         }
       )
 

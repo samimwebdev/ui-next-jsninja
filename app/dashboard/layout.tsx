@@ -3,7 +3,7 @@ import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
 import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
 import { getUserWithProfile } from '@/lib/auth'
-import { redirect } from 'next/navigation'
+
 import { EmailVerificationBanner } from '@/components/auth/email-verification-banner'
 
 // Force dynamic rendering for all dashboard routes
@@ -56,9 +56,6 @@ export default async function DashboardLayout({
   // Check authentication
   const user = await getUserWithProfile()
 
-  if (!user) {
-    redirect('/login?redirect=/dashboard')
-  }
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <FlashMessageHandler />

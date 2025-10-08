@@ -17,7 +17,9 @@ export function getCourseContentSection<T extends CourseComponentType>(
 }
 
 // Helper to format price
-export function formatPrice(price: number): string {
+export function formatPrice(price: number | undefined): string {
+  if (price === undefined) return '৳0.00'
+
   return new Intl.NumberFormat('BDT', {
     style: 'currency',
     currency: 'BDT',
@@ -77,4 +79,30 @@ export function getNextLessonTitle(
   lastAccessedLesson?: { lesson: { title: string } } | null
 ): string {
   return lastAccessedLesson?.lesson?.title || 'Start learning'
+}
+
+// lib/date-utils.ts
+export const isModuleReleased = (releaseDate: string | null): boolean => {
+  if (!releaseDate) return false
+
+  try {
+    const release = new Date(releaseDate)
+    const now = new Date()
+    return release <= now
+  } catch (error) {
+    console.log('Error checking release date:', error)
+    console.warn('Invalid release date:', releaseDate)
+    return false
+  }
+}
+
+export const formatReleaseDate = (releaseDate: Date | null): string => {
+  if (!releaseDate) return ''
+
+  const date = new Date(releaseDate)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }

@@ -115,7 +115,17 @@ export async function POST(request: NextRequest) {
           revalidatedTags
         )
         break
-
+      // case 'module':
+      // case 'lecture':
+      //   // Modules and lectures affect the course page
+      //   //courseBase validation
+      //   //course validation
+      //   await handleModuleLectureRevalidation(
+      //     body,
+      //     revalidatedPaths,
+      //     revalidatedTags
+      //   )
+      //   break
       case 'blog':
         await handleBlogRevalidation(body, revalidatedPaths, revalidatedTags)
         break

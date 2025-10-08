@@ -17,12 +17,13 @@ export const BootcampPricing: React.FC<{
     liveBootcampPrice?: number
     isRecordedRegistrationAvailable: boolean
     endDate: string | null
+    actualPrice?: number | null
   }
 }> = ({ data, courseInfo }) => {
   // Server-side HTML parsing using cheerio-like approach or regex
 
-  const liveBootcampPrice = courseInfo.liveBootcampPrice
-  const recordedBootcampPrice = courseInfo.price
+  // const liveBootcampPrice = courseInfo.liveBootcampPrice
+  // const recordedBootcampPrice = courseInfo.price
 
   const parseChecklist = (htmlString: string) => {
     // Simple regex approach for server-side parsing
@@ -85,17 +86,13 @@ export const BootcampPricing: React.FC<{
                   </div>
                 </div>
 
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <p className="text-3xl font-bold">
-                    ৳
                     {pkg.packageType === 'live'
-                      ? liveBootcampPrice?.toLocaleString()
-                      : recordedBootcampPrice?.toLocaleString()}
-                    <span className="text-lg text-muted-foreground font-normal">
-                      /course
-                    </span>
+                      ? formatPrice(liveBootcampPrice)
+                      : formatPrice(recordedBootcampPrice)}
                   </p>
-                </div>
+                </div> */}
 
                 <div className="space-y-4 mb-8">
                   {features.map((feature, featureIndex) => (

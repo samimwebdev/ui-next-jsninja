@@ -10,21 +10,144 @@ import { revalidatePath } from 'next/cache'
 import * as yup from 'yup'
 import { cookies } from 'next/headers'
 
-function generateReadableUsernameWithSeparator(
+// Beautiful adjectives for username generation
+const coolAdjectives = [
+  'swift',
+  'brave',
+  'wise',
+  'cool',
+  'pro',
+  'epic',
+  'ace',
+  'prime',
+  'stellar',
+  'cosmic',
+  'bright',
+  'clever',
+  'smart',
+  'super',
+  'mega',
+  'ultra',
+  'turbo',
+  'alpha',
+  'beta',
+  'sigma',
+  'delta',
+  'quantum',
+  'ninja',
+  'master',
+  'expert',
+  'legend',
+  'titan',
+  'phoenix',
+  'storm',
+]
+
+// Fun suffixes for username generation
+const coolSuffixes = [
+  'dev',
+  'coder',
+  'tech',
+  'geek',
+  'wizard',
+  'guru',
+  'sensei',
+  'pro',
+  'master',
+  'ninja',
+  'hacker',
+  'boss',
+  'king',
+  'queen',
+  'star',
+  'hero',
+]
+
+/**
+ * Generates a beautiful, unique, and readable username
+ * Patterns:
+ * 1. firstname_adjective_number (e.g., john_swift_42)
+ * 2. firstname_lastname_number (e.g., john_doe_99)
+ * 3. adjective_firstname_suffix (e.g., cool_john_dev)
+ * 4. firstname_suffix_number (e.g., john_ninja_7)
+ */
+function generateBeautifulUsername(
   firstName: string,
   lastName: string
 ): string {
-  const cleanFirst = firstName.toLowerCase().replace(/[^a-zA-Z]/g, '')
-  const cleanLast = lastName.toLowerCase().replace(/[^a-zA-Z]/g, '')
+  // Clean and normalize names
+  const cleanFirst = firstName
+    .toLowerCase()
+    .replace(/[^a-zA-Z]/g, '')
+    .substring(0, 12)
+  const cleanLast = lastName
+    .toLowerCase()
+    .replace(/[^a-zA-Z]/g, '')
+    .substring(0, 12)
 
-  // Use first name + last initial + short nanoID for better readability
-  const firstPart = cleanFirst.substring(0, Math.min(6, cleanFirst.length))
-  const lastInitial = cleanLast.charAt(0)
+  // Generate a short unique identifier (4 characters)
   const uniqueId = nanoid(4)
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '')
 
-  return `${firstPart}${lastInitial}${uniqueId}`
+  // Random number between 1-999
+  const randomNum = Math.floor(Math.random() * 999) + 1
+
+  // Choose a random pattern
+  const patterns = [
+    // Pattern 1: firstname_adjective_number
+    () => {
+      const adj =
+        coolAdjectives[Math.floor(Math.random() * coolAdjectives.length)]
+      return `${cleanFirst}_${adj}_${randomNum}`
+    },
+
+    // Pattern 2: firstname_lastname_number (if last name exists)
+    () => {
+      if (cleanLast.length > 2) {
+        return `${cleanFirst}_${cleanLast}_${randomNum}`
+      }
+      return `${cleanFirst}_${uniqueId}`
+    },
+
+    // Pattern 3: adjective_firstname_suffix
+    () => {
+      const adj =
+        coolAdjectives[Math.floor(Math.random() * coolAdjectives.length)]
+      const suffix =
+        coolSuffixes[Math.floor(Math.random() * coolSuffixes.length)]
+      return `${adj}_${cleanFirst}_${suffix}`
+    },
+
+    // Pattern 4: firstname_suffix_number
+    () => {
+      const suffix =
+        coolSuffixes[Math.floor(Math.random() * coolSuffixes.length)]
+      return `${cleanFirst}_${suffix}_${randomNum}`
+    },
+
+    // Pattern 5: firstname.lastname (professional style)
+    () => {
+      if (cleanLast.length > 2) {
+        return `${cleanFirst}.${cleanLast}${randomNum}`
+      }
+      return `${cleanFirst}.${uniqueId}`
+    },
+
+    // Pattern 6: firstLast_uniqueId (camelCase style)
+    () => {
+      const camelName =
+        cleanFirst + cleanLast.charAt(0).toUpperCase() + cleanLast.slice(1)
+      return `${camelName}_${uniqueId}`
+    },
+  ]
+
+  // Randomly select a pattern
+  const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)]
+  const username = selectedPattern()
+
+  // Ensure username is within reasonable length (3-30 characters)
+  return username.substring(0, 30)
 }
 
 export type FormState = {
@@ -51,11 +174,16 @@ export async function registerAction(
       abortEarly: false,
     })
 
+    // Generate a beautiful username
+    const username = generateBeautifulUsername(
+      validated.firstName,
+      validated.lastName
+    )
+
+    console.log('Generated username:', username)
+
     const registrationData = {
-      username: generateReadableUsernameWithSeparator(
-        validated.firstName,
-        validated.lastName
-      ),
+      username: username,
       email: validated.email,
       password: validated.password,
     }
@@ -76,7 +204,7 @@ export async function registerAction(
       body: JSON.stringify(registrationData),
     })
 
-    // DON'T CREATE PROFILE HERE - Let user do it after OTP verification
+    // Create profile
     const profileData = {
       data: {
         firstName: validated.firstName,
@@ -94,7 +222,7 @@ export async function registerAction(
         Authorization: `Bearer ${res.data.jwt}`,
       },
     })
-    // Just return success message
+
     return {
       message: 'Registration successful! Please sign in to continue.',
       errors: {},
@@ -743,6 +871,47 @@ export async function disableTotpAction() {
       message: 'Failed to disable two-factor authentication. Please try again.',
       success: false,
       errors: { server: ['Failed to disable 2FA'] },
+    }
+  }
+}
+
+export async function resendOTPAction(): Promise<FormState> {
+  try {
+    // Get the temporary JWT from cookies
+    const tempToken = (await cookies()).get('temp_jwt')?.value
+
+    if (!tempToken) {
+      return {
+        message: 'Session expired. Please log in again.',
+        errors: { server: ['Session expired'] },
+        success: false,
+      }
+    }
+
+    // Call your Strapi resend endpoint - backend will extract user info from token
+    await strapiFetch('/api/auth/resend-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${tempToken}`,
+      },
+      body: JSON.stringify({
+        verifyType: 'email',
+      }), // Empty body since backend extracts from token
+    })
+
+    return {
+      message: 'New verification code sent successfully!',
+      errors: {},
+      success: true,
+    }
+  } catch (error) {
+    console.error('Resend OTP error:', error)
+
+    return {
+      message: 'Failed to send verification code. Please try again.',
+      errors: error instanceof Error ? { server: [error.message] } : {},
+      success: false,
     }
   }
 }

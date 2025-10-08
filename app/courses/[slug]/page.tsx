@@ -16,11 +16,12 @@ import { ProjectShowcase } from '@/components/course/project-showcase'
 import { CourseBundle } from '@/components/course/course-bundle'
 import { CoursePriceSidebar } from '@/components/course/course-price-sidebar'
 import { AnimatedSection } from '@/components/shared/animated-section'
-import { notFound } from 'next/navigation'
+
 import { Curriculum } from '@/types/shared-types'
 import { CoursePageData } from '@/types/course-page-types'
 import { strapiFetch } from '@/lib/strapi'
 import { CourseTracking } from '@/components/course/course-tracking'
+import CourseNotFound from '@/components/shared/not-found'
 
 interface CoursePageProps {
   params: Promise<{
@@ -116,6 +117,15 @@ export async function generateMetadata({ params }: CoursePageProps) {
   const { slug } = await params
   try {
     const courseData = await getCourseData(slug)
+    if (!courseData) {
+      console.error('❌ No course data found for metadata')
+      //fall seo data
+      return generateSEOMetadata(
+        undefined,
+        { title: 'Course Not Found' },
+        { path: `/courses/${slug}` }
+      )
+    }
 
     return generateSEOMetadata(
       courseData.baseContent?.seo,
@@ -142,13 +152,18 @@ export default async function CoursePage({ params }: CoursePageProps) {
   const { slug } = await params
   console.log('🔥 Statically generating course page for:', slug)
 
-  let courseData: CoursePageData
+  let courseData: CoursePageData | null = null
 
   try {
     courseData = await getCourseData(slug)
+    if (!courseData) {
+      console.error('❌ No course data found, rendering 404')
+      return <CourseNotFound courseType="course" />
+    }
   } catch (error) {
     console.error('❌ Failed to fetch course data:', error)
-    notFound()
+    // 🔑 Do not swallow notFound error
+    throw error // ✅ crash → error.tsx (not stuck nav)
   }
 
   // Extract section data
@@ -190,6 +205,7 @@ export default async function CoursePage({ params }: CoursePageProps) {
     courseType: courseData.baseContent?.courseType,
     isRegistrationOpen: courseData.baseContent?.isRegistrationEnabled || false,
     endDate: courseData.baseContent?.endDate || null,
+    actualPrice: courseData.baseContent?.actualPrice || null,
   }
 
   return (
@@ -229,7 +245,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 {/* Curriculum Section - Using sanitized data */}
                 {sanitizedCurriculum && (
                   <AnimatedSection animation="fadeInUp" delay={0.4}>
-                    <CourseCurriculum data={sanitizedCurriculum} />
+                    <CourseCurriculum
+                      data={sanitizedCurriculum}
+                      courseType={courseInfo.courseType}
+                    />
                   </AnimatedSection>
                 )}
 

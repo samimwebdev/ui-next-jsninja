@@ -55,10 +55,13 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
             </p>
             <div className="flex items-center">
               <div className="flex-shrink-0 mr-3">
-                {reviews[currentReview].profile?.image?.url ? (
+                {reviews[currentReview].profile?.image?.formats?.thumbnail
+                  ?.url ? (
                   <Image
                     className="h-10 w-10 rounded-full object-cover"
-                    src={reviews[currentReview].profile.image.url}
+                    src={
+                      reviews[currentReview].profile.image.formats.thumbnail.url
+                    }
                     alt={reviews[currentReview].reviewerName}
                     width={40}
                     height={40}

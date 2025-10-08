@@ -14,8 +14,8 @@ export function getBootcampContentSection<T extends BootcampComponentType>(
   )
 }
 
-export function formatBootcampPrice(price: number): string {
-  return `${price.toLocaleString()} TK`
+export function formatBootcampPrice(price: number | null | undefined): string {
+  return `${price?.toLocaleString() || 0} TK`
 }
 
 export function formatDate(dateString: string): string {

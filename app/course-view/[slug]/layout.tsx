@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { strapiFetch } from '@/lib/strapi'
-import { redirect } from 'next/navigation'
 import type { CourseViewData } from '@/types/course-view-types'
 import CourseViewLayoutWrapper from '@/components/context/course-view-provider'
 import { SecurityTracker } from '@/components/course-view/security-tracker'
 import { getAuthToken } from '@/lib/auth'
 import { checkUserSecurity } from '@/lib/security-check'
+import { CourseAccessDenied } from '@/components/course-view/course-access-denied'
 
 interface CourseDataResponse {
   data: CourseViewData
@@ -21,18 +21,6 @@ interface CourseErrorResponse {
   }
 }
 
-// FIX: Type guard for Next.js redirect errors
-function isNextRedirectError(
-  error: unknown
-): error is Error & { digest: string } {
-  return (
-    error instanceof Error &&
-    'digest' in error &&
-    typeof error.digest === 'string' &&
-    error.digest.includes('NEXT_REDIRECT')
-  )
-}
-
 // Course Layout Component (SSR)
 async function CourseViewLayout({
   children,
@@ -43,106 +31,89 @@ async function CourseViewLayout({
 }) {
   const { slug } = await params
 
-  try {
-    // First check user security status
-    const securityCheck = await checkUserSecurity(slug)
+  // Get token
+  const token = await getAuthToken()
 
-    if (!securityCheck.allowed) {
-      redirect(
-        `/dashboard?error=${encodeURIComponent(
-          securityCheck.message || 'Access denied'
-        )}`
-      )
-    }
-
-    const token = await getAuthToken()
-
-    if (!token) {
-      console.log('No auth token, redirecting to dashboard')
-      redirect(
-        '/dashboard?error=' + encodeURIComponent('Authentication required')
-      )
-    }
-
-    let courseData = null
-
-    const response = await strapiFetch<
-      CourseDataResponse | CourseErrorResponse
-    >(`/api/course-view/${slug}`, {
-      method: 'GET',
-      token: token,
-      returnErrorResponse: true,
-    })
-
-    // Check if response has error property using proper type checking
-    if ('error' in response && response.error) {
-      // Handle specific error statuses
-      if (response.error.status === 404) {
-        redirect(`/dashboard?error=${encodeURIComponent('Course not found.')}`)
-      }
-
-      if (response.error.status === 403) {
-        redirect(
-          `/dashboard?error=${encodeURIComponent(
-            'You do not have access to this course. Please check your enrollment status.'
-          )}`
-        )
-      }
-
-      // Other error statuses
-      redirect(
-        `/dashboard?error=${encodeURIComponent(
-          response.error.message || 'Failed to load course'
-        )}`
-      )
-    }
-
-    // Success case - extract course data
-    if ('data' in response && response.data) {
-      courseData = response.data
-    } else {
-      console.error('Unexpected course response format:', response)
-      redirect(
-        `/dashboard?error=${encodeURIComponent(
-          'Invalid course data format received'
-        )}`
-      )
-    }
-
+  if (!token) {
     return (
-      <div>
-        <SecurityTracker courseSlug={slug} />
+      <CourseAccessDenied message="Authentication required. Please log in to access this course." />
+    )
+  }
 
-        <div className="min-h-screen bg-background text-foreground max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] lg:gap-6">
-            <CourseViewLayoutWrapper courseData={courseData} error={null}>
-              {children}
-            </CourseViewLayoutWrapper>
-          </div>
+  // Check security
+  const securityCheck = await checkUserSecurity(slug)
+
+  if (!securityCheck.allowed) {
+    return (
+      <CourseAccessDenied
+        message={
+          securityCheck.message ||
+          'You do not have access to this course. Please check your enrollment status.'
+        }
+      />
+    )
+  }
+
+  // Fetch course data
+  let response: CourseDataResponse | CourseErrorResponse
+
+  try {
+    response = await strapiFetch<CourseDataResponse | CourseErrorResponse>(
+      `/api/course-view/${slug}`,
+      {
+        method: 'GET',
+        token: token,
+        returnErrorResponse: true,
+        allowNotFound: true,
+      }
+    )
+  } catch (error) {
+    console.error('Failed to fetch course data:', error)
+    return (
+      <CourseAccessDenied message="Failed to load course. Please try again later." />
+    )
+  }
+
+  // Handle API errors
+  if ('error' in response && response.error) {
+    const errorMessages: Record<number, string> = {
+      404: 'Course not found. It may have been removed or the link is incorrect.',
+      403: 'You do not have access to this course. Please check your enrollment status.',
+      401: 'Your session has expired. Please log in again.',
+      500: 'Server error. Please try again later.',
+    }
+
+    const errorMessage =
+      errorMessages[response.error.status] ||
+      response.error.message ||
+      'Failed to load course'
+
+    return <CourseAccessDenied message={errorMessage} />
+  }
+
+  // Validate course data
+  if (!('data' in response) || !response.data) {
+    return (
+      <CourseAccessDenied message="Invalid course data received. Please try again." />
+    )
+  }
+
+  const courseData = response.data
+
+  // Render course view
+  return (
+    <div>
+      <SecurityTracker courseSlug={slug} />
+
+      <div className="min-h-screen bg-background text-foreground max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] lg:gap-6">
+          <CourseViewLayoutWrapper courseData={courseData} error={null}>
+            {children}
+          </CourseViewLayoutWrapper>
         </div>
       </div>
-    )
-  } catch (err) {
-    // FIX: Use type guard for better TypeScript support
-    if (isNextRedirectError(err)) {
-      // This is a Next.js redirect, let it through
-      console.log('Detected Next.js redirect, re-throwing:', err.digest)
-      throw err
-    }
-
-    console.error('Failed to fetch course data:', err)
-
-    // Extract error message for actual errors
-    let errorMessage = 'Failed to load course data'
-
-    if (err instanceof Error) {
-      errorMessage = err.message
-    }
-
-    console.log('Course data fetch failed, redirecting:', errorMessage)
-
-    redirect(`/dashboard?error=${encodeURIComponent(errorMessage)}`)
-  }
+    </div>
+  )
 }
 
 export default CourseViewLayout

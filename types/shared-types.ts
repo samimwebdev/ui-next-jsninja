@@ -108,7 +108,7 @@ export interface Review {
   reviewerName: string
   profile?: Profile
   designation?: string
-  course?: CourseBase
+  courses?: CourseBase[]
 }
 
 export interface Video {
@@ -150,6 +150,7 @@ export interface Module {
   description?: string | null
   order: number
   duration: number
+  releaseDate: Date | null
   lessons: Lesson[]
 }
 
@@ -225,12 +226,11 @@ export interface CourseBase {
   price: number
   level: string
   featured?: boolean
+  isRegistrationEnabled: boolean
   totalStudents: number
   averageRating: number
-  isRegistrationEnabled: boolean
   endDate?: string | null
   totalLessons: number
-  totalModules: number | null
   shortDescription: string
   longDescription: string
   duration: number | string
@@ -239,6 +239,7 @@ export interface CourseBase {
   categories: Category[]
   featureImage?: StrapiImage
   seo?: SEOData
+  actualPrice?: number | null
 }
 
 export interface Project {

@@ -193,7 +193,7 @@ export const VideoPlayer = ({
           Your browser does not support the video tag.
         </video>
       ) : (
-        <div style={{ position: 'relative', aspectRatio: '16/9' }}>
+        <div style={{ position: 'relative', aspectRatio: '24/13' }}>
           <iframe
             ref={iframeRef}
             loading="lazy"

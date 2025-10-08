@@ -28,7 +28,7 @@ export function VideoPlayer({
   const aspectClasses = {
     video: 'aspect-video',
     square: 'aspect-square',
-    wide: 'aspect-[21/9]',
+    wide: 'aspect-[24/13]',
   }
 
   // Determine video type

@@ -99,6 +99,10 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
 
   useOutsideClick(ref, () => setBootcamp(null))
 
+  const hasDiscount =
+    bootcamp?.baseContent.actualPrice &&
+    bootcamp?.baseContent.actualPrice > bootcamp?.baseContent.price
+
   return (
     <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
       <div className="container mx-auto px-4">
@@ -145,7 +149,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                   <div className="relative">
                     <Image
                       src={
-                        bootcamp.baseContent.featureImage?.formats?.medium
+                        bootcamp.baseContent.featureImage?.formats?.small
                           ?.url ||
                         bootcamp.baseContent.featureImage?.url ||
                         '/images/placeholder.svg'
@@ -167,9 +171,31 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
 
                     {/* Price Badge */}
                     <div className="absolute top-4 left-4">
-                      <Badge className="bg-primary text-primary-foreground px-3 py-1 text-sm font-semibold">
-                        {formatBootcampPrice(bootcamp.baseContent.price)}
+                      <Badge className="text-base bg-primary text-primary-foreground px-3 py-1 font-semibold">
+                        {formatBootcampPrice(bootcamp.baseContent.price)}{' '}
                       </Badge>
+                      {hasDiscount && (
+                        <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full ">
+                          {formatBootcampPrice(
+                            bootcamp.baseContent.actualPrice
+                          )}
+                        </span>
+                      )}
+
+                      {bootcamp.baseContent.actualPrice &&
+                        bootcamp.baseContent.actualPrice >
+                          bootcamp.baseContent.price && (
+                          <span className="inline-block mb-2 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-semibold border border-red-200">
+                            Save{' '}
+                            {Math.round(
+                              ((bootcamp.baseContent.actualPrice -
+                                bootcamp.baseContent.price) /
+                                bootcamp.baseContent.actualPrice) *
+                                100
+                            )}
+                            %
+                          </span>
+                        )}
                     </div>
                   </div>
 
@@ -178,7 +204,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       {bootcamp.baseContent.title}
                     </h2>
 
-                    {/* Bootcamp Details - Single Row */}
+                    {/* Bootcamp Details - Modal - Single Row */}
                     <div className="flex items-center gap-6 mb-4">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar size={16} />
@@ -280,9 +306,20 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       />
                       {/* Price and Level Badges */}
                       <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-                        <Badge className="bg-primary text-primary-foreground font-semibold shadow-lg">
-                          {formatBootcampPrice(bootcamp.baseContent.price)}
-                        </Badge>
+                        <div className="flex items-baseline gap-2">
+                          <Badge className="text-base bg-primary  text-primary-foreground font-semibold px-3 py-1">
+                            {formatBootcampPrice(bootcamp.baseContent.price)}
+                          </Badge>
+                          {bootcamp.baseContent.actualPrice &&
+                            bootcamp.baseContent.actualPrice >
+                              bootcamp.baseContent.price && (
+                              <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full">
+                                {formatBootcampPrice(
+                                  bootcamp.baseContent.actualPrice
+                                )}
+                              </span>
+                            )}
+                        </div>
                         {bootcamp.baseContent.level && (
                           <Badge
                             className={`font-semibold shadow-lg border text-xs hover:text-white ${getDifficultyStyle(

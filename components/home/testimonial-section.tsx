@@ -51,10 +51,7 @@ const ReviewCard = ({
       <div className="flex items-center gap-4 mb-4 flex-shrink-0">
         <Avatar className="size-14">
           <AvatarImage
-            src={
-              review?.profile?.imageUrl ||
-              review?.profile?.image?.formats?.medium?.url
-            }
+            src={review?.profile?.image?.formats?.thumbnail?.url}
             alt={review.reviewerName}
           />
           <AvatarFallback>
@@ -69,7 +66,7 @@ const ReviewCard = ({
             {review.reviewerName}
           </h3>
           <p className="text-muted-foreground text-sm truncate">
-            {review?.course?.title}
+            {review?.courses?.[0]?.title}
           </p>
         </div>
       </div>

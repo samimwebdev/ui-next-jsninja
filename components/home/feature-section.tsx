@@ -63,7 +63,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({ data }) => {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={cardVariants}
-              className="flex flex-col border rounded-xl py-6 px-5 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:bg-accent/50"
+              className="flex flex-col border rounded-xl py-6 px-5 transition-all duration-100 hover:scale-105 hover:shadow-lg "
               whileHover={{ y: -5 }}
             >
               <motion.div

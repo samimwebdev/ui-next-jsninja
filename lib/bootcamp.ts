@@ -13,12 +13,9 @@ export async function getBootcampData(slug: string): Promise<BootcampPageData> {
         headers: {
           'Content-Type': 'application/json',
         },
+        allowNotFound: true, // Handle 404s gracefully
       }
     )
-
-    if (!response?.data) {
-      throw new Error(`No Bootcamp data found for slug: ${slug}`)
-    }
 
     return response.data
   } catch (error) {

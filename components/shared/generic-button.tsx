@@ -13,7 +13,7 @@ interface EnrollButtonProps {
     slug: string
     title: string
     price: number
-
+    actualPrice?: number | null
     courseType: CourseType
     isRegistrationOpen: boolean
     endDate: string | null

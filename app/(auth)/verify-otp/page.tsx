@@ -5,6 +5,7 @@ import React, {
   useActionState,
   useEffect,
   useRef,
+  useState,
 } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,9 +13,9 @@ import { Label } from '@/components/ui/label'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import { verifyOTPAction } from '../actions'
+import { verifyOTPAction, resendOTPAction } from '../actions'
 import { otpSchema } from '@/lib/validation'
-import { Shield, ArrowLeft } from 'lucide-react'
+import { Shield, ArrowLeft, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -35,12 +36,28 @@ const VerifyOTP = () => {
     success: false,
   } as ActionState)
 
+  // Only initialize resend action for email-based OTP
+  const [resendState, resendAction] = useActionState(resendOTPAction, {
+    message: '',
+    errors: {},
+    success: false,
+  } as ActionState)
+
   const router = useRouter()
   const queryClient = useQueryClient()
   const searchParams = useSearchParams()
   const userId = searchParams.get('userId')
   const email = searchParams.get('email')
   const twoFactorEnabled = searchParams.get('twoFactor') === 'true'
+
+  // Resend OTP states - only for email OTP
+  const [resendTimer, setResendTimer] = useState(60)
+  const [canResend, setCanResend] = useState(false)
+  const [resendAttempts, setResendAttempts] = useState(0)
+  const [isResending, setIsResending] = useState(false)
+
+  const MAX_RESEND_ATTEMPTS = 3
+  const RESEND_COOLDOWN = 60
 
   const {
     register,
@@ -57,6 +74,146 @@ const VerifyOTP = () => {
   const tokenValue = watch('token')
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
+  // Timer countdown effect - only for email OTP
+  useEffect(() => {
+    // Skip timer logic for TOTP
+    if (twoFactorEnabled) return
+
+    let interval: NodeJS.Timeout
+
+    if (resendTimer > 0 && !canResend) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [resendTimer, canResend, twoFactorEnabled])
+
+  // Initialize resend functionality - only for email OTP
+  useEffect(() => {
+    // Skip resend logic for TOTP
+    if (twoFactorEnabled || !userId || !email) return
+
+    // Use userId as the primary key for tracking attempts across sessions
+    const attemptKey = `otp_attempts_${userId}`
+    const lastSentKey = `otp_last_sent_${userId}`
+    const blockedUntilKey = `otp_blocked_until_${userId}`
+
+    // Check if user is currently blocked
+    const blockedUntil = localStorage.getItem(blockedUntilKey)
+    if (blockedUntil) {
+      const blockedTime = parseInt(blockedUntil, 10)
+      const now = Date.now()
+
+      if (now < blockedTime) {
+        // User is still blocked
+        setResendAttempts(MAX_RESEND_ATTEMPTS)
+        setCanResend(false)
+        setResendTimer(0)
+        return
+      } else {
+        // Block period has expired, clear the block
+        localStorage.removeItem(blockedUntilKey)
+        localStorage.removeItem(attemptKey)
+        localStorage.removeItem(lastSentKey)
+      }
+    }
+
+    // Check localStorage for previous attempts
+    const storedAttempts = localStorage.getItem(attemptKey)
+    const storedLastSent = localStorage.getItem(lastSentKey)
+
+    if (storedAttempts) {
+      const attempts = parseInt(storedAttempts, 10)
+      setResendAttempts(attempts)
+
+      if (attempts >= MAX_RESEND_ATTEMPTS) {
+        // Block user for 15 minutes
+        const blockUntil = Date.now() + 15 * 60 * 1000 // 15 minutes
+        localStorage.setItem(blockedUntilKey, blockUntil.toString())
+        setCanResend(false)
+        setResendTimer(0)
+        return
+      }
+    }
+
+    if (storedLastSent) {
+      const lastSentTime = parseInt(storedLastSent, 10)
+      const timePassed = Math.floor((Date.now() - lastSentTime) / 1000)
+      const remainingTime = RESEND_COOLDOWN - timePassed
+
+      if (remainingTime > 0) {
+        // Still in cooldown period
+        setResendTimer(remainingTime)
+        setCanResend(false)
+      } else {
+        // Cooldown period has passed
+        setCanResend(true)
+        setResendTimer(0)
+      }
+    } else {
+      // First time visiting - show timer immediately (OTP was sent during login)
+      setResendTimer(RESEND_COOLDOWN)
+      setCanResend(false)
+    }
+  }, [userId, email, twoFactorEnabled])
+
+  // Handle resend OTP - only for email OTP
+  const handleResendOTP = async () => {
+    // Prevent resend for TOTP
+    if (
+      twoFactorEnabled ||
+      !canResend ||
+      resendAttempts >= MAX_RESEND_ATTEMPTS ||
+      isResending
+    ) {
+      return
+    }
+
+    setIsResending(true)
+
+    try {
+      await startTransition(() => {
+        return resendAction()
+      })
+
+      // Update attempts and timer
+      const newAttempts = resendAttempts + 1
+      setResendAttempts(newAttempts)
+      setResendTimer(RESEND_COOLDOWN)
+      setCanResend(false)
+
+      // Use userId-based keys for persistent tracking
+      const attemptKey = `otp_attempts_${userId}`
+      const lastSentKey = `otp_last_sent_${userId}`
+
+      localStorage.setItem(attemptKey, newAttempts.toString())
+      localStorage.setItem(lastSentKey, Date.now().toString())
+
+      // If max attempts reached, set a block period
+      if (newAttempts >= MAX_RESEND_ATTEMPTS) {
+        const blockUntil = Date.now() + 15 * 60 * 1000 // Block for 15 minutes
+        localStorage.setItem(
+          `otp_blocked_until_${userId}`,
+          blockUntil.toString()
+        )
+      }
+    } catch (error) {
+      console.error('Resend error:', error)
+    } finally {
+      setIsResending(false)
+    }
+  }
+
   // Redirect if no user ID
   useEffect(() => {
     if (!userId) {
@@ -71,8 +228,8 @@ const VerifyOTP = () => {
       const formData = new FormData()
       formData.append('token', data.token)
       formData.append('userId', userId || '')
-      formData.append('email', email || '') // Add email
-      formData.append('twoFactorEnabled', twoFactorEnabled.toString()) // Add 2FA status
+      formData.append('email', email || '')
+      formData.append('twoFactorEnabled', twoFactorEnabled.toString())
 
       startTransition(() => {
         return formAction(formData)
@@ -131,13 +288,46 @@ const VerifyOTP = () => {
   useEffect(() => {
     if (state.success) {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] })
+
+      // Clear resend attempts on successful verification using userId-based keys
+      if (userId) {
+        localStorage.removeItem(`otp_attempts_${userId}`)
+        localStorage.removeItem(`otp_last_sent_${userId}`)
+        localStorage.removeItem(`otp_blocked_until_${userId}`)
+      }
+
       setTimeout(() => {
         router.push('/dashboard')
       }, 1500)
     }
-    //disable the exhaustive-deps rule for this useEffect
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.success, router])
+  }, [state.success, router, queryClient, userId])
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`
+  }
+
+  const getRemainingAttempts = () => MAX_RESEND_ATTEMPTS - resendAttempts
+
+  const getBlockedStatus = () => {
+    if (!userId) return null
+
+    const blockedUntil = localStorage.getItem(`otp_blocked_until_${userId}`)
+    if (!blockedUntil) return null
+
+    const blockedTime = parseInt(blockedUntil, 10)
+    const now = Date.now()
+
+    if (now < blockedTime) {
+      const remainingMinutes = Math.ceil((blockedTime - now) / 1000 / 60)
+      return remainingMinutes
+    }
+
+    return null
+  }
 
   if (!userId) {
     return null // Will redirect
@@ -163,6 +353,13 @@ const VerifyOTP = () => {
                 ? 'from your authenticator app'
                 : `sent to ${email}`}
             </p>
+
+            {/* Additional instruction for TOTP */}
+            {twoFactorEnabled && (
+              <p className="mt-1 text-xs text-slate-500 dark:text-muted-foreground">
+                Codes refresh every 30 seconds in your authenticator app
+              </p>
+            )}
           </div>
 
           {/* Success/Error Message */}
@@ -175,6 +372,19 @@ const VerifyOTP = () => {
               }`}
             >
               {state.message}
+            </div>
+          )}
+
+          {/* Resend Message - only for email OTP */}
+          {!twoFactorEnabled && resendState.message && (
+            <div
+              className={`mb-6 p-3 rounded-lg text-sm text-center ${
+                resendState.success
+                  ? 'bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800'
+                  : 'bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800'
+              }`}
+            >
+              {resendState.message}
             </div>
           )}
 
@@ -235,12 +445,116 @@ const VerifyOTP = () => {
             </Button>
           </form>
 
+          {/* Resend OTP Section - Only show for email-based OTP */}
+          {!twoFactorEnabled && (
+            <div className="mt-8 pt-6 border-t border-slate-200 dark:border-border">
+              <div className="text-center space-y-4">
+                <p className="text-sm text-slate-600 dark:text-muted-foreground">
+                  Didn&apos;t receive the code?
+                </p>
+
+                {/* Check if user is blocked */}
+                {(() => {
+                  const blockedMinutes = getBlockedStatus()
+                  if (blockedMinutes) {
+                    return (
+                      <div className="text-center">
+                        <p className="text-red-600 dark:text-red-400 text-sm font-medium">
+                          Too many attempts
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">
+                          Please wait {blockedMinutes} minutes before trying
+                          again
+                        </p>
+                      </div>
+                    )
+                  }
+
+                  // Show normal resend logic if not blocked
+                  if (canResend && resendAttempts < MAX_RESEND_ATTEMPTS) {
+                    return (
+                      <Button
+                        variant="outline"
+                        onClick={handleResendOTP}
+                        disabled={isResending}
+                        className="w-full border-ninja-gold text-ninja-gold hover:bg-ninja-gold hover:text-slate-900"
+                      >
+                        {isResending ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            Sending...
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Send Code Again
+                          </div>
+                        )}
+                      </Button>
+                    )
+                  } else if (resendAttempts >= MAX_RESEND_ATTEMPTS) {
+                    return (
+                      <div className="text-center">
+                        <p className="text-red-600 dark:text-red-400 text-sm font-medium">
+                          Maximum attempts reached
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">
+                          Account temporarily locked. Try again in 15 minutes
+                        </p>
+                      </div>
+                    )
+                  } else {
+                    return (
+                      <div className="text-center">
+                        <p className="text-sm text-slate-600 dark:text-muted-foreground mb-2">
+                          You can request a new code in:
+                        </p>
+                        <div className="text-lg font-mono font-bold text-ninja-gold">
+                          {formatTime(resendTimer)}
+                        </div>
+                      </div>
+                    )
+                  }
+                })()}
+
+                {/* Attempts remaining - only show if not blocked and has attempts */}
+                {!getBlockedStatus() &&
+                  resendAttempts > 0 &&
+                  resendAttempts < MAX_RESEND_ATTEMPTS && (
+                    <p className="text-xs text-slate-500 dark:text-muted-foreground">
+                      {getRemainingAttempts()} attempt
+                      {getRemainingAttempts() !== 1 ? 's' : ''} remaining
+                    </p>
+                  )}
+
+                {/* Show current attempt count - only if not blocked */}
+                {!getBlockedStatus() && resendAttempts > 0 && (
+                  <div className="text-xs text-slate-500 dark:text-muted-foreground">
+                    Resend requests: {resendAttempts}/{MAX_RESEND_ATTEMPTS}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TOTP Helper Section - Show for TOTP only */}
+          {twoFactorEnabled && (
+            <div className="mt-8 pt-6 border-t border-slate-200 dark:border-border">
+              <div className="text-center space-y-3">
+                <p className="text-sm text-slate-600 dark:text-muted-foreground">
+                  Having trouble with your authenticator?
+                </p>
+                <div className="text-xs text-slate-500 dark:text-muted-foreground space-y-1">
+                  <p>• Make sure your device time is synchronized</p>
+                  <p>• Try waiting for the next code (refreshes every 30s)</p>
+                  <p>• Check that you&apos;re using the correct app</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
           <div className="mt-6 text-center space-y-3">
-            <p className="text-sm text-slate-600 dark:text-muted-foreground">
-              Didn&apos;t receive the code? Check your spam folder or try
-              logging in again.
-            </p>
             <Link
               href="/login"
               className="inline-flex items-center gap-2 text-sm text-ninja-gold-light dark:text-ninja-gold-dark hover:text-ninja-orange transition-colors font-medium"

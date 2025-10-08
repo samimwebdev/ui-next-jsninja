@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/context/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
 import { CookieConsent } from '@/components/shared/cookie-consent'
-import { PromotionProvider } from '@/components/shared/promotion-provider' // New import
+import { PromotionProvider } from '@/components/shared/promotion-provider'
 import { Toaster } from 'sonner'
 import AuthProvider from '@/components/context/AuthProvider'
 import { getUser } from '@/lib/auth'
@@ -20,6 +20,8 @@ import { GoogleAnalytics } from '@/components/analytics/google-analytics'
 import { FacebookPixel } from '@/components/analytics/facebook-pixel'
 import { VercelAnalytics } from '@/components/analytics/vercel-analytics'
 import { getPromotionData } from '@/lib/actions/promotion-actions'
+import { MaintenanceMode } from '@/components/shared/maintenance-mode' // Add this component
+import { setGATrackingId, setFBPixelId } from '@/lib/analytics'
 
 const hindSiliguri = Hind_Siliguri({
   subsets: ['latin', 'bengali'],
@@ -39,6 +41,7 @@ export interface StrapiSettingData {
   googleAnalyticID?: string
   seo?: SEOData
   logo?: StrapiImage
+  maintenanceMode: boolean
 }
 
 // Default Seo Metadata
@@ -135,7 +138,48 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const currentUser = await getUser()
-  // Fetch promotion data
+
+  // Fetch settings first to check maintenance mode
+  const { data: setting } = await strapiFetch<{ data: StrapiSettingData }>(
+    '/api/setting?populate=*',
+    {
+      headers: { 'Content-Type': 'application/json' },
+      next: {
+        revalidate: 3600,
+        tags: ['settings'],
+      },
+    }
+  )
+
+  // If maintenance mode is enabled, show maintenance page
+  if (setting?.maintenanceMode && process.env.NODE_ENV === 'production') {
+    return (
+      <html lang="en">
+        <body
+          className={`${hindSiliguri.className} ${hindSiliguri.variable} antialiased`}
+        >
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <MaintenanceMode logo={setting?.logo} />
+          </ThemeProvider>
+        </body>
+      </html>
+    )
+  }
+
+  // Set dynamic analytics IDs for utility functions
+  if (setting?.googleAnalyticID) {
+    setGATrackingId(setting.googleAnalyticID)
+  }
+  if (setting?.facebookPixelID) {
+    setFBPixelId(setting.facebookPixelID)
+  }
+
+  // Continue with normal layout if not in maintenance mode
   const promotionData = await getPromotionData()
 
   // Fetch menus
@@ -151,36 +195,29 @@ export default async function RootLayout({
     }
   )
 
-  // Fetch settings for logo
-  const { data: setting } = await strapiFetch<{ data: StrapiSettingData }>(
-    '/api/setting?populate=*',
-    {
-      headers: { 'Content-Type': 'application/json' },
-      next: {
-        revalidate: 3600,
-        tags: ['settings'],
-      },
-    }
-  )
   const logo = setting?.logo
-
   const headerMenu = menus.find((menu) => menu?.slug === headerMenuSlug)
   const footerMenu = menus.find((menu) => menu?.slug === footerMenuSlug)
+  const isProduction = process.env.NODE_ENV === 'production'
 
   return (
     <html lang="en">
       <head>
-        {/* ✅ Analytics Scripts */}
         <Suspense fallback={null}>
-          <GoogleAnalytics />
-          <FacebookPixel />
+          {/* Pass dynamic IDs to components */}
+          {isProduction && setting?.googleAnalyticID && (
+            <GoogleAnalytics gaId={setting.googleAnalyticID} />
+          )}
+          {isProduction && setting?.facebookPixelID && (
+            <FacebookPixel pixelId={setting.facebookPixelID} />
+          )}
         </Suspense>
       </head>
       <body
         className={`${hindSiliguri.className} ${hindSiliguri.variable} antialiased`}
         suppressHydrationWarning
       >
-        <VercelAnalytics />
+        {/* ✅ OPTIMAL PROVIDER HIERARCHY */}
         <ReactQueryProvider>
           <AuthProvider user={currentUser}>
             <ThemeProvider
@@ -189,17 +226,27 @@ export default async function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              {/* Add PromotionProvider to manage promotions */}
-              <PromotionProvider promotionData={promotionData}>
-                <Navigation menuItems={headerMenu?.items || []} logo={logo} />
+              <VideoProvider>
+                <PromotionProvider promotionData={promotionData}>
+                  {/* ✅ Analytics inside all providers */}
+                  <VercelAnalytics />
 
-                <Toaster position="top-right" richColors />
-                <VideoProvider>{children}</VideoProvider>
-                <Footer menuItems={footerMenu?.items || []} logo={logo} />
+                  {/* ✅ Toaster at top level for all notifications */}
+                  <Toaster position="top-right" richColors />
 
-                {/* ✅ Cookie Consent Popup */}
-                <CookieConsent />
-              </PromotionProvider>
+                  {/* ✅ Navigation with all context available */}
+                  <Navigation menuItems={headerMenu?.items || []} logo={logo} />
+
+                  {/* ✅ Main content */}
+                  <main className="min-h-screen">{children}</main>
+
+                  {/* ✅ Footer with all context available */}
+                  <Footer menuItems={footerMenu?.items || []} logo={logo} />
+
+                  {/* ✅ Cookie Consent at end (fixed position) */}
+                  <CookieConsent />
+                </PromotionProvider>
+              </VideoProvider>
             </ThemeProvider>
           </AuthProvider>
         </ReactQueryProvider>

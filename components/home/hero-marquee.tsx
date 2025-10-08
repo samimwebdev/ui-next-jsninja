@@ -3,15 +3,16 @@ import Image from 'next/image'
 // Import the Marquee component directly from the home directory to avoid compatibility issues
 import { Marquee } from '@/components/home/marquee'
 import { useEffect, useState } from 'react'
-import { Course } from '@/types/home-page-types'
 
-const CourseCard: React.FC<Course> = ({ title, level, featureImage }) => {
+import { CourseBase } from '@/types/shared-types'
+
+const CourseCard: React.FC<CourseBase> = ({ title, level, featureImage }) => {
   return (
     <div className="w-60 mx-auto rounded-xl overflow-hidden shadow-lg transition-all duration-300 transform hover:scale-105 bg-white dark:bg-gray-800">
       <div className="relative h-40 w-full">
         <Image
           src={
-            featureImage?.formats?.medium?.url ||
+            featureImage?.formats?.thumbnail?.url ||
             featureImage?.url ||
             '/images/placeholder.png'
           }
@@ -31,7 +32,7 @@ const CourseCard: React.FC<Course> = ({ title, level, featureImage }) => {
   )
 }
 
-export const HeroMarquee: React.FC<{ data: Course[] }> = ({
+export const HeroMarquee: React.FC<{ data: CourseBase[] }> = ({
   data: courses,
 }) => {
   const [mounted, setMounted] = useState(false)

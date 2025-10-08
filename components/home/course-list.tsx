@@ -49,12 +49,19 @@ const CourseCard = ({ course }: { course: Course }) => {
     shortDescription = 'No description available',
     slug = '',
     price = 0,
+    actualPrice = null,
     level = 'Unknown',
     duration = 0,
     featureImage = null,
     categories = [],
     browseCoursesBtn = null,
   } = course.baseContent
+
+  // Calculate discount percentage
+  const hasDiscount = actualPrice && actualPrice > price
+  const discountPercentage = hasDiscount
+    ? Math.round(((actualPrice - price) / actualPrice) * 100)
+    : null
 
   // Don't render link if slug is empty
   const cardContent = (
@@ -63,7 +70,7 @@ const CourseCard = ({ course }: { course: Course }) => {
         <div className="relative h-48 w-full overflow-hidden">
           <Image
             src={
-              featureImage?.formats?.medium?.url ||
+              featureImage?.formats?.small?.url ||
               featureImage?.url ||
               '/images/placeholder.svg'
             }
@@ -71,10 +78,22 @@ const CourseCard = ({ course }: { course: Course }) => {
             fill
             className="object-cover"
           />
-          <div className="absolute top-2 right-2">
-            <Badge className="bg-primary text-primary-foreground">
-              {price.toLocaleString()} BDT
-            </Badge>
+          <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+            <div className="flex items-baseline gap-2">
+              <Badge className="bg-primary text-primary-foreground text-base font-bold px-3 py-1">
+                {price.toLocaleString()} Tk
+              </Badge>
+              {hasDiscount && (
+                <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full">
+                  {actualPrice?.toLocaleString()} Tk
+                </span>
+              )}
+            </div>
+            {hasDiscount && (
+              <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-semibold border border-red-200">
+                Save {discountPercentage}%
+              </span>
+            )}
           </div>
         </div>
       </CardHeader>

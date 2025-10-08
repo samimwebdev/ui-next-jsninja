@@ -284,6 +284,9 @@ export interface Certificate {
   receivedAssignmentMarks: number
   certificateUrl: string
   isTopPerformer: boolean
+  grade: string
+  percentage: number
+  totalMarks: number
 }
 
 export interface CertificatesResponse {

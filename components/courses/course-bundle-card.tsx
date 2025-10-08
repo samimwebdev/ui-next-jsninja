@@ -30,7 +30,7 @@ interface CourseBundleCardProps {
 // Helper function to format price
 const formatPrice = (price: number): string => {
   if (!price || price <= 0) return 'Free'
-  return `${price.toLocaleString()} BDT`
+  return `${price.toLocaleString()}  Tk`
 }
 
 // Calculate bundle savings
@@ -78,7 +78,7 @@ export const CourseBundleCard: React.FC<CourseBundleCardProps> = ({
             {bundle.featureImage ? (
               <Image
                 src={
-                  bundle.featureImage.formats?.medium?.url ||
+                  bundle.featureImage.formats?.small?.url ||
                   bundle.featureImage.url ||
                   '/images/placeholder.svg'
                 }
@@ -233,11 +233,11 @@ export const CourseBundleCard: React.FC<CourseBundleCardProps> = ({
 
             {/* Badges */}
             <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-              <Badge className="bg-primary text-primary-foreground font-semibold shadow-lg">
+              <Badge className="bg-primary text-base text-primary-foreground font-semibold shadow-lg">
                 Bundle
               </Badge>
               {savings > 0 && (
-                <Badge className="bg-emerald-500 text-white font-semibold shadow-lg dark:bg-emerald-600 dark:text-white">
+                <Badge className="bg-emerald-500 text-base text-white font-semibold shadow-lg dark:bg-emerald-600 dark:text-white">
                   Save {formatPrice(savings)}
                 </Badge>
               )}

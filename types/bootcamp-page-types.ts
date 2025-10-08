@@ -292,6 +292,7 @@ export interface BootcampPageData {
         description?: string | null
         order: number
         duration: number
+        releaseDate: Date | null
         lessons: Array<{
           id: number
           documentId: string
