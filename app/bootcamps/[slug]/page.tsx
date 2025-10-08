@@ -30,6 +30,8 @@ interface BootcampPageProps {
   }>
 }
 
+export const dynamic = 'force-static'
+export const revalidate = 3600
 // Generate static params for all bootcamp pages
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   try {
