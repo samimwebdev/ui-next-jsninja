@@ -61,7 +61,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
     const auth = await checkAuthOnly()
 
     if (!auth) {
-      router.push(`/auth/login?redirect=${encodeURIComponent(enrollLink)}`)
+      router.push(`/login?redirect=${encodeURIComponent(enrollLink)}`)
       return
     }
 

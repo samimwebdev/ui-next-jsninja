@@ -10,7 +10,6 @@ interface FooterProps {
 }
 
 export const Footer = ({ menuItems, logo }: FooterProps) => {
-  console.log(logo, 'Footer logo')
   return (
     <div className="flex flex-col">
       <div className="grow bg-muted" />
