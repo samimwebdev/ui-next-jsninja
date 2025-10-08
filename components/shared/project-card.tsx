@@ -42,7 +42,7 @@ export function ProjectCard({
           <CardContent className="p-6">
             <div className="aspect-video relative rounded-lg overflow-hidden mb-4">
               <Image
-                src={image?.formats?.small?.url || '/images/placeholder.svg'}
+                src={image?.url || '/images/placeholder.svg'}
                 alt={title}
                 fill
                 className="object-cover w-full h-full"

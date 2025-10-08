@@ -31,7 +31,6 @@ export async function getUser(): Promise<User | null> {
   const token = cookieStore.get(COOKIE)?.value
 
   if (!token) {
-    console.log('No token found in cookies')
     return null
   }
 

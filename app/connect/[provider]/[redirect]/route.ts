@@ -39,7 +39,9 @@ export async function GET(
         email: string
         documentId: string
       }
-    }>(`/api/auth/${provider}/callback?access_token=${token}`)
+    }>(`/api/auth/${provider}/callback?access_token=${token}`, {
+      credentials: 'include', // Include cookies with the request
+    })
 
     await setAuthCookie(res.jwt)
 

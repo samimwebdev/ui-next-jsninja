@@ -35,7 +35,6 @@ export const CurriculumClient: React.FC<{
   const user = useUser()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
-  console.log({ courseType })
 
   useEffect(() => {
     setMounted(true)
