@@ -1,5 +1,5 @@
 import { Separator } from '@/components/ui/separator'
-import { DribbbleIcon, GithubIcon, TwitchIcon, TwitterIcon } from 'lucide-react'
+// import { DribbbleIcon, GithubIcon, TwitchIcon, TwitterIcon } from 'lucide-react'
 import Link from 'next/link'
 import { MenuItem, StrapiImage } from '@/types/shared-types'
 import Image from 'next/image'
@@ -45,9 +45,8 @@ export const Footer = ({ menuItems, logo }: FooterProps) => {
                 </svg>
               )}
 
-              <p className="mt-4 text-muted-foreground">
-                Design amazing digital experiences that create more happy in the
-                world.
+              <p className="text-muted-foreground">
+                Code with clarity. Build with confidence.
               </p>
             </div>
 
@@ -72,16 +71,16 @@ export const Footer = ({ menuItems, logo }: FooterProps) => {
             ))}
           </div>
           <Separator />
-          <div className="py-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-x-2 gap-y-5 px-6 xl:px-0">
+          <div className="py-8 flex justify-center items-center px-6 xl:px-0">
             {/* Copyright */}
-            <span className="text-muted-foreground">
+            <span className="text-muted-foreground text-center">
               &copy; {new Date().getFullYear()}{' '}
               <Link href="/" target="_blank">
                 JavaScript Ninja
               </Link>
               . All rights reserved.
             </span>
-            <div className="flex items-center gap-5 text-muted-foreground">
+            {/* <div className="flex items-center gap-5 text-muted-foreground">
               <Link href="https://twitter.com" target="_blank">
                 <TwitterIcon className="h-5 w-5" />
               </Link>
@@ -94,7 +93,7 @@ export const Footer = ({ menuItems, logo }: FooterProps) => {
               <Link href="https://github.com" target="_blank">
                 <GithubIcon className="h-5 w-5" />
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </footer>

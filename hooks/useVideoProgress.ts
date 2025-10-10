@@ -120,6 +120,7 @@ export function useVideoProgress(
     } catch (error) {
       console.error('❌ Failed to seek to last position:', error)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastPosition, isLessonComplete, lessonDocumentId])
 
   const sendProgressToStrapi = useCallback(
@@ -326,6 +327,7 @@ export function useVideoProgress(
                 '📹 Sending final video completion with full duration:',
                 videoDuration.current
               )
+
               sendProgressToStrapi(
                 videoDuration.current,
                 videoDuration.current,

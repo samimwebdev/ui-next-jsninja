@@ -12,7 +12,7 @@ export function CourseAccessDenied({ message }: CourseAccessDeniedProps) {
   const router = useRouter()
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+    <div className="relative min-h-screen flex items-center px-4 overflow-hidden">
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-auth-dark dark:bg-gradient-auth-dark-enhanced" />
 
