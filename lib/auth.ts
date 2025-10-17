@@ -1,13 +1,42 @@
 'use server'
 import { cookies } from 'next/headers'
 import { strapiFetch } from './strapi'
-import QueryString from 'qs'
+// import QueryString from 'qs'
 import { User, UserWithProfile } from '@/types/shared-types'
-import { cache } from 'react'
 
-const COOKIE = 'strapi_jwt'
+const COOKIE = 'jsn_jwt'
+const REFRESH_COOKIE = 'jsn_refresh'
 
-export async function setAuthCookie(token: string) {
+/**
+ * Set both access and refresh tokens
+ */
+export async function setAuthCookies(jwt: string, refreshToken: string) {
+  'use server'
+  const cookieStore = await cookies()
+
+  // Set access token (15 minutes)
+  cookieStore.set(COOKIE, jwt, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 15, // 15 minutes
+  })
+
+  // Set refresh token (30 days)
+  cookieStore.set(REFRESH_COOKIE, refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  })
+}
+
+/**
+ * Legacy function - now also sets refresh token if available
+ */
+export async function setAuthCookie(token: string, refreshToken?: string) {
   'use server'
   const cookieStore = await cookies()
   cookieStore.set(COOKIE, token, {
@@ -15,51 +44,68 @@ export async function setAuthCookie(token: string) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 15, // 15 minutes
   })
+
+  // If refresh token provided, set it too
+  if (refreshToken) {
+    cookieStore.set(REFRESH_COOKIE, refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    })
+  }
 }
 
+/**
+ * Clear all auth cookies
+ */
 export async function clearAuthCookie() {
   'use server'
   const cookieStore = await cookies()
   cookieStore.delete(COOKIE)
+  cookieStore.delete(REFRESH_COOKIE)
+}
+
+/**
+ * Get auth token from cookies
+ * Middleware ensures this is always fresh
+ */
+export async function getAuthToken(): Promise<string | null> {
+  'use server'
+  const cookieStore = await cookies()
+  const cookie = cookieStore.get(COOKIE)
+  return cookie?.value || null
+}
+
+/**
+ * Get valid auth token (alias for getAuthToken for clarity)
+ */
+export async function getValidAuthToken(): Promise<string | null> {
+  'use server'
+  return await getAuthToken()
 }
 
 export async function getUser(): Promise<User | null> {
   'use server'
-  const cookieStore = await cookies()
-  const token = cookieStore.get(COOKIE)?.value
+  const token = await getAuthToken()
 
   if (!token) {
     return null
   }
 
-  const query = QueryString.stringify({
-    populate: {
-      profile: {
-        populate: {
-          image: true,
-        },
-      },
-    },
-  })
-
   try {
-    return await strapiFetch(`/api/users/me?${query}`, {
+    return await strapiFetch(`/api/users/me`, {
       headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
     })
-  } catch {
-    // await clearAuthCookie()
+  } catch (error) {
+    console.error('[Auth] getUser error:', error)
     return null
   }
 }
-
-export const getAuthToken = cache(async (): Promise<string | null> => {
-  'use server'
-  const cookieStore = await cookies()
-  const token = cookieStore.get(COOKIE)
-  return token?.value || null
-})
 
 export async function getUserWithProfile(): Promise<UserWithProfile | null> {
   'use server'
@@ -69,11 +115,13 @@ export async function getUserWithProfile(): Promise<UserWithProfile | null> {
 
     const profile = await strapiFetch<UserWithProfile | null>(
       '/api/users/me?populate=profile.image',
-      { token }
+      {
+        token,
+        cache: 'no-store',
+      }
     )
 
     if (!profile) {
-      // await clearAuthCookie()
       return null
     }
 
@@ -87,8 +135,7 @@ export async function getUserWithProfile(): Promise<UserWithProfile | null> {
       profile: profile?.profile,
     }
   } catch (error) {
-    console.error('Failed to get user with profile:', error)
-    await clearAuthCookie()
+    console.error('[Auth] getUserWithProfile error:', error)
     return null
   }
 }
@@ -102,7 +149,7 @@ export async function clearInvalidAuthCookie() {
       await clearAuthCookie()
     }
   } catch (error) {
-    console.error('Error checking auth:', error)
+    console.error('[Auth] clearInvalidAuthCookie error:', error)
     await clearAuthCookie()
   }
 }
@@ -110,6 +157,7 @@ export async function clearInvalidAuthCookie() {
 // Middleware helper
 export async function isAuthenticated(): Promise<boolean> {
   'use server'
-  const user = await getUser()
-  return !!user && !user.blocked
+  const token = await getAuthToken()
+  console.log('Auth token presence:', token) // Debug log
+  return !!token
 }

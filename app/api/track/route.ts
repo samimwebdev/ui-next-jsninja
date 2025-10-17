@@ -74,24 +74,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ✅ Simple logging for verification events
-    if (event_name === 'payment_verification_success') {
-      console.log('Payment verification success:', {
-        transaction_id: ga_parameters.transaction_id,
-        course_slug: ga_parameters.course_slug,
-        value: ga_parameters.value,
-        verification_status: ga_parameters.verification_status,
-      })
-    }
-
-    if (event_name === 'payment_verification_error') {
-      console.log('Payment verification error:', {
-        transaction_id: ga_parameters.transaction_id,
-        error_message: ga_parameters.error_message,
-        course_slug: ga_parameters.course_slug,
-      })
-    }
-
     const response = NextResponse.json({
       success: ga_success || fb_success,
       ga_success,

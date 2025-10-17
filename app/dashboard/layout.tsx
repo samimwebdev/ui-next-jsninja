@@ -2,9 +2,10 @@ import type React from 'react'
 import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
 import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
-import { getUserWithProfile } from '@/lib/auth'
+import { getUser } from '@/lib/auth'
 
 import { EmailVerificationBanner } from '@/components/auth/email-verification-banner'
+import { TwoFactorPromptBanner } from '@/components/auth/two-factor-verification-banner'
 
 // Force dynamic rendering for all dashboard routes
 export const dynamic = 'force-dynamic'
@@ -54,7 +55,8 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   // Check authentication
-  const user = await getUserWithProfile()
+  const user = await getUser()
+  console.log({ user })
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -64,6 +66,8 @@ export default async function DashboardLayout({
       {user && !user.confirmed && (
         <EmailVerificationBanner userEmail={user.email} />
       )}
+
+      {user && user.confirmed && !user.enableTotp && <TwoFactorPromptBanner />}
 
       {/* User Profile Header */}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

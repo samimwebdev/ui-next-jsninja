@@ -43,10 +43,10 @@ export const fetchCurrentUser = cache(
 
       return data
     } catch (err) {
-      console.error('Error fetching certificates:', err)
+      console.error('Error fetching current user:', err)
       throw err instanceof Error
         ? err
-        : new Error('Failed to fetch certificates')
+        : new Error('Failed to fetch current user')
     }
   }
 )

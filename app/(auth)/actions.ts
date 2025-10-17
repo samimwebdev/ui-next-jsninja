@@ -180,8 +180,6 @@ export async function registerAction(
       validated.lastName
     )
 
-    console.log('Generated username:', username)
-
     const registrationData = {
       username: username,
       email: validated.email,
@@ -317,16 +315,14 @@ export async function loginAction(
     })
 
     const res = await strapiFetch<{
-      data: {
-        jwt: string
-        user: {
-          id: number
-          username: string
-          email: string
-          enableTotp: boolean
-        }
+      jwt: string
+      refreshToken: string
+      user: {
+        id: number
+        username: string
+        email: string
+        enableTotp: boolean | null
       }
-      verifyType: string
     }>('/api/auth/local', {
       method: 'POST',
       body: JSON.stringify(validated),
@@ -334,9 +330,15 @@ export async function loginAction(
 
     const cookieStore = await cookies()
 
-    console.log('Login response:', res)
+    // Store temporary tokens for OTP verification
+    cookieStore.set('temp_jwt', res.jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 300, // 5 minutes
+    })
 
-    cookieStore.set('temp_jwt', res.data.jwt, {
+    cookieStore.set('temp_refresh', res.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -344,21 +346,19 @@ export async function loginAction(
     })
 
     // OTP is ALWAYS required after login
-
     return {
-      message: res.data.user.enableTotp
+      message: res.user.enableTotp
         ? 'Please enter the code from your authenticator app.'
         : 'Please check your email for the verification code.',
       errors: {},
       success: false,
       requiresOTP: true,
-      userId: res.data.user.id,
-      // Pass additional info for OTP verification
+      userId: res.user.id,
       userInfo: {
-        email: res.data.user.email,
-        twoFactorEnabled: res.data.user.enableTotp,
-        jwt: res.data.jwt, // Pass JWT for later use
-        verifyType: res.verifyType, // Pass verification type
+        email: res.user.email,
+        twoFactorEnabled: !!res.user.enableTotp,
+        jwt: res.jwt,
+        verifyType: res.user.enableTotp ? 'totp' : 'email',
       },
     }
   } catch (error) {
@@ -400,11 +400,11 @@ export async function verifyOTPAction(
       abortEarly: false,
     })
 
-    // Get the temporary JWT from cookies
+    const cookieStore = await cookies()
+    const tempToken = cookieStore.get('temp_jwt')?.value
+    const tempRefresh = cookieStore.get('temp_refresh')?.value
 
-    const tempToken = (await cookies()).get('temp_jwt')?.value
-
-    if (!tempToken) {
+    if (!tempToken || !tempRefresh) {
       return {
         message: 'Your verification session has expired. Please log in again.',
         errors: { server: ['Session expired'] },
@@ -413,7 +413,8 @@ export async function verifyOTPAction(
     }
 
     const userId = data.userId as string
-    const email = data.email as string // Get email from form data
+    const email = data.email as string
+
     const twoFactorEnabled = data.twoFactorEnabled === 'true'
 
     if (!userId || !email) {
@@ -424,20 +425,12 @@ export async function verifyOTPAction(
       }
     }
 
-    // Determine the verification type based on 2FA status
     const verificationType = twoFactorEnabled ? 'totp' : 'email'
 
-    console.log(
-      'Verifying OTP for userId:',
-      userId,
-      'with email:',
-      email,
-      'using',
-      verificationType
-    )
-    // Verify OTP with Strapi
+    // Verify OTP with Strapi - expecting new token format
     const res = await strapiFetch<{
       jwt: string
+      refreshToken: string
       user: {
         id: number
         username: string
@@ -448,7 +441,7 @@ export async function verifyOTPAction(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(tempToken && { Authorization: `Bearer ${tempToken}` }),
+        Authorization: `Bearer ${tempToken}`,
       },
       body: JSON.stringify({
         code: validated.token,
@@ -457,21 +450,22 @@ export async function verifyOTPAction(
       }),
     })
 
-    //delete the temporary cookie
-    const cookieStore = await cookies()
+    // Delete temporary cookies
     cookieStore.delete('temp_jwt')
+    cookieStore.delete('temp_refresh')
 
-    // Set auth cookie after successful verification
-    await setAuthCookie(res.jwt)
+    // Set permanent auth cookies with both tokens
+    const { setAuthCookies } = await import('@/lib/auth')
 
-    // Profile exists, redirect to dashboard
+    await setAuthCookies(res.jwt, res.refreshToken)
+
     return {
       message: 'Login successful. Redirecting to dashboard...',
       errors: {},
       success: true,
     }
   } catch (error) {
-    console.log('OTP Verification error:', error)
+    console.error('OTP Verification error:', error)
     if (error instanceof ValidationError) {
       const fieldErrors: Record<string, string[]> = {}
       error.inner.forEach((err) => {
@@ -552,7 +546,7 @@ export async function saveTotpSecret(
       }
     }
 
-    const res = await strapiFetch(`/api/auth/save-totp-secret`, {
+    await strapiFetch(`/api/auth/save-totp-secret`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -563,8 +557,6 @@ export async function saveTotpSecret(
         secret: data.secret,
       }),
     })
-
-    console.log('TOTP setup successful:', res)
 
     // Return success instead of redirecting
     return {
@@ -888,28 +880,28 @@ export async function resendOTPAction(): Promise<FormState> {
       }
     }
 
-    // Call your Strapi resend endpoint - backend will extract user info from token
-    await strapiFetch('/api/auth/resend-otp', {
+    // Call your Strapi resend OTP endpoint
+    const res = await strapiFetch<{
+      message: string
+      success: boolean
+    }>('/api/auth/resend-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${tempToken}`,
       },
-      body: JSON.stringify({
-        verifyType: 'email',
-      }), // Empty body since backend extracts from token
     })
 
     return {
-      message: 'New verification code sent successfully!',
+      message: res.message,
       errors: {},
-      success: true,
+      success: res.success,
     }
   } catch (error) {
     console.error('Resend OTP error:', error)
 
     return {
-      message: 'Failed to send verification code. Please try again.',
+      message: 'Failed to resend OTP. Please try again.',
       errors: error instanceof Error ? { server: [error.message] } : {},
       success: false,
     }

@@ -34,13 +34,13 @@ function shouldRevalidate(body: StrapiWebhookBody): boolean {
     console.log(`🔄 Revalidating due to ${event} event`)
     return true
   }
-
+  console.log('entry', entry)
   // ✅ For create, update, publish - check if entry is published
-  const isPublished = !!entry.publishedAt
+  const isPublished = !!entry?.publishedAt
 
   if (!isPublished) {
     console.log(
-      `⏭️ Skipping revalidation - entry not published (publishedAt: ${entry.publishedAt})`
+      `⏭️ Skipping revalidation - entry not published (publishedAt: ${entry?.publishedAt})`
     )
     return false
   }

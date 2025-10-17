@@ -71,6 +71,13 @@ export interface ExistingAssignmentSubmission {
   liveLink: string | null
   code: string | null
 }
+export interface ExistingQuizSubmissionErrorResponse {
+  data: null
+  error: {
+    status: number
+    message: string
+  }
+}
 
 export interface AssignmentSubmissionRequest {
   courseId: string
@@ -99,15 +106,36 @@ export async function getQuizSubmission(
 
     const apiUrl = `/api/course-view/${courseSlug}/${moduleDocumentId}/${lessonDocumentId}/${quizId}/assessment-quiz`
 
-    const response = await strapiFetch<ExistingQuizSubmission>(apiUrl, {
+    const response = await strapiFetch<
+      ExistingQuizSubmission | ExistingQuizSubmissionErrorResponse
+    >(apiUrl, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      next: { tags: [`quiz-submission-${quizId}`] },
+      next: {
+        tags: [`quiz-submission-${quizId}`],
+      },
+      allowNotFound: true,
     })
 
-    return response
+    // Type guard to check if response is an error
+    if (
+      'error' in response &&
+      response.error &&
+      response.error.status === 404
+    ) {
+      console.log('No existing quiz submission found', response.error)
+      return null
+    }
+
+    // Type guard to check if response is ExistingQuizSubmission
+    if ('data' in response && response.data) {
+      return response.data as ExistingQuizSubmission
+    }
+
+    // Fallback - should not reach here normally
+    return null
   } catch (error) {
     console.log('No existing quiz submission found', error)
     return null
@@ -160,16 +188,22 @@ export async function getAssignmentSubmission(
     }).toString()
 
     const response = await strapiFetch<{
-      data: ExistingAssignmentSubmission
+      data: ExistingAssignmentSubmission | ExistingQuizSubmissionErrorResponse
     }>(`/api/assignment-submissions?${queryParams}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
       },
       next: { tags: [`assignment-submission-${assignmentId}`] },
+      allowNotFound: true,
     })
 
-    return response.data
+    if ('error' in response && response.error) {
+      console.log('No existing assignment submission found', response.error)
+      return null
+    }
+
+    return response.data as ExistingAssignmentSubmission
   } catch (error) {
     console.log('No existing assignment submission found', error)
     return null

@@ -61,3 +61,11 @@ export interface ExistingQuizSubmission {
   timeSpent: number | null
   attempts: number
 }
+export interface ExistingQuizSubmissionErrorResponse {
+  data: null
+  error: {
+    status: number
+    name: string
+    message: string
+  }
+}

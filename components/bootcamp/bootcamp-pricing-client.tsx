@@ -165,10 +165,15 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   const shouldShowCountdown =
     !isEnrolled && isRegistrationOpen && !buttonContent.disabled && endDate
 
+  const packagePrice =
+    packageType === 'live'
+      ? courseInfo?.liveBootcampPrice ?? courseInfo?.price
+      : courseInfo?.price
+
   // Calculate discount percentage if actualPrice exists
   const discountPercentage =
-    actualPrice && actualPrice > price
-      ? Math.round(((actualPrice - price) / actualPrice) * 100)
+    actualPrice && actualPrice > packagePrice
+      ? Math.round(((actualPrice - packagePrice) / actualPrice) * 100)
       : null
 
   return (
@@ -195,7 +200,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
         <div className="flex items-baseline justify-center gap-3 mb-2">
           {/* Discounted Price (Current Price) */}
           <span className="text-4xl font-bold text-ninja-gold">
-            {formatPrice(price)}
+            {formatPrice(packagePrice)}
           </span>
 
           {/* Original Price (Crossed Out) - ALIGNED TO BASELINE */}
