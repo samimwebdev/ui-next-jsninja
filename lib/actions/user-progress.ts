@@ -3,12 +3,13 @@
 import { strapiFetch } from '@/lib/strapi'
 import { getAuthToken } from '../auth'
 
-export interface LessonProgressPayload {
+export type LessonProgressPayload = {
   startedAt: string
   lastPosition: number
-  timeSpent: number
-  lessonStatus: 'completed' | 'inProgress'
+  lessonStatus: 'notStarted' | 'inProgress' | 'completed'
   isModuleCompleted: boolean
+  // Send watched segments for backend to process
+  watchedSegments?: Array<{ start: number; end: number }>
 }
 
 export interface UserProgressResponse {

@@ -21,7 +21,6 @@ import {
   Smartphone,
   AlertTriangle,
   CheckCircle,
-  QrCode,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { disableTotpAction } from '@/app/(auth)/actions'
@@ -223,14 +222,14 @@ export function SecuritySettings({
           <div className="flex flex-col sm:flex-row gap-3">
             {totpEnabled ? (
               <>
-                <Button
+                {/* <Button
                   variant="outline"
-                  onClick={() => router.push('/auth/app-setup')}
+                  onClick={() => router.push('/app-setup')}
                   className="flex items-center gap-2"
                 >
                   <QrCode className="h-4 w-4" />
                   Reconfigure 2FA
-                </Button>
+                </Button> */}
                 <Button
                   variant="outline"
                   onClick={() => setShowDisableDialog(true)}

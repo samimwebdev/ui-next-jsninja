@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Mail, X, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
-import { trackVercelEvent } from '@/components/analytics/vercel-analytics'
 import { resendEmailConfirmation } from '@/lib/actions/email-verification'
 
 interface EmailVerificationBannerProps {
@@ -25,13 +24,6 @@ export function EmailVerificationBanner({
 
     startTransition(async () => {
       try {
-        // ✅ Track verification email request
-        trackVercelEvent('email_verification_requested', {
-          user_email_domain: userEmail.split('@')[1] || 'unknown',
-          source: 'banner',
-        })
-
-        // ✅ Use server action
         const result = await resendEmailConfirmation(userEmail)
 
         if (result.success) {

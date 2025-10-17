@@ -13,15 +13,19 @@ interface UseVideoProgressOptions {
   courseDocumentId: string
   moduleDocumentId: string
   lessonDocumentId: string
-  updateInterval?: number
-  completionThreshold?: number
+  updateInterval?: number // How often to save progress (default: 30s)
+  completionThreshold?: number // Percentage to mark as complete (default: 90%)
   totalModuleLessons?: number
   completedModuleLessons?: number
   onLessonCompleted?: (lessonDocumentId: string) => void
   isLessonComplete?: boolean
-  lastPosition?: number // Last watched position in seconds
+  lastPosition?: number
 }
 
+/**
+ * Video progress tracking hook
+ * Sends watched time segments to backend for server-side deduplication
+ */
 export function useVideoProgress(
   iframeRef: React.RefObject<HTMLIFrameElement | null>,
   {
@@ -38,135 +42,234 @@ export function useVideoProgress(
   }: UseVideoProgressOptions
 ) {
   const pathname = usePathname()
+
+  // ==================== REFS ====================
   const playerRef = useRef<Player | null>(null)
-  const lastReportedTime = useRef<number>(0)
-  const videoDuration = useRef<number>(0)
-  const isComplete = useRef<boolean>(isLessonComplete)
-  const completionSent = useRef<boolean>(isLessonComplete)
-  const thresholdReached = useRef<boolean>(isLessonComplete)
-  const videoEnded = useRef<boolean>(false)
-  const finalProgressSent = useRef<boolean>(isLessonComplete)
-  const initializationAttempts = useRef<number>(0)
   const isInitialized = useRef<boolean>(false)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const isPlaying = useRef<boolean>(false)
-  const totalWatchTime = useRef<number>(0)
-  const lastPlayTime = useRef<number | null>(null)
 
-  // FIX: Track current lesson to detect changes - move this to the top
-  const currentLessonRef = useRef<string>(lessonDocumentId)
-  const hasSeekToLastPosition = useRef<boolean>(false)
-  const seekAttempted = useRef<boolean>(false)
+  // Video metadata
+  const videoDuration = useRef<number>(0)
+  const lastReportedTime = useRef<number>(0)
 
-  // FIX: Reset seek state IMMEDIATELY when lesson or position changes
+  // Completion tracking
+  const isComplete = useRef<boolean>(isLessonComplete)
+  const hasReachedThreshold = useRef<boolean>(isLessonComplete)
+  const hasVideoEnded = useRef<boolean>(false)
+  const hasSentFinalProgress = useRef<boolean>(isLessonComplete)
+
+  // Progress interval
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Watch time tracking - Store segments to send to backend
+  const isCurrentlyPlaying = useRef<boolean>(false)
+  const currentSegmentStart = useRef<number | null>(null)
+  const pendingSegments = useRef<Array<{ start: number; end: number }>>([])
+
+  // Seek state
+  const currentLessonId = useRef<string>(lessonDocumentId)
+  const hasSeekToStart = useRef<boolean>(false)
+
+  // ==================== LESSON CHANGE DETECTION ====================
+  /**
+   * Reset all state when lesson changes
+   */
   useEffect(() => {
-    const lessonChanged = currentLessonRef.current !== lessonDocumentId
+    const lessonChanged = currentLessonId.current !== lessonDocumentId
 
     if (lessonChanged) {
-      currentLessonRef.current = lessonDocumentId
+      console.log(`🔄 Lesson changed: ${lessonDocumentId}`)
+      currentLessonId.current = lessonDocumentId
+
+      // Reset all tracking state
+      lastReportedTime.current = 0
+      videoDuration.current = 0
+      isComplete.current = isLessonComplete
+      hasReachedThreshold.current = isLessonComplete
+      hasVideoEnded.current = false
+      hasSentFinalProgress.current = isLessonComplete
+      isCurrentlyPlaying.current = false
+      currentSegmentStart.current = null
+      pendingSegments.current = []
+      hasSeekToStart.current = false
     }
 
-    // FIX: Reset seek state for new lesson OR new position
-    if (lessonChanged || lastPosition > 0) {
-      // console.log(
-      //   `🔄 Resetting seek state - lesson changed: ${lessonChanged}, lastPosition: ${lastPosition}`
-      // )
-      hasSeekToLastPosition.current = false
-      seekAttempted.current = false // ← This is the key fix!
+    // Reset seek flag when position changes
+    if (lastPosition > 0) {
+      hasSeekToStart.current = false
     }
-  }, [lessonDocumentId, lastPosition]) // Run when either changes
+  }, [lessonDocumentId, lastPosition, isLessonComplete])
 
-  // FIX: Simplified seek function without redundant checks
+  // ==================== SEGMENT TRACKING ====================
+  /**
+   * Record a watched segment (to be sent to backend)
+   */
+  const recordWatchSegment = useCallback((start: number, end: number) => {
+    // Only record valid segments (forward progress, minimum 1 second)
+    if (end > start && end - start >= 1) {
+      console.log(`📊 Recording segment: ${start.toFixed(1)}s - ${end.toFixed(1)}s`)
+      pendingSegments.current.push({ start, end })
+    }
+  }, [])
+
+  /**
+   * Handle play event - start tracking segment
+   */
+  const handlePlay = useCallback(
+    (currentTime: number) => {
+      console.log('▶️ Video playing')
+      isCurrentlyPlaying.current = true
+      currentSegmentStart.current = currentTime
+    },
+    []
+  )
+
+  /**
+   * Handle pause event - finish tracking segment
+   */
+  const handlePause = useCallback(
+    (currentTime: number) => {
+      console.log('⏸️ Video paused')
+      
+      // Record the segment if valid
+      if (
+        isCurrentlyPlaying.current &&
+        currentSegmentStart.current !== null &&
+        currentTime > currentSegmentStart.current
+      ) {
+        recordWatchSegment(currentSegmentStart.current, currentTime)
+      }
+
+      isCurrentlyPlaying.current = false
+      currentSegmentStart.current = null
+    },
+    [recordWatchSegment]
+  )
+
+  /**
+   * Handle seek event - finish previous segment and start new one
+   */
+  const handleSeek = useCallback(
+    (oldTime: number, newTime: number) => {
+      console.log(`⏩ Seeked from ${oldTime.toFixed(1)}s to ${newTime.toFixed(1)}s`)
+
+      // If was playing, record the previous segment
+      if (
+        isCurrentlyPlaying.current &&
+        currentSegmentStart.current !== null &&
+        oldTime > currentSegmentStart.current
+      ) {
+        recordWatchSegment(currentSegmentStart.current, oldTime)
+      }
+
+      // If still playing after seek, start new segment
+      if (isCurrentlyPlaying.current) {
+        currentSegmentStart.current = newTime
+      }
+    },
+    [recordWatchSegment]
+  )
+
+  // ==================== SEEK TO LAST POSITION ====================
+  /**
+   * Seek video to last watched position when lesson loads
+   */
   const seekToLastPosition = useCallback(() => {
-    // console.log('🔍 Seek attempt:', {
-    //   lessonId: lessonDocumentId,
-    //   lastPosition,
-    //   hasPlayer: !!playerRef.current,
-    //   isInitialized: isInitialized.current,
-    //   hasSeekToLastPosition: hasSeekToLastPosition.current,
-    //   seekAttempted: seekAttempted.current,
-    //   isLessonComplete,
-    // })
-
     if (
       !playerRef.current ||
       !isInitialized.current ||
-      hasSeekToLastPosition.current || // Only check if already successfully seeked
+      hasSeekToStart.current ||
       !lastPosition ||
       lastPosition <= 0 ||
       isLessonComplete
     ) {
-      console.log('🚫 Skipping seek - conditions not met')
       return
     }
 
-    // FIX: Don't check seekAttempted here - just try to seek
-    // console.log(
-    //   `🎯 Seeking to last position: ${lastPosition} seconds for lesson: ${lessonDocumentId}`
-    // )
+    console.log(`🎯 Seeking to last position: ${lastPosition}s`)
 
     try {
       playerRef.current.setCurrentTime(lastPosition, (error) => {
         if (error) {
-          console.error('❌ Error seeking to last position:', error)
+          console.error('❌ Seek error:', error)
         } else {
-          // console.log(
-          //   `✅ Successfully seeked to ${lastPosition} seconds for lesson: ${lessonDocumentId}`
-          // )
-          hasSeekToLastPosition.current = true // Only set on success
+          console.log(`✅ Seeked to ${lastPosition}s`)
+          hasSeekToStart.current = true
           lastReportedTime.current = lastPosition
         }
       })
     } catch (error) {
-      console.error('❌ Failed to seek to last position:', error)
+      console.error('❌ Seek failed:', error)
     }
-  }, [lastPosition, isLessonComplete, lessonDocumentId])
+  }, [lastPosition, isLessonComplete])
 
+  // ==================== SEND PROGRESS TO BACKEND ====================
+  /**
+   * Save progress to Strapi backend
+   * Backend will handle segment deduplication and calculate unique watch time
+   */
   const sendProgressToStrapi = useCallback(
     async (
-      time: number,
+      currentTime: number,
       duration: number,
-      isFinal = false,
-      isVideoEnd = false
+      isFinalUpdate = false,
+      isVideoEndEvent = false
     ) => {
+      // Don't send if already completed
       if (isLessonComplete) return
 
       try {
-        if (isPlaying.current && lastPlayTime.current !== null) {
-          const now = Date.now()
-          const delta = (now - lastPlayTime.current) / 1000
-          totalWatchTime.current += delta
-          lastPlayTime.current = now
-        }
+        const progressPercent = (currentTime / duration) * 100
 
-        const progressPercent = (time / duration) * 100
-
+        // Determine lesson status
         const lessonStatus =
-          isVideoEnd || progressPercent >= completionThreshold
+          isVideoEndEvent || progressPercent >= completionThreshold
             ? 'completed'
             : 'inProgress'
 
+        // Trigger completion callback
         if (
           lessonStatus === 'completed' &&
           !isComplete.current &&
           onLessonCompleted
         ) {
+          console.log('🎉 Lesson completed!')
           onLessonCompleted(lessonDocumentId)
           isComplete.current = true
         }
 
+        // Check if module will be completed
         const willCompleteModule =
           lessonStatus === 'completed' &&
           completedModuleLessons + 1 >= totalModuleLessons
 
-        const payload: LessonProgressPayload = {
-          startedAt: new Date().toISOString(),
-          lastPosition: Math.floor(time),
-          timeSpent: Math.floor(totalWatchTime.current),
-          lessonStatus,
-          isModuleCompleted: willCompleteModule,
+        // Get pending segments to send
+        const segmentsToSend = [...pendingSegments.current]
+        
+        // If currently playing, add the current segment
+        if (
+          isCurrentlyPlaying.current &&
+          currentSegmentStart.current !== null &&
+          currentTime > currentSegmentStart.current
+        ) {
+          segmentsToSend.push({
+            start: currentSegmentStart.current,
+            end: currentTime,
+          })
         }
 
+        // Prepare payload with watched segments
+        const payload: LessonProgressPayload = {
+          startedAt: new Date().toISOString(),
+          lastPosition: Math.floor(currentTime),
+          lessonStatus,
+          isModuleCompleted: willCompleteModule,
+          // Send watched segments to backend for processing
+          watchedSegments: segmentsToSend.length > 0 ? segmentsToSend : undefined,
+        }
+
+        console.log(`📤 Sending ${segmentsToSend.length} segments to backend`)
+
+        // Send to backend
         await updateLessonProgress(
           courseDocumentId,
           moduleDocumentId,
@@ -174,20 +277,26 @@ export function useVideoProgress(
           payload
         )
 
+        console.log(`✅ Progress saved: ${Math.floor(progressPercent)}%`)
+
+        // Clear sent segments (backend now has them)
+        pendingSegments.current = []
+
+        // Update current segment start time if still playing
+        if (isCurrentlyPlaying.current) {
+          currentSegmentStart.current = currentTime
+        }
+
+        // Update completion flags
         if (lessonStatus === 'completed') {
-          completionSent.current = true
-          if (!isVideoEnd) {
-            thresholdReached.current = true
-          }
+          hasReachedThreshold.current = true
         }
-
-        if (isFinal || isVideoEnd) {
-          finalProgressSent.current = true
+        if (isFinalUpdate || isVideoEndEvent) {
+          hasSentFinalProgress.current = true
         }
-
-        console.info('✅ Video progress sent successfully')
       } catch (error) {
-        console.error('❌ Failed to send video progress:', error)
+        console.error('❌ Failed to save progress:', error)
+        // Don't clear segments on error - retry next time
       }
     },
     [
@@ -202,48 +311,58 @@ export function useVideoProgress(
     ]
   )
 
+  // ==================== PLAYER CLEANUP ====================
+  /**
+   * Clean up player instance and intervals
+   */
   const cleanupPlayer = useCallback(() => {
     if (playerRef.current && isInitialized.current) {
       try {
-        if (iframeRef.current && iframeRef.current.contentWindow) {
-          playerRef.current.off('timeupdate')
-          playerRef.current.off('ready')
-          playerRef.current.off('error')
-          playerRef.current.off('ended')
-          playerRef.current.off('play')
-          playerRef.current.off('pause')
-        }
+        // Remove all event listeners
+        playerRef.current.off('timeupdate')
+        playerRef.current.off('ready')
+        playerRef.current.off('error')
+        playerRef.current.off('ended')
+        playerRef.current.off('play')
+        playerRef.current.off('pause')
       } catch (error) {
-        console.error('Error cleaning up player events:', error)
+        console.error('❌ Cleanup error:', error)
       }
 
       playerRef.current = null
       isInitialized.current = false
-      isPlaying.current = false
-      lastPlayTime.current = 0
     }
 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-      intervalRef.current = null
+    // Clear interval
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current)
+      progressIntervalRef.current = null
     }
+
+    // Clear iframe onload
     if (iframeRef.current) {
       iframeRef.current.onload = null
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [iframeRef])
 
+  // ==================== PLAYER INITIALIZATION ====================
+  /**
+   * Initialize player.js and set up event listeners
+   */
   const initializePlayer = useCallback(() => {
     if (
       !iframeRef?.current ||
       playerRef.current ||
       isInitialized.current ||
       isLessonComplete
-    )
+    ) {
       return
+    }
+
+    console.log('🎬 Initializing video player...')
 
     try {
-      const checkIframeLoad = () => {
+      const setupPlayer = () => {
         if (!iframeRef.current || isLessonComplete) return
 
         try {
@@ -251,81 +370,79 @@ export function useVideoProgress(
           playerRef.current = player
           isInitialized.current = true
 
+          let lastTimeUpdateTime = 0
+
+          // ===== READY EVENT =====
           player.on('ready', () => {
-            if (!playerRef.current || isLessonComplete) return
+            console.log('✅ Player ready')
 
-            player.getDuration((d) => {
-              videoDuration.current = d
+            player.getDuration((duration) => {
+              videoDuration.current = duration
+              console.log(`📹 Duration: ${duration}s`)
 
-              // FIX: Always try to seek if we have a valid position
-              if (lastPosition > 0 && lastPosition < d) {
-                console.log(
-                  `📍 Valid position found: ${lastPosition}s, seeking...`
-                )
-                setTimeout(() => {
-                  seekToLastPosition()
-                }, 1500)
-              } else if (lastPosition >= d) {
-                console.log(
-                  `⚠️ Position ${lastPosition}s exceeds duration ${d}s, starting from beginning`
-                )
-              } else {
-                console.log(
-                  `🆕 No previous position (${lastPosition}), starting from beginning`
-                )
+              if (lastPosition > 0 && lastPosition < duration) {
+                setTimeout(() => seekToLastPosition(), 1500)
               }
             })
           })
 
+          // ===== TIME UPDATE EVENT =====
           player.on('timeupdate', (data) => {
-            if (
-              !videoDuration.current ||
-              !isInitialized.current ||
-              isLessonComplete
-            ) {
-              return
-            }
+            if (!videoDuration.current || !isInitialized.current) return
+
             const { seconds = 0 } = data || {}
             const progressPercent = (seconds / videoDuration.current) * 100
 
+            // Detect seeks (jump in time)
+            const timeDiff = Math.abs(seconds - lastTimeUpdateTime)
+            if (timeDiff > 2 && lastTimeUpdateTime > 0) {
+              handleSeek(lastTimeUpdateTime, seconds)
+            }
+            lastTimeUpdateTime = seconds
+
+            // Check completion threshold
             if (
-              !thresholdReached.current &&
+              !hasReachedThreshold.current &&
               progressPercent >= completionThreshold
             ) {
-              thresholdReached.current = true
+              console.log(`🎯 Reached ${completionThreshold}% threshold`)
+              hasReachedThreshold.current = true
               sendProgressToStrapi(seconds, videoDuration.current)
             }
           })
 
+          // ===== PLAY EVENT =====
           player.on('play', () => {
-            isPlaying.current = true
-            lastPlayTime.current = Date.now()
+            player.getCurrentTime((time) => {
+              handlePlay(time)
+            })
           })
 
+          // ===== PAUSE EVENT =====
           player.on('pause', () => {
-            if (lastPlayTime.current !== null) {
-              const now = Date.now()
-              totalWatchTime.current += (now - lastPlayTime.current) / 1000
-            }
-            isPlaying.current = false
-            lastPlayTime.current = null
+            player.getCurrentTime((time) => {
+              handlePause(time)
+            })
           })
 
+          // ===== ENDED EVENT =====
           player.on('ended', () => {
             console.log('🏁 Video ended')
-            isPlaying.current = false
-            lastPlayTime.current = null
+
+            // Record final segment
             if (
-              !videoEnded.current &&
-              !finalProgressSent.current &&
-              !isLessonComplete &&
-              videoDuration.current > 0
+              isCurrentlyPlaying.current &&
+              currentSegmentStart.current !== null
             ) {
-              videoEnded.current = true
-              console.log(
-                '📹 Sending final video completion with full duration:',
-                videoDuration.current
-              )
+              recordWatchSegment(currentSegmentStart.current, videoDuration.current)
+            }
+
+            isCurrentlyPlaying.current = false
+            currentSegmentStart.current = null
+
+            // Send final progress
+            if (!hasVideoEnded.current && !hasSentFinalProgress.current) {
+              hasVideoEnded.current = true
               sendProgressToStrapi(
                 videoDuration.current,
                 videoDuration.current,
@@ -335,63 +452,46 @@ export function useVideoProgress(
             }
           })
 
+          // ===== ERROR EVENT =====
           player.on('error', (error) => {
             console.error('🚨 Player error:', error)
           })
         } catch (error) {
-          console.error('Failed to initialize player:', error)
+          console.error('❌ Player initialization failed:', error)
           isInitialized.current = false
-
-          if (initializationAttempts.current < 3 && !isLessonComplete) {
-            initializationAttempts.current++
-            setTimeout(() => {
-              if (iframeRef.current && !isLessonComplete) {
-                checkIframeLoad()
-              }
-            }, 2000)
-          }
         }
       }
 
       if (iframeRef.current.contentDocument?.readyState === 'complete') {
-        setTimeout(checkIframeLoad, 1000)
+        setTimeout(setupPlayer, 1000)
       } else {
-        iframeRef.current.onload = () => {
-          setTimeout(checkIframeLoad, 1000)
-        }
+        iframeRef.current.onload = () => setTimeout(setupPlayer, 1000)
       }
     } catch (error) {
-      console.error('Failed to set up player initialization:', error)
+      console.error('❌ Setup failed:', error)
     }
-    // exhaustive deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLessonComplete, seekToLastPosition, lessonDocumentId, lastPosition])
+  }, [
+    iframeRef,
+    isLessonComplete,
+    lastPosition,
+    completionThreshold,
+    seekToLastPosition,
+    sendProgressToStrapi,
+    handlePlay,
+    handlePause,
+    handleSeek,
+    recordWatchSegment,
+  ])
 
-  // FIX: Main effect - simplified state reset
+  // ==================== MAIN EFFECT ====================
   useEffect(() => {
     if (isLessonComplete) {
-      console.log(
-        '🎥 Video lesson already completed - skipping progress tracking'
-      )
+      console.log('✅ Lesson already completed - skipping tracking')
       return
     }
 
-    // console.log(`📍 Starting with last position: ${lastPosition} seconds`)
-
-    // Reset ALL progress tracking state
-    initializationAttempts.current = 0
-    isComplete.current = false
-    completionSent.current = false
-    thresholdReached.current = false
-    videoEnded.current = false
-    finalProgressSent.current = false
-    lastReportedTime.current = 0
-    videoDuration.current = 0
-    totalWatchTime.current = 0
-    isPlaying.current = false
-    lastPlayTime.current = null
-
-    // FIX: Seek state is already reset in the earlier useEffect
+    console.log(`📍 Starting lesson: ${lessonDocumentId}`)
+    console.log(`⏱️ Last position: ${lastPosition}s`)
 
     if (!iframeRef?.current) {
       const checkIframe = setInterval(() => {
@@ -409,58 +509,50 @@ export function useVideoProgress(
       initializePlayer()
     }
 
-    intervalRef.current = setInterval(() => {
+    // ===== PERIODIC PROGRESS SAVE =====
+    progressIntervalRef.current = setInterval(() => {
       if (
         !playerRef.current ||
         !isInitialized.current ||
-        videoEnded.current ||
-        !videoDuration.current ||
-        isLessonComplete
-      )
+        hasVideoEnded.current ||
+        !videoDuration.current
+      ) {
         return
+      }
 
       try {
-        playerRef.current.getCurrentTime((time) => {
-          if (Math.abs(time - lastReportedTime.current) >= 10) {
-            const progressPercent = (time / videoDuration.current) * 100
-
-            if (
-              !thresholdReached.current &&
-              progressPercent < completionThreshold
-            ) {
-              sendProgressToStrapi(time, videoDuration.current)
-              lastReportedTime.current = time
-            } else if (thresholdReached.current && !videoEnded.current) {
-              lastReportedTime.current = time
-
-              if (progressPercent >= 99 && !finalProgressSent.current) {
-                sendProgressToStrapi(time, videoDuration.current, true, false)
-                finalProgressSent.current = true
-              }
-            }
+        playerRef.current.getCurrentTime((currentTime) => {
+          // Save progress periodically
+          if (
+            Math.abs(currentTime - lastReportedTime.current) >= 10 ||
+            pendingSegments.current.length > 0
+          ) {
+            sendProgressToStrapi(currentTime, videoDuration.current)
+            lastReportedTime.current = currentTime
           }
         })
       } catch (error) {
-        console.error('Error getting current time:', error)
+        console.error('❌ Progress check error:', error)
       }
     }, updateInterval)
 
+    // ===== SAVE ON PAGE UNLOAD =====
     const handleBeforeUnload = () => {
       if (
         !playerRef.current ||
         !isInitialized.current ||
         !videoDuration.current ||
-        finalProgressSent.current ||
-        isLessonComplete
-      )
+        hasSentFinalProgress.current
+      ) {
         return
+      }
 
       try {
         playerRef.current.getCurrentTime((time) => {
-          sendProgressToStrapi(time, videoDuration.current, true, false)
+          sendProgressToStrapi(time, videoDuration.current, true)
         })
       } catch (error) {
-        console.error('Error in beforeunload:', error)
+        console.error('❌ Unload save error:', error)
       }
     }
 
@@ -470,40 +562,33 @@ export function useVideoProgress(
       window.removeEventListener('beforeunload', handleBeforeUnload)
       cleanupPlayer()
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    courseDocumentId,
-    moduleDocumentId,
     lessonDocumentId,
-    updateInterval,
-    completionThreshold,
-    totalModuleLessons,
-    completedModuleLessons,
-    onLessonCompleted,
     isLessonComplete,
-    lastPosition, // FIX: Add lastPosition as dependency
-    sendProgressToStrapi,
+    lastPosition,
+    updateInterval,
     initializePlayer,
     cleanupPlayer,
+    sendProgressToStrapi,
+    iframeRef,
   ])
 
-  // Handle route changes
+  // ===== ROUTE CHANGE CLEANUP =====
   useEffect(() => {
     return () => {
       if (
         playerRef.current &&
         isInitialized.current &&
         videoDuration.current &&
-        !finalProgressSent.current &&
+        !hasSentFinalProgress.current &&
         !isLessonComplete
       ) {
         try {
           playerRef.current.getCurrentTime((time) => {
-            sendProgressToStrapi(time, videoDuration.current, true, false)
+            sendProgressToStrapi(time, videoDuration.current, true)
           })
         } catch (error) {
-          console.error('Error in route change cleanup:', error)
+          console.error('❌ Route change save error:', error)
         }
       }
     }

@@ -111,39 +111,67 @@ export default function LecturePage({
     (module) => module.id === currentContent?.moduleId
   )
 
-  if (!resolvedParams) {
+  // Loading state - Show skeleton while params are resolving OR course is loading OR content is not yet available
+  if (!resolvedParams || isLoading || !currentContent) {
     return (
-      <div className="relative flex flex-col">
-        <div className="h-64 bg-muted animate-pulse rounded-lg mb-4"></div>
-        <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
-      </div>
-    )
-  }
+      <div className="relative flex flex-col space-y-4">
+        {/* Video/Content Skeleton */}
+        <div className="w-full aspect-video bg-gradient-to-r from-muted via-muted/50 to-muted animate-pulse rounded-lg"></div>
 
-  if (isLoading) {
-    return (
-      <div className="relative flex flex-col">
-        <div className="h-64 bg-muted animate-pulse rounded-lg mb-4"></div>
-        <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
-      </div>
-    )
-  }
+        {/* Action Buttons Skeleton */}
+        <div className="flex gap-2">
+          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
+          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
+          <div className="h-10 w-40 bg-muted animate-pulse rounded-md"></div>
+        </div>
 
-  if (error) {
-    return (
-      <div className="relative flex flex-col">
-        <div className="text-center text-red-500 p-8">
-          <p>Error loading course content: {error}</p>
+        {/* Content Area Skeleton */}
+        <div className="space-y-4 p-6 bg-card rounded-lg border">
+          {/* Title skeleton */}
+          <div className="h-8 w-3/4 bg-muted animate-pulse rounded"></div>
+
+          {/* Description lines skeleton */}
+          <div className="space-y-3">
+            <div className="h-4 w-full bg-muted animate-pulse rounded"></div>
+            <div className="h-4 w-full bg-muted animate-pulse rounded"></div>
+            <div className="h-4 w-2/3 bg-muted animate-pulse rounded"></div>
+          </div>
+
+          {/* Resources skeleton */}
+          <div className="space-y-2 pt-4">
+            <div className="h-6 w-32 bg-muted animate-pulse rounded"></div>
+            <div className="h-12 bg-muted animate-pulse rounded-md"></div>
+            <div className="h-12 bg-muted animate-pulse rounded-md"></div>
+          </div>
+        </div>
+
+        {/* Navigation Skeleton */}
+        <div className="flex justify-between pt-6">
+          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
+          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
         </div>
       </div>
     )
   }
 
-  if (!courseData || !currentContent) {
+  // Error state
+  if (error) {
     return (
       <div className="relative flex flex-col">
-        <div className="text-center p-8">
-          <p>No course content available.</p>
+        <div className="text-center text-red-500 p-8 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+          <p className="font-semibold mb-2">Error Loading Course Content</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // No data state (after loading is complete)
+  if (!courseData) {
+    return (
+      <div className="relative flex flex-col">
+        <div className="text-center p-8 bg-muted/50 rounded-lg border">
+          <p className="text-muted-foreground">No course content available.</p>
         </div>
       </div>
     )

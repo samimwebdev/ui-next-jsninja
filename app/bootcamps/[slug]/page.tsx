@@ -20,7 +20,7 @@ import { BootcampPageData } from '@/types/bootcamp-page-types'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { PromoVideosSkeleton } from '@/components/bootcamp/promo-videos/promo-videos-lazy'
-import { strapiFetch } from '@/lib/strapi'
+// import { strapiFetch } from '@/lib/strapi'
 import { CourseTracking } from '@/components/course/course-tracking'
 import CourseNotFound from '@/components/shared/not-found'
 
@@ -30,43 +30,41 @@ interface BootcampPageProps {
   }>
 }
 
-export const dynamic = 'force-static'
-export const revalidate = 3600
 // Generate static params for all bootcamp pages
-export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
-  try {
-    // Fetch all bootcamp slugs from baseContent
-    const response = await strapiFetch<{
-      data: Array<{
-        baseContent: {
-          slug: string
-        }
-      }>
-    }>(
-      '/api/bootcamps?populate[baseContent][fields][0]=slug&pagination[limit]=100',
-      {
-        next: {
-          revalidate: 3600, // Revalidate every hour
-        },
-      }
-    )
+// export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+//   try {
+//     // Fetch all bootcamp slugs from baseContent
+//     const response = await strapiFetch<{
+//       data: Array<{
+//         baseContent: {
+//           slug: string
+//         }
+//       }>
+//     }>(
+//       '/api/bootcamps?populate[baseContent][fields][0]=slug&pagination[limit]=100',
+//       {
+//         next: {
+//           revalidate: 3600, // Revalidate every hour
+//         },
+//       }
+//     )
 
-    if (!response?.data) {
-      console.warn('No bootcamp data found for static generation')
-      return []
-    }
+//     if (!response?.data) {
+//       console.warn('No bootcamp data found for static generation')
+//       return []
+//     }
 
-    // Extract slug from baseContent
-    return response.data
-      .filter((bootcamp) => bootcamp.baseContent?.slug) // Filter out any without slugs
-      .map((bootcamp) => ({
-        slug: bootcamp.baseContent.slug,
-      }))
-  } catch (error) {
-    console.error('Error fetching bootcamp slugs for static generation:', error)
-    return []
-  }
-}
+//     // Extract slug from baseContent
+//     return response.data
+//       .filter((bootcamp) => bootcamp.baseContent?.slug) // Filter out any without slugs
+//       .map((bootcamp) => ({
+//         slug: bootcamp.baseContent.slug,
+//       }))
+//   } catch (error) {
+//     console.error('Error fetching bootcamp slugs for static generation:', error)
+//     return []
+//   }
+// }
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: BootcampPageProps) {

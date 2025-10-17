@@ -93,7 +93,7 @@ export function QuizSection({
   // Convert existing submission to result format if it exists
   useEffect(() => {
     if (existingSubmission && questions.length > 0) {
-      const totalPoints = existingSubmission.answers.reduce((sum, answer) => {
+      const totalPoints = existingSubmission?.answers?.reduce((sum, answer) => {
         const question = questions.find(
           (q) => q.documentId === answer.questionId
         )
@@ -200,7 +200,7 @@ export function QuizSection({
   // Get total points for existing submission
   const getExistingSubmissionTotalPoints = () => {
     if (!existingSubmission) return 0
-    return existingSubmission.answers.reduce((sum, answer) => {
+    return existingSubmission?.answers?.reduce((sum, answer) => {
       const question = questions.find((q) => q.documentId === answer.questionId)
       return sum + (question?.points || 1)
     }, 0)

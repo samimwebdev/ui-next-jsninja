@@ -9,7 +9,7 @@ export default async function SecurityPage() {
   const user = await getUserWithProfile()
 
   if (!token || !user) {
-    redirect('/auth/login?redirect=/dashboard/security')
+    redirect('/login?redirect=/dashboard/security')
   }
 
   // Get current 2FA status

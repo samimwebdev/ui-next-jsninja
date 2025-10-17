@@ -10,7 +10,6 @@ import { useSearchParams } from 'next/navigation'
 import { CheckoutError } from './checkout-error'
 import { CheckoutPageSkeleton } from './checkout-skeleton'
 import { CheckoutSummary } from './checkout-summary'
-// ✅ Import the new checkout tracking component
 import { CheckoutTracking } from './checkout-tracking'
 
 export function CheckoutContent() {

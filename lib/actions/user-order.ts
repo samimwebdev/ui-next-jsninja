@@ -16,7 +16,6 @@ export async function fetchUserOrders(): Promise<OrdersResponse> {
       token,
     })
 
-    console.log('Fetched user orders:', response)
     return response
   } catch (error) {
     console.error('Error fetching user orders:', error)

@@ -13,6 +13,8 @@ export const fetchEnrolledCourses = cache(
   }): Promise<EnrolledCoursesResponse | null> => {
     const token = await getAuthToken()
 
+    console.log('Auth token for enrolled courses:', token) // Debug log
+
     // If no token and it's a public page, return null instead of throwing
     if (!token) {
       if (isPublicPage) {

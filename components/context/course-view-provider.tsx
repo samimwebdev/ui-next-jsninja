@@ -136,8 +136,6 @@ export default function CourseViewLayoutWrapper({
 
     const completedLessons = userProgress?.completedLessons || []
 
-    console.log({ userProgress }, { currentContent })
-
     // Combine server data with optimistic updates
     const allCompletedLessonIds = new Set([
       ...completedLessons.map((lesson) => lesson.documentId),
