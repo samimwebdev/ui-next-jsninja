@@ -67,7 +67,6 @@ export function useTextProgress({
       completionSent.current = true
 
       if (!isComplete.current && onLessonCompleted) {
-        console.log('🔥 Marking text lesson as completed')
         onLessonCompleted(lessonDocumentId)
         isComplete.current = true
       }

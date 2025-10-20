@@ -9,6 +9,7 @@ interface CurrentUserResponse {
   documentId: string // Assuming this is the user ID in your Strapi setup
   email: string
   username: string
+  enableTotp?: boolean
   confirmed?: boolean
   blocked?: boolean
 }

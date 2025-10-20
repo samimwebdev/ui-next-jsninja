@@ -77,7 +77,6 @@ export function useVideoProgress(
     const lessonChanged = currentLessonId.current !== lessonDocumentId
 
     if (lessonChanged) {
-      console.log(`🔄 Lesson changed: ${lessonDocumentId}`)
       currentLessonId.current = lessonDocumentId
 
       // Reset all tracking state
@@ -106,7 +105,9 @@ export function useVideoProgress(
   const recordWatchSegment = useCallback((start: number, end: number) => {
     // Only record valid segments (forward progress, minimum 1 second)
     if (end > start && end - start >= 1) {
-      console.log(`📊 Recording segment: ${start.toFixed(1)}s - ${end.toFixed(1)}s`)
+      console.log(
+        `📊 Recording segment: ${start.toFixed(1)}s - ${end.toFixed(1)}s`
+      )
       pendingSegments.current.push({ start, end })
     }
   }, [])
@@ -114,22 +115,16 @@ export function useVideoProgress(
   /**
    * Handle play event - start tracking segment
    */
-  const handlePlay = useCallback(
-    (currentTime: number) => {
-      console.log('▶️ Video playing')
-      isCurrentlyPlaying.current = true
-      currentSegmentStart.current = currentTime
-    },
-    []
-  )
+  const handlePlay = useCallback((currentTime: number) => {
+    isCurrentlyPlaying.current = true
+    currentSegmentStart.current = currentTime
+  }, [])
 
   /**
    * Handle pause event - finish tracking segment
    */
   const handlePause = useCallback(
     (currentTime: number) => {
-      console.log('⏸️ Video paused')
-      
       // Record the segment if valid
       if (
         isCurrentlyPlaying.current &&
@@ -150,7 +145,9 @@ export function useVideoProgress(
    */
   const handleSeek = useCallback(
     (oldTime: number, newTime: number) => {
-      console.log(`⏩ Seeked from ${oldTime.toFixed(1)}s to ${newTime.toFixed(1)}s`)
+      console.log(
+        `⏩ Seeked from ${oldTime.toFixed(1)}s to ${newTime.toFixed(1)}s`
+      )
 
       // If was playing, record the previous segment
       if (
@@ -244,7 +241,7 @@ export function useVideoProgress(
 
         // Get pending segments to send
         const segmentsToSend = [...pendingSegments.current]
-        
+
         // If currently playing, add the current segment
         if (
           isCurrentlyPlaying.current &&
@@ -264,7 +261,8 @@ export function useVideoProgress(
           lessonStatus,
           isModuleCompleted: willCompleteModule,
           // Send watched segments to backend for processing
-          watchedSegments: segmentsToSend.length > 0 ? segmentsToSend : undefined,
+          watchedSegments:
+            segmentsToSend.length > 0 ? segmentsToSend : undefined,
         }
 
         console.log(`📤 Sending ${segmentsToSend.length} segments to backend`)
@@ -427,14 +425,15 @@ export function useVideoProgress(
 
           // ===== ENDED EVENT =====
           player.on('ended', () => {
-            console.log('🏁 Video ended')
-
             // Record final segment
             if (
               isCurrentlyPlaying.current &&
               currentSegmentStart.current !== null
             ) {
-              recordWatchSegment(currentSegmentStart.current, videoDuration.current)
+              recordWatchSegment(
+                currentSegmentStart.current,
+                videoDuration.current
+              )
             }
 
             isCurrentlyPlaying.current = false

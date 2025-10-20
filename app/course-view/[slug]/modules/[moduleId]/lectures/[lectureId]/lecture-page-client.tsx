@@ -56,7 +56,6 @@ export default function LecturePage({
       )
 
       if (!targetModule) {
-        console.log('LecturePage: Module not found, redirecting to first')
         const firstModule = modules[0]
         const firstLesson = firstModule?.lessons[0]
         if (firstLesson) {
@@ -81,9 +80,6 @@ export default function LecturePage({
           handleContentSelect(targetModule.id, targetLesson)
         }
       } else {
-        console.log(
-          'LecturePage: Lesson not found in target module, redirecting'
-        )
         // If lesson not found in the specific module, redirect to first lesson of that module
         const firstLesson = targetModule.lessons[0]
         if (firstLesson) {

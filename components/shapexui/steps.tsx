@@ -17,40 +17,42 @@ const BootcampSteps: React.FC<{ data: BootcampStepsContentSection }> = ({
   }))
 
   return (
-    <div className="py-12 max-w-screen-xl flex flex-col md:flex-row items-center justify-center mx-auto gap-8">
-      <div className="align-top p-2">
-        <h3 className="text-4xl md:text-4xl font-bold tracking-tight mb-4">
-          <span className="text-primary">{data.title}</span>
-        </h3>
-        <p className="text-muted-foreground text-lg">{data.description}</p>
-        {data.btn && (
-          <Link
-            href={data.btn.btnLink || '#'}
-            className="inline-flex items-center justify-center px-6 mt-6 py-3 font-sans text-base font-semibold transition-all duration-200 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900"
-            role="button"
-          >
-            {data.btn.btnLabel}
-            {data.btn.btnIcon && (
-              <DynamicIcon
-                icon={data.btn.btnIcon}
-                className="h-5 w-5 ml-2"
-                width={20}
-                height={20}
-              />
-            )}
-          </Link>
-        )}
-      </div>
+    <section className="w-full px-4 py-12">
+      <div className="max-w-screen-xl container mx-auto flex flex-col md:flex-row items-center justify-center gap-8">
+        <div className="align-top p-2">
+          <h3 className="text-4xl md:text-4xl font-bold tracking-tight mb-4">
+            <span className="text-primary">{data.title}</span>
+          </h3>
+          <p className="text-muted-foreground text-lg">{data.description}</p>
+          {data.btn && (
+            <Link
+              href={data.btn.btnLink || '#'}
+              className="inline-flex items-center justify-center px-6 mt-6 py-3 font-sans text-base font-semibold transition-all duration-200 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900"
+              role="button"
+            >
+              {data.btn.btnLabel}
+              {data.btn.btnIcon && (
+                <DynamicIcon
+                  icon={data.btn.btnIcon}
+                  className="h-5 w-5 ml-2"
+                  width={20}
+                  height={20}
+                />
+              )}
+            </Link>
+          )}
+        </div>
 
-      {/* Lazy-loaded interactive steps component */}
-      <Suspense fallback={<StepsClientSkeleton />}>
-        <StepsLazy
-          secondaryHeading={data.secondaryHeading}
-          secondaryDescription={data.secondaryDescription}
-          steps={steps}
-        />
-      </Suspense>
-    </div>
+        {/* Lazy-loaded interactive steps component */}
+        <Suspense fallback={<StepsClientSkeleton />}>
+          <StepsLazy
+            secondaryHeading={data.secondaryHeading}
+            secondaryDescription={data.secondaryDescription}
+            steps={steps}
+          />
+        </Suspense>
+      </div>
+    </section>
   )
 }
 

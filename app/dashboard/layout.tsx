@@ -47,6 +47,10 @@ const sidebarNavItems = [
     title: 'Reviews',
     href: '/dashboard/reviews',
   },
+  {
+    title: 'Notifications',
+    href: '/dashboard/notifications',
+  },
 ]
 
 export default async function DashboardLayout({

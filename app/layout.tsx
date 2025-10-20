@@ -1,6 +1,6 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import { Hind_Siliguri } from 'next/font/google'
+
 import { ThemeProvider } from '@/components/context/theme-provider'
 import { Navigation } from '@/components/shared/navbar/navigation'
 import { Footer } from '@/components/shared/footer'
@@ -23,12 +23,46 @@ import { getPromotionData } from '@/lib/actions/promotion-actions'
 import { MaintenanceMode } from '@/components/shared/maintenance-mode' // Add this component
 import { setGATrackingId, setFBPixelId } from '@/lib/analytics'
 
-const hindSiliguri = Hind_Siliguri({
-  subsets: ['latin', 'bengali'],
-  weight: ['300', '400', '500', '600', '700'],
-  display: 'swap',
+import localFont from 'next/font/local'
+
+const hindSiliguri = localFont({
+  src: [
+    {
+      path: './fonts/HindSiliguri-Light.ttf',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: './fonts/HindSiliguri-Regular.ttf',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './fonts/HindSiliguri-Medium.ttf',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: './fonts/HindSiliguri-SemiBold.ttf',
+      weight: '600',
+      style: 'normal',
+    },
+    {
+      path: './fonts/HindSiliguri-Bold.ttf',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
   variable: '--font-hind-siliguri',
+  display: 'swap',
 })
+
+// const hindSiliguri = Hind_Siliguri({
+//   subsets: ['latin', 'bengali'],
+//   weight: ['300', '400', '500', '600', '700'],
+//   display: 'swap',
+//   variable: '--font-hind-siliguri',
+// })
 
 export interface StrapiSettingData {
   id: number
@@ -60,6 +94,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const seo = setting?.seo
 
     return {
+      applicationName: 'JavaScript Ninja',
       title: seo?.metaTitle || 'JavaScript Ninja - Learn Web Development',
       description:
         seo?.metaDescription ||
@@ -83,10 +118,20 @@ export async function generateMetadata(): Promise<Metadata> {
         ],
         apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
       },
+      manifest: '/site.webmanifest',
+      appleWebApp: {
+        capable: true,
+        title: seo?.metaTitle || 'JavaScript Ninja - Learn Web Development',
+        statusBarStyle: 'default',
+      },
+      formatDetection: {
+        telephone: false,
+      },
+
       robots: seo?.metaRobots || 'index, follow',
       openGraph: {
         type: 'website',
-        url: seo?.canonicalURL || 'https://javascriptninja.com',
+        url: seo?.canonicalURL || 'https://javascript-ninja.com',
         title: seo?.metaTitle || 'JavaScript Ninja - Learn Web Development',
         description:
           seo?.metaDescription ||
@@ -95,7 +140,7 @@ export async function generateMetadata(): Promise<Metadata> {
           {
             url:
               seo?.structuredData?.provider?.logo?.url ||
-              'https://javascriptninja.com/images/og-default.jpg',
+              'https://javascript-ninja.com/images/og-default.jpg',
             width: 1200,
             height: 630,
             alt: seo?.metaTitle || 'JavaScript Ninja - Learn Web Development',
@@ -110,13 +155,13 @@ export async function generateMetadata(): Promise<Metadata> {
           'Master modern web development with expert-led courses and tutorials.',
         images: [
           seo?.structuredData?.provider?.logo?.url ||
-            'https://javascriptninja.com/images/twitter-default.jpg',
+            'https://javascript-ninja.com/images/twitter-default.jpg',
         ],
       },
       alternates: {
-        canonical: seo?.canonicalURL || 'https://javascriptninja.com',
+        canonical: seo?.canonicalURL || 'https://javascript-ninja.com',
       },
-      metadataBase: new URL('https://javascriptninja.com'),
+      metadataBase: new URL('https://javascript-ninja.com'),
     }
   } catch (e) {
     // fallback if Strapi fails
@@ -129,6 +174,9 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+export const viewport: Viewport = {
+  themeColor: '#FFFFFF',
+}
 const headerMenuSlug = process.env.HEADER_MENU_SLUG || 'header_navigation'
 const footerMenuSlug = process.env.FOOTER_MENU_SLUG || 'footer_navigation'
 

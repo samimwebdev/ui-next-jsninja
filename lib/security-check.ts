@@ -68,7 +68,6 @@ export async function checkUserSecurity(courseSlug: string): Promise<{
 
       // Check for 403 (user blocked) - NOW WORKS IN TRY BLOCK
       if (securityResponse.error.status === 403) {
-        console.log('User access blocked:', securityResponse.error.message)
         return {
           allowed: false,
           message: securityResponse.error.message,
@@ -92,10 +91,6 @@ export async function checkUserSecurity(courseSlug: string): Promise<{
 
     // Success response - user is allowed
     if ('data' in securityResponse && securityResponse.data) {
-      console.log(
-        'User security check passed:',
-        securityResponse.data.accessType
-      )
       return {
         allowed: true,
         message: `Access granted. Type: ${securityResponse.data.accessType}`,

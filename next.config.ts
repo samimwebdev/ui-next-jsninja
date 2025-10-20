@@ -1,4 +1,16 @@
 import { withSentryConfig } from '@sentry/nextjs'
+
+import withPWAInit from '@ducanh2912/next-pwa'
+
+const withPWA = withPWAInit({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  cacheOnFrontEndNav: true,
+  register: true,
+  sw: 'sw.js',
+  reloadOnOnline: true,
+})
+
 const nextConfig = {
   images: {
     unoptimized: true,
@@ -11,13 +23,51 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/sw.js',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self'",
+          },
+        ],
+      },
+    ]
+  },
 }
 
-export default withSentryConfig(nextConfig, {
+const configureNextConfig = withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: 'webdeveloper-bd',
+  org: 'javascript ninja',
 
   project: 'ninja-frontend-production',
 
@@ -45,3 +95,5 @@ export default withSentryConfig(nextConfig, {
   // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
 })
+
+export default withPWA(configureNextConfig)

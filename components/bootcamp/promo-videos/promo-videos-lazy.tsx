@@ -16,7 +16,7 @@ const PromoVideos = dynamic(
 
 // Loading skeleton component that matches the promo videos layout
 const PromoVideosSkeleton = () => (
-  <section className="relative flex flex-col items-center py-16 bg-background text-foreground overflow-hidden">
+  <section className="relative flex flex-col items-center px-4 py-16 bg-background text-foreground overflow-hidden">
     {/* Background Pattern */}
     <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 dark:opacity-10"></div>
 

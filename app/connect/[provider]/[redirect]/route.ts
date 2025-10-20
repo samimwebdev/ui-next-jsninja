@@ -101,7 +101,6 @@ export async function GET(
           Authorization: `Bearer ${res.jwt}`,
         },
       })
-      console.log('New profile created')
     } else {
       console.log('Profile already exists, skipping creation')
     }
