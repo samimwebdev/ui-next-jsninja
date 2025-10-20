@@ -9,6 +9,7 @@ export type LessonProgressPayload = {
   lessonStatus: 'notStarted' | 'inProgress' | 'completed'
   isModuleCompleted: boolean
   // Send watched segments for backend to process
+  timeSpent?: number
   watchedSegments?: Array<{ start: number; end: number }>
 }
 

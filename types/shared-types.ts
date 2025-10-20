@@ -297,9 +297,9 @@ export type User = {
   email: string
   username: string
   confirmed?: boolean
-  blocked: boolean
+  blocked?: boolean
   profile?: Profile
-  enableTotp: boolean
+  enableTotp?: boolean
 } | null
 
 export interface UserWithProfile {

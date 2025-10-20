@@ -71,7 +71,6 @@ export async function strapiFetch<T>(
 
     return res.json()
   } catch (err) {
-    // console.log(err, 'strapi fetch error')
     let message = 'Something went wrong'
 
     if (err instanceof Error) {

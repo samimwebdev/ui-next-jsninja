@@ -54,8 +54,6 @@ export const Navigation = ({
 
       // ✅ Redirect to login page
       router.push('/login')
-
-      console.log('Logout successful')
     } catch (err) {
       console.error('Logout failed:', err)
       // ✅ Even if logout action fails, clear the cache

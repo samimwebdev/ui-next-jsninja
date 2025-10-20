@@ -65,12 +65,6 @@ export function PaymentVerificationTracking({
               },
             }),
           })
-
-          console.log('Payment verification success tracked:', {
-            transactionId,
-            status,
-            courseSlug,
-          })
         } else if (status === 'error') {
           // Track error
           trackPaymentVerificationError(

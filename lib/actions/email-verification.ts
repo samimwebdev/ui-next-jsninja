@@ -63,7 +63,6 @@ export async function resendEmailConfirmation(email: string) {
       }
     }
 
-    console.log('✅ Email confirmation sent successfully:', { email })
     return {
       success: true,
       message: 'Confirmation email sent successfully',
@@ -87,11 +86,6 @@ export async function confirmEmailWithToken(confirmationToken: string) {
       }
     }
 
-    console.log(
-      '🔍 Attempting email confirmation with token:',
-      confirmationToken.substring(0, 8) + '...'
-    )
-
     // ✅ Use direct fetch instead of strapiFetch
     const strapiUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/auth/email-confirmation?confirmation=${confirmationToken}`
 
@@ -103,11 +97,8 @@ export async function confirmEmailWithToken(confirmationToken: string) {
       },
     })
 
-    console.log('📊 Email confirmation response status:', response.status)
-
     // ✅ Success case - status 200 with HTML response
     if (response.status === 200) {
-      console.log('✅ Email confirmed successfully (status 200)')
       return {
         success: true,
         message: 'Email confirmed successfully',

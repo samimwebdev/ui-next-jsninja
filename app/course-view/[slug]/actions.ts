@@ -125,7 +125,6 @@ export async function getQuizSubmission(
       response.error &&
       response.error.status === 404
     ) {
-      console.log('No existing quiz submission found', response.error)
       return null
     }
 
@@ -137,7 +136,7 @@ export async function getQuizSubmission(
     // Fallback - should not reach here normally
     return null
   } catch (error) {
-    console.log('No existing quiz submission found', error)
+    console.error('No existing quiz submission found', error)
     return null
   }
 }
@@ -199,13 +198,13 @@ export async function getAssignmentSubmission(
     })
 
     if ('error' in response && response.error) {
-      console.log('No existing assignment submission found', response.error)
+      console.error('No existing assignment submission found', response.error)
       return null
     }
 
     return response.data as ExistingAssignmentSubmission
   } catch (error) {
-    console.log('No existing assignment submission found', error)
+    console.error('No existing assignment submission found', error)
     return null
   }
 }

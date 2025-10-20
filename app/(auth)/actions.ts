@@ -841,15 +841,13 @@ export async function disableTotpAction() {
       }
     }
 
-    const res = await strapiFetch(`/api/auth/disable-totp`, {
+    await strapiFetch(`/api/auth/disable-totp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
     })
-
-    console.log('TOTP disable successful:', res)
 
     return {
       message: 'Two-factor authentication has been successfully disabled.',

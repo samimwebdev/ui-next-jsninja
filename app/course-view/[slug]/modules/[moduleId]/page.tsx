@@ -30,9 +30,6 @@ export default function ModulePage({
             `/course-view/${resolvedParams.slug}/modules/${resolvedParams.moduleId}/lectures/${firstLesson.documentId}`
           )
         } else {
-          console.log(
-            'ModulePage: Module not found or has no lessons, redirecting to course'
-          )
           // If module not found or has no lessons, redirect to main course page
           router.replace(`/course-view/${resolvedParams.slug}`)
         }

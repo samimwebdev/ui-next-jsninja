@@ -127,7 +127,7 @@ const Login = () => {
         <div className="relative z-10 container px-4 sm:px-6 lg:px-8 py-12 max-w-screen-xl mx-auto">
           <div className="grid items-center lg:grid-cols-2 gap-8 lg:gap-12 min-h-[calc(100vh-6rem)]">
             {/* Left Side - Welcome Content */}
-            <div className="relative order-2 lg:order-1">
+            <div className="relative  lg:order-1">
               <div className="absolute inset-0 -m-8 bg-gradient-to-r from-white/80 via-white/60 to-transparent dark:from-background/80 dark:via-background/60 dark:to-transparent backdrop-blur-sm rounded-3xl" />
 
               <div className="relative z-10">

@@ -34,7 +34,6 @@ export default function EmailConfirmedPage() {
       hasProcessedRef.current ||
       confirmationProcessedRef.current === confirmation
     ) {
-      console.log('🔄 Already processed this confirmation token, skipping...')
       return
     }
 
@@ -44,10 +43,6 @@ export default function EmailConfirmedPage() {
 
     startTransition(async () => {
       try {
-        console.log(
-          '🚀 Processing email confirmation...',
-          confirmation.substring(0, 8) + '...'
-        )
         setStatus('checking')
 
         // ✅ Try the confirmation process with the token

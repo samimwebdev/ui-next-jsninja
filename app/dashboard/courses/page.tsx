@@ -28,7 +28,7 @@ function CourseCardSkeleton() {
     <Card className="h-full">
       <CardHeader>
         <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full mt-2" />
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -38,7 +38,7 @@ function CourseCardSkeleton() {
           </div>
           <Skeleton className="h-2 w-full" />
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-2">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-4 w-full" />
           ))}
@@ -53,8 +53,8 @@ function ErrorMessage({ message }: { message: string }) {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-2 text-destructive">
-        <AlertTriangle className="h-5 w-5" />
-        <p>Error loading courses: {message}</p>
+        <AlertTriangle className="h-5 w-5 flex-shrink-0" />
+        <p className="text-sm">{message}</p>
       </div>
     </Card>
   )
@@ -68,55 +68,80 @@ function CourseCard({ course }: { course: EnrolledCourse }) {
         course.isExpired,
         course.progress.lastAccessedLesson
       )}
+      className="block h-full"
     >
-      <Card className="transition-colors hover:bg-muted/50 h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            {course.title}
-            <Badge variant={getLevelBadgeVariant(course.level)}>
-              {course.level}
-            </Badge>
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">Goal: {course.goal}</p>
+      <Card className="transition-all hover:bg-muted/50 hover:shadow-md h-full">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col gap-2">
+            <CardTitle className="text-base sm:text-lg line-clamp-2">
+              {course.title}
+            </CardTitle>
+            <div className="flex items-center justify-between gap-2">
+              <Badge
+                variant={getLevelBadgeVariant(course.level)}
+                className="text-xs"
+              >
+                {course.level}
+              </Badge>
+            </div>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mt-2">
+            Goal: {course.goal}
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Progress Section */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span>{course.progress.percentage}%</span>
+            <div className="flex justify-between text-xs sm:text-sm">
+              <span className="font-medium">Progress</span>
+              <span className="font-semibold">
+                {course.progress.percentage}%
+              </span>
             </div>
-            <Progress value={course.progress.percentage} />
+            <Progress value={course.progress.percentage} className="h-2" />
           </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center gap-1">
-              <GraduationCap className="h-4 w-4" />
+
+          {/* Stats Grid - Stacked on mobile, grid on larger screens */}
+          <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <GraduationCap className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <span>
                 {course.progress.completedCount}/{course.progress.totalLessons}{' '}
                 lessons
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Clock className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <span>{course.duration}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <span>{course.totalStudents} students</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Last Accessed: {formatDate(course.progress.lastAccessDate)}
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Calendar className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+              <span className="truncate">
+                {formatDate(course.progress.lastAccessDate)}
               </span>
             </div>
           </div>
+
+          {/* Next Lesson Badge */}
           <div>
-            <Badge variant="secondary">
+            <Badge
+              variant="secondary"
+              className="text-xs w-full justify-center sm:w-auto"
+            >
               Next: {getNextLessonTitle(course.progress.lastAccessedLesson)}
             </Badge>
           </div>
+
+          {/* Expiry Warning */}
           {course.isExpired && (
-            <Badge variant="destructive" className="w-full justify-center">
+            <Badge
+              variant="destructive"
+              className="w-full justify-center text-xs"
+            >
               Expired on {formatDate(course.expiryDate)}
             </Badge>
           )}
@@ -138,52 +163,79 @@ function BootcampCard({ bootcamp }: { bootcamp: EnrolledBootcamp }) {
         bootcamp.isExpired,
         bootcamp.progress.lastAccessedLesson
       )}
+      className="block h-full"
     >
-      <Card className="transition-colors hover:bg-muted/50 h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            {bootcamp.title}
-            <Badge variant={getLevelBadgeVariant(bootcamp.level)}>
-              {bootcamp.level}
-            </Badge>
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">Goal: {bootcamp.goal}</p>
+      <Card className="transition-all hover:bg-muted/50 hover:shadow-md h-full">
+        <CardHeader className="pb-3">
+          <div className="flex flex-col gap-2">
+            <CardTitle className="text-base sm:text-lg line-clamp-2">
+              {bootcamp.title}
+            </CardTitle>
+            <div className="flex items-center justify-between gap-2">
+              <Badge
+                variant={getLevelBadgeVariant(bootcamp.level)}
+                className="text-xs"
+              >
+                {bootcamp.level}
+              </Badge>
+            </div>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mt-2">
+            Goal: {bootcamp.goal}
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Progress Section */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span>{bootcamp.progress.percentage}%</span>
+            <div className="flex justify-between text-xs sm:text-sm">
+              <span className="font-medium">Progress</span>
+              <span className="font-semibold">
+                {bootcamp.progress.percentage}%
+              </span>
             </div>
-            <Progress value={bootcamp.progress.percentage} />
+            <Progress value={bootcamp.progress.percentage} className="h-2" />
           </div>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center gap-1">
-              <GraduationCap className="h-4 w-4" />
+
+          {/* Stats Grid - Stacked on mobile, grid on larger screens */}
+          <div className="space-y-2 sm:grid sm:grid-cols-2 sm:gap-2 sm:space-y-0">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <GraduationCap className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <span>
                 {completedModules}/{estimatedModules} modules
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Clock className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <span>{Math.ceil(parseInt(bootcamp.duration) / 7)} weeks</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Users className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               <span>{bootcamp.totalStudents} students</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>Started: {formatDate(bootcamp.startDate)}</span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Calendar className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
+              <span className="truncate">
+                Started: {formatDate(bootcamp.startDate)}
+              </span>
             </div>
           </div>
+
+          {/* Next Lesson Badge */}
           <div>
-            <Badge variant="secondary">
+            <Badge
+              variant="secondary"
+              className="text-xs w-full justify-center sm:w-auto"
+            >
               Next: {getNextLessonTitle(bootcamp.progress.lastAccessedLesson)}
             </Badge>
           </div>
+
+          {/* Expiry Warning */}
           {bootcamp.isExpired && (
-            <Badge variant="destructive" className="w-full justify-center">
+            <Badge
+              variant="destructive"
+              className="w-full justify-center text-xs"
+            >
               Expired on {formatDate(bootcamp.expiryDate)}
             </Badge>
           )}
@@ -229,17 +281,17 @@ export default function CoursesPage() {
       </div>
 
       <Tabs defaultValue="courses" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="courses">
+        <TabsList className="w-full sm:w-auto">
+          <TabsTrigger value="courses" className="flex-1 sm:flex-initial">
             Courses {data && `(${data?.data?.courses.length})`}
           </TabsTrigger>
-          <TabsTrigger value="bootcamps">
+          <TabsTrigger value="bootcamps" className="flex-1 sm:flex-initial">
             Bootcamps {data && `(${data?.data?.bootcamps.length})`}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="courses">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
             {isLoading || !data ? (
               [...Array(4)].map((_, i) => <CourseCardSkeleton key={i} />)
             ) : data?.data.courses.length === 0 ? (
@@ -249,7 +301,7 @@ export default function CoursesPage() {
                   <h3 className="text-lg font-medium mb-2">
                     No courses enrolled
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Start your learning journey by enrolling in a course.
                   </p>
                 </Card>
@@ -263,7 +315,7 @@ export default function CoursesPage() {
         </TabsContent>
 
         <TabsContent value="bootcamps">
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
             {isLoading ? (
               [...Array(2)].map((_, i) => <CourseCardSkeleton key={i} />)
             ) : data?.data.bootcamps.length === 0 ? (
@@ -273,7 +325,7 @@ export default function CoursesPage() {
                   <h3 className="text-lg font-medium mb-2">
                     No bootcamps enrolled
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     Join a bootcamp for intensive, structured learning.
                   </p>
                 </Card>

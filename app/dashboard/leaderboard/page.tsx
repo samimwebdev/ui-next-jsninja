@@ -161,11 +161,11 @@ export default function LeaderboardPage() {
       return failureCount < 2
     },
   })
-  console.log('courses:', courses, {
-    selectedCourseId,
-    coursesLoading,
-    coursesError,
-  })
+  // console.log('courses:', courses, {
+  //   selectedCourseId,
+  //   coursesLoading,
+  //   coursesError,
+  // })
   // Show courses loading state
   if (!courses.length && coursesLoading) {
     return (
