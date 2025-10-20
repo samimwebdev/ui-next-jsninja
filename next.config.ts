@@ -67,7 +67,7 @@ const configureNextConfig = withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: 'javascript ninja',
+  org: 'webdeveloper-bd',
 
   project: 'ninja-frontend-production',
 
