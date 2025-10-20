@@ -31,6 +31,7 @@ const authRoutes = [
   '/register',
   '/forgot-password',
   '/reset-password',
+  '/verify-otp',
 ]
 
 /**

@@ -155,7 +155,7 @@ export type FormState = {
   errors: Record<string, string[]>
   success: boolean
   requiresOTP?: boolean
-  userId?: number
+  userId?: string
   userInfo?: {
     email: string
     twoFactorEnabled: boolean
@@ -319,6 +319,7 @@ export async function loginAction(
       refreshToken: string
       user: {
         id: number
+        documentId: string
         username: string
         email: string
         enableTotp: boolean | null
@@ -329,20 +330,21 @@ export async function loginAction(
     })
 
     const cookieStore = await cookies()
+    console.log({ res })
 
     // Store temporary tokens for OTP verification
     cookieStore.set('temp_jwt', res.jwt, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 300, // 5 minutes
+      maxAge: 600, // 10 minutes
     })
 
     cookieStore.set('temp_refresh', res.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 300, // 5 minutes
+      maxAge: 600, // 10 minutes
     })
 
     // OTP is ALWAYS required after login
@@ -353,7 +355,7 @@ export async function loginAction(
       errors: {},
       success: false,
       requiresOTP: true,
-      userId: res.user.id,
+      userId: res.user.documentId,
       userInfo: {
         email: res.user.email,
         twoFactorEnabled: !!res.user.enableTotp,
@@ -419,7 +421,7 @@ export async function verifyOTPAction(
 
     if (!userId || !email) {
       return {
-        message: 'Session expired. Please login again.',
+        message: 'Session expired. Please login again. Redirecting to login...',
         errors: {},
         success: false,
       }
@@ -872,7 +874,8 @@ export async function resendOTPAction(): Promise<FormState> {
 
     if (!tempToken) {
       return {
-        message: 'Session expired. Please log in again.',
+        message:
+          'Session expired. Please log in again. Redirecting to login...',
         errors: { server: ['Session expired'] },
         success: false,
       }
@@ -896,8 +899,6 @@ export async function resendOTPAction(): Promise<FormState> {
       success: res.success,
     }
   } catch (error) {
-    console.error('Resend OTP error:', error)
-
     return {
       message: 'Failed to resend OTP. Please try again.',
       errors: error instanceof Error ? { server: [error.message] } : {},

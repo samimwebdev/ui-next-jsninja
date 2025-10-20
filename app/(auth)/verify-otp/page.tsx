@@ -36,7 +36,6 @@ const VerifyOTP = () => {
     success: false,
   } as ActionState)
 
-  // Only initialize resend action for email-based OTP
   const [resendState, resendAction] = useActionState(resendOTPAction, {
     message: '',
     errors: {},
@@ -50,14 +49,13 @@ const VerifyOTP = () => {
   const email = searchParams.get('email')
   const twoFactorEnabled = searchParams.get('twoFactor') === 'true'
 
-  // Resend OTP states - only for email OTP
   const [resendTimer, setResendTimer] = useState(60)
   const [canResend, setCanResend] = useState(false)
   const [resendAttempts, setResendAttempts] = useState(0)
   const [isResending, setIsResending] = useState(false)
 
-  const MAX_RESEND_ATTEMPTS = 3
-  const RESEND_COOLDOWN = 60
+  const MAX_RESEND_ATTEMPTS = 2
+  const RESEND_COOLDOWN = 90
 
   const {
     register,
@@ -66,6 +64,7 @@ const VerifyOTP = () => {
     clearErrors,
     setError,
     watch,
+    setValue,
   } = useForm<FormData>({
     resolver: yupResolver(otpSchema),
     mode: 'onBlur',
@@ -73,6 +72,26 @@ const VerifyOTP = () => {
 
   const tokenValue = watch('token')
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  // ✅ Redirect to login if resend OTP fails
+  useEffect(() => {
+    if (resendState && !resendState.success && resendState.message) {
+      // Check if the error is session-related
+      const isSessionError =
+        resendState.message.includes('Session expired') ||
+        resendState.message.includes('expired') ||
+        resendState.errors?.server?.some((err) => err.includes('expired'))
+
+      if (isSessionError) {
+        // Show message briefly before redirect
+        const timer = setTimeout(() => {
+          router.push('/login')
+        }, 2000) // 2 second delay to show the message
+
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [resendState, router])
 
   // Timer countdown effect - only for email OTP
   useEffect(() => {
@@ -239,25 +258,39 @@ const VerifyOTP = () => {
     }
   }
 
-  // Handle OTP input changes
+  // ✅ Enhanced paste handler
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pastedData = e.clipboardData.getData('text/plain').trim()
+
+    // Extract only digits from pasted content
+    const digits = pastedData.replace(/\D/g, '').slice(0, 6)
+
+    if (digits.length > 0) {
+      // Update form value
+      setValue('token', digits.padEnd(6, ''))
+
+      // Focus on the last filled input or the first empty one
+      const nextIndex = Math.min(digits.length, 5)
+      inputRefs.current[nextIndex]?.focus()
+    }
+  }
+
+  // ✅ Enhanced OTP input handler
   const handleOTPChange = (index: number, value: string) => {
+    // Only allow digits
     if (value.length <= 1 && /^\d*$/.test(value)) {
-      const newToken = tokenValue
-        ? tokenValue.split('')
-        : ['', '', '', '', '', '']
-      newToken[index] = value
+      const currentToken = tokenValue || ''
+      const tokenArray = currentToken.padEnd(6, '').split('')
+      tokenArray[index] = value
 
-      const tokenString = newToken.join('')
+      const newToken = tokenArray.join('')
+      setValue('token', newToken)
 
-      // Move to next input if value entered
+      // Auto-focus next input if value entered
       if (value && index < 5) {
         inputRefs.current[index + 1]?.focus()
       }
-
-      // Update form value
-      register('token').onChange({
-        target: { value: tokenString, name: 'token' },
-      })
     }
   }
 
@@ -395,7 +428,7 @@ const VerifyOTP = () => {
                 Verification Code
               </Label>
 
-              {/* OTP Input Fields */}
+              {/* ✅ OTP Input Fields with paste support */}
               <div className="flex gap-3 justify-center mb-4">
                 {[0, 1, 2, 3, 4, 5].map((index) => (
                   <Input
@@ -410,6 +443,7 @@ const VerifyOTP = () => {
                     value={tokenValue?.[index] || ''}
                     onChange={(e) => handleOTPChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
+                    onPaste={handlePaste} // ✅ Add paste handler to all inputs
                     autoComplete="off"
                   />
                 ))}
@@ -460,12 +494,12 @@ const VerifyOTP = () => {
                     return (
                       <div className="text-center">
                         <p className="text-red-600 dark:text-red-400 text-sm font-medium">
-                          Too many attempts
+                          Too many attempts. Please try again later.
                         </p>
-                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">
+                        {/* <p className="text-xs text-slate-500 dark:text-muted-foreground mt-1">
                           Please wait {blockedMinutes} minutes before trying
                           again
-                        </p>
+                        </p> */}
                       </div>
                     )
                   }

@@ -60,7 +60,6 @@ export default async function DashboardLayout({
 }) {
   // Check authentication
   const user = await getUser()
-  console.log({ user })
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
