@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { EnrolledUser } from '@/types/enrolled-users'
-import { getUserAvatarUrl } from '@/lib/actions/enrolled-users'
+import { getUserAvatarUrl } from '@/lib/utils/get-user-avatar-url'
 
 interface AnimatedAvatarsProps {
   users: EnrolledUser[] // Replace avatarCount with actual users

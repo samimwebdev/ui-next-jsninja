@@ -79,11 +79,6 @@ const withPWA = withPWAInit({
 })
 
 const nextConfig: NextConfig = {
-  experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    optimizeCss: true,
-  },
-
   images: {
     unoptimized: true,
     remotePatterns: [
