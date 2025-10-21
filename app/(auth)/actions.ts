@@ -404,7 +404,16 @@ export async function verifyOTPAction(
 
     const cookieStore = await cookies()
     const tempToken = cookieStore.get('temp_jwt')?.value
-    const tempRefresh = cookieStore.get('temp_refresh')?.value
+
+    const tempRefresh =
+      cookieStore.get('temp_refresh')?.value ||
+      cookieStore.get('refreshToken')?.value
+
+    console.log(
+      { cookies, tempToken, tempRefresh },
+      cookieStore.get('refreshToken')?.value,
+      'cookies in verifyOTPAction'
+    )
 
     if (!tempToken || !tempRefresh) {
       return {
@@ -451,6 +460,8 @@ export async function verifyOTPAction(
         type: verificationType,
       }),
     })
+
+    console.log({ res }, 'OTP verification response')
 
     // Delete temporary cookies
     cookieStore.delete('temp_jwt')
