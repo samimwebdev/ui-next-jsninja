@@ -76,7 +76,7 @@ export function ProjectCard({
         </DialogHeader>
         <div className="grid gap-4">
           <Image
-            src={image?.formats?.medium?.url || '/images/placeholder.svg'}
+            src={image?.url || '/images/placeholder.svg'}
             alt={title}
             width={600}
             height={338}

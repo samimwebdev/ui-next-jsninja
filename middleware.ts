@@ -62,6 +62,7 @@ async function refreshAccessToken(
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ refreshToken }),
         cache: 'no-store',
       }
@@ -84,7 +85,17 @@ export async function middleware(request: NextRequest) {
 
   // Get cookies
   const tokenCookie = request.cookies.get(COOKIE)
-  const refreshCookie = request.cookies.get(REFRESH_COOKIE)
+
+  const refreshCookie =
+    request.cookies.get(REFRESH_COOKIE) || request.cookies.get('refreshToken')
+
+  console.log(
+    '[Middleware] Cookies:',
+    tokenCookie,
+    refreshCookie,
+    'refreshToken cookie value',
+    request.cookies.get('refreshToken')
+  )
 
   let token = tokenCookie?.value
   const refreshToken = refreshCookie?.value

@@ -349,7 +349,7 @@ const Login = () => {
                 {/* Footer Links */}
                 <div className="mt-6 space-y-4 text-center">
                   <Link
-                    href="/auth/forgot-password"
+                    href="/forgot-password"
                     className="text-sm text-ninja-gold-light dark:text-ninja-gold-dark hover:text-ninja-orange transition-colors font-medium"
                   >
                     Forgot your password?
@@ -357,7 +357,7 @@ const Login = () => {
                   <p className="text-sm text-slate-600 dark:text-muted-foreground">
                     Don&apos;t have an account?{' '}
                     <Link
-                      href="/auth/register"
+                      href="/register"
                       className="text-ninja-gold-light dark:text-ninja-gold-dark hover:text-ninja-orange transition-colors font-medium"
                     >
                       Create account
