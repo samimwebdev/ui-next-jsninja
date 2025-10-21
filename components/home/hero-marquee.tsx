@@ -17,9 +17,8 @@ const CourseCard: React.FC<CourseBase> = ({ title, level, featureImage }) => {
             '/images/placeholder.png'
           }
           alt={title}
-          layout="fill"
-          objectFit="cover"
-          className="transition-all duration-300 hover:opacity-90"
+          fill
+          className="object-cover transition-all duration-300 hover:opacity-90"
         />
       </div>
       <div className="p-4">

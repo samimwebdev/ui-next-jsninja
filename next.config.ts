@@ -1,6 +1,6 @@
 import { withSentryConfig } from '@sentry/nextjs'
-
 import withPWAInit from '@ducanh2912/next-pwa'
+import type { NextConfig } from 'next'
 
 const withPWA = withPWAInit({
   dest: 'public',
@@ -9,15 +9,97 @@ const withPWA = withPWAInit({
   register: true,
   sw: 'sw.js',
   reloadOnOnline: true,
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'cloudinary-images',
+          expiration: {
+            maxEntries: 100,
+            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'google-fonts-stylesheets',
+        },
+      },
+      {
+        urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'google-fonts-webfonts',
+          expiration: {
+            maxEntries: 30,
+            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+          },
+        },
+      },
+    ],
+  },
 })
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
-    domains: ['images.unsplash.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fonts.googleapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fonts.gstatic.com',
+      },
+      // Video thumbnails
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.gumlet.io',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.gumlet.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.b-cdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'vz-*.b-cdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.vimeocdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'f.vimeocdn.com',
+      },
+    ],
   },
   typescript: {
-    // ❌ WARNING: this ignores *all* TS errors
     ignoreBuildErrors: true,
   },
   eslint: {
@@ -29,12 +111,29 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           {
+            key: 'Content-Security-Policy',
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel-scripts.com https://va.vercel-scripts.com https://www.youtube.com https://player.vimeo.com https://play.gumlet.io;
+              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+              img-src 'self' data: blob: https: https://*.cloudinary.com https://images.unsplash.com https://i.ytimg.com https://img.youtube.com https://*.gumlet.io https://*.gumlet.com https://*.b-cdn.net https://i.vimeocdn.com https://f.vimeocdn.com;
+              font-src 'self' data: https://fonts.gstatic.com;
+              connect-src 'self' https://*.cloudinary.com https://fonts.googleapis.com https://fonts.gstatic.com https://vercel.live https://va.vercel-scripts.com https://*.pusher.com wss://*.pusher.com https://*.sentry.io https://*.gumlet.io https://*.gumlet.com https://play.gumlet.io https://*.b-cdn.net https://www.youtube.com https://player.vimeo.com;
+              frame-src 'self' https://vercel.live https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://play.gumlet.io https://iframe.mediadelivery.net https://video.bunnycdn.com;
+              media-src 'self' https://*.gumlet.io https://*.gumlet.com https://play.gumlet.io https://*.b-cdn.net https://www.youtube.com https://player.vimeo.com https://iframe.mediadelivery.net https://video.bunnycdn.com blob:;
+              worker-src 'self' blob:;
+              manifest-src 'self';
+            `
+              .replace(/\s+/g, ' ')
+              .trim(),
+          },
+          {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'Referrer-Policy',
@@ -54,8 +153,27 @@ const nextConfig = {
             value: 'no-cache, no-store, must-revalidate',
           },
           {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self'",
+            key: 'Service-Worker-Allowed',
+            value: '/',
+          },
+        ],
+      },
+      {
+        source: '/worker-:hash.js',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
+          },
+        ],
+      },
+      // ✅ Add specific header for Vercel Insights script
+      {
+        source: '/_vercel/insights/:path*',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/javascript; charset=utf-8',
           },
         ],
       },
@@ -64,35 +182,12 @@ const nextConfig = {
 }
 
 const configureNextConfig = withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://www.npmjs.com/package/@sentry/webpack-plugin#options
-
   org: 'webdeveloper-bd',
-
   project: 'ninja-frontend-production',
-
-  // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
   widenClientFileUpload: true,
-
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
   tunnelRoute: '/monitoring',
-
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
-
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
 })
 
