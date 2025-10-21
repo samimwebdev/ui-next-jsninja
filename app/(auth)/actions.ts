@@ -407,11 +407,11 @@ export async function verifyOTPAction(
 
     const tempRefresh =
       cookieStore.get('temp_refresh')?.value ||
-      cookieStore.get('refreshToken')?.value
+      cookieStore.get('strapi_up_refresh')?.value
 
     console.log(
       { cookies, tempToken, tempRefresh },
-      cookieStore.get('refreshToken')?.value,
+      cookieStore.get('strapi_up_refresh')?.value,
       'cookies in verifyOTPAction'
     )
 

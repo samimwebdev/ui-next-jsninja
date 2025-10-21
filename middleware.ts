@@ -87,15 +87,8 @@ export async function middleware(request: NextRequest) {
   const tokenCookie = request.cookies.get(COOKIE)
 
   const refreshCookie =
-    request.cookies.get(REFRESH_COOKIE) || request.cookies.get('refreshToken')
-
-  console.log(
-    '[Middleware] Cookies:',
-    tokenCookie,
-    refreshCookie,
-    'refreshToken cookie value',
-    request.cookies.get('refreshToken')
-  )
+    request.cookies.get(REFRESH_COOKIE) ||
+    request.cookies.get('strapi_up_refresh')
 
   let token = tokenCookie?.value
   const refreshToken = refreshCookie?.value
