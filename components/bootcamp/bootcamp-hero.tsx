@@ -12,10 +12,13 @@ import { AnimatedAvatars } from '../shared/animated-avatars'
 import { CourseType } from '@/types/checkout-types'
 import { Suspense } from 'react'
 import { VideoPlayerSkeleton } from '../shared/video-player-lazy'
+import { EnrolledUsersResponse } from '@/types/enrolled-users'
 
 interface BootcampHeroProps {
   data: HeroLayoutContentSection
+  enrolledUsersData: EnrolledUsersResponse
   assessmentData: AssessmentQuiz | null
+  totalStudents: number
   courseInfo: {
     title: string
     isRegistrationOpen: boolean
@@ -29,6 +32,8 @@ export const BootcampHero = ({
   data,
   assessmentData,
   courseInfo,
+  enrolledUsersData,
+  totalStudents,
 }: BootcampHeroProps) => {
   const title = data?.title || 'Javascript Bootcamp'
   const description = data?.shortDescription || 'Learn to code from scratch'
@@ -82,8 +87,10 @@ export const BootcampHero = ({
           <AnimatedSection className="pt-8 border-white/10">
             <div className="flex items-center gap-4">
               <AnimatedAvatars
-                avatarCount={4}
-                totalUsers={400}
+                users={enrolledUsersData?.data || []}
+                totalUsers={
+                  totalStudents || enrolledUsersData?.data.length || 0
+                }
                 avatarSize="sm"
                 message="who enrolled in this bootcamp"
               />

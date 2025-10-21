@@ -18,7 +18,41 @@ const withPWA = withPWAInit({
           cacheName: 'cloudinary-images',
           expiration: {
             maxEntries: 100,
-            maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+            maxAgeSeconds: 30 * 24 * 60 * 60,
+          },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/backend\.javascript-ninja\.com\/.*/i,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'api-cache',
+          networkTimeoutSeconds: 10,
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 5 * 60,
+          },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/i\.pravatar\.cc\/.*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'avatar-images',
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+          },
+        },
+      },
+      {
+        urlPattern: /^https:\/\/ui-avatars\.com\/.*/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'ui-avatar-images',
+          expiration: {
+            maxEntries: 50,
+            maxAgeSeconds: 7 * 24 * 60 * 60,
           },
         },
       },
@@ -36,7 +70,7 @@ const withPWA = withPWAInit({
           cacheName: 'google-fonts-webfonts',
           expiration: {
             maxEntries: 30,
-            maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+            maxAgeSeconds: 365 * 24 * 60 * 60,
           },
         },
       },
@@ -45,6 +79,11 @@ const withPWA = withPWAInit({
 })
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizeCss: true,
+  },
+
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -64,7 +103,6 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'fonts.gstatic.com',
       },
-      // Video thumbnails
       {
         protocol: 'https',
         hostname: 'i.ytimg.com',
@@ -87,24 +125,35 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'vz-*.b-cdn.net',
-      },
-      {
-        protocol: 'https',
         hostname: 'i.vimeocdn.com',
       },
       {
         protocol: 'https',
         hostname: 'f.vimeocdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ui-avatars.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+      },
     ],
   },
+
   typescript: {
     ignoreBuildErrors: true,
   },
+
   eslint: {
     ignoreDuringBuilds: true,
   },
+
   async headers() {
     return [
       {
@@ -114,13 +163,13 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel-scripts.com https://va.vercel-scripts.com https://www.youtube.com https://player.vimeo.com https://play.gumlet.io;
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.pusher.com https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com https://connect.facebook.net https://*.facebook.com https://vercel.live https://*.vercel-scripts.com https://va.vercel-scripts.com https://www.youtube.com https://player.vimeo.com https://play.gumlet.io;
               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-              img-src 'self' data: blob: https: https://*.cloudinary.com https://images.unsplash.com https://i.ytimg.com https://img.youtube.com https://*.gumlet.io https://*.gumlet.com https://*.b-cdn.net https://i.vimeocdn.com https://f.vimeocdn.com;
+              img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://*.facebook.com https://i.pravatar.cc https://ui-avatars.com https://avatars.githubusercontent.com;
               font-src 'self' data: https://fonts.gstatic.com;
-              connect-src 'self' https://*.cloudinary.com https://fonts.googleapis.com https://fonts.gstatic.com https://vercel.live https://va.vercel-scripts.com https://*.pusher.com wss://*.pusher.com https://*.sentry.io https://*.gumlet.io https://*.gumlet.com https://play.gumlet.io https://*.b-cdn.net https://www.youtube.com https://player.vimeo.com;
-              frame-src 'self' https://vercel.live https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://play.gumlet.io https://iframe.mediadelivery.net https://video.bunnycdn.com;
-              media-src 'self' https://*.gumlet.io https://*.gumlet.com https://play.gumlet.io https://*.b-cdn.net https://www.youtube.com https://player.vimeo.com https://iframe.mediadelivery.net https://video.bunnycdn.com blob:;
+              connect-src 'self' http://localhost:1337 https://backend.javascript-ninja.com https://*.cloudinary.com https://fonts.googleapis.com https://fonts.gstatic.com https://ui-avatars.com https://i.pravatar.cc https://sockjs-mt1.pusher.com https://*.pusher.com wss://*.pusher.com https://www.google-analytics.com https://www.googletagmanager.com https://analytics.google.com https://stats.g.doubleclick.net https://www.facebook.com https://*.facebook.com https://*.facebook.net wss: https:;
+              frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://play.gumlet.io https://iframe.mediadelivery.net https://video.bunnycdn.com https://www.facebook.com https://*.facebook.com;
+              media-src 'self' https: blob:;
               worker-src 'self' blob:;
               manifest-src 'self';
             `
@@ -130,10 +179,6 @@ const nextConfig: NextConfig = {
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
           },
           {
             key: 'Referrer-Policy',
@@ -155,25 +200,6 @@ const nextConfig: NextConfig = {
           {
             key: 'Service-Worker-Allowed',
             value: '/',
-          },
-        ],
-      },
-      {
-        source: '/worker-:hash.js',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'application/javascript; charset=utf-8',
-          },
-        ],
-      },
-      // ✅ Add specific header for Vercel Insights script
-      {
-        source: '/_vercel/insights/:path*',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'application/javascript; charset=utf-8',
           },
         ],
       },

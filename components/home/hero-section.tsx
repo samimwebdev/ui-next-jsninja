@@ -7,31 +7,35 @@ import { AnimatedAvatars } from '../shared/animated-avatars'
 import { CTAButtons } from '../shared/cta-buttons'
 import { useRouter } from 'next/navigation'
 import { useVideo } from '../context/video-provider'
+import { EnrolledUser } from '@/types/enrolled-users'
 
 interface HeroSectionProps {
   data: HeroSectionData
+  enrolledUsers: EnrolledUser[] // Add enrolled users prop
 }
 
-export function HeroSection({ data: heroSectionData }: HeroSectionProps) {
+export function HeroSection({
+  data: heroSectionData,
+  enrolledUsers,
+}: HeroSectionProps) {
   const router = useRouter()
   const { openVideo } = useVideo()
-  // Ensure courses is always an array - processed on server
+
+  // Ensure courses is always an array
   const courses =
     Array.isArray(heroSectionData.courses) || heroSectionData.courses === null
       ? heroSectionData.courses
       : [heroSectionData.courses]
 
-  // Calculate total students safely - processed on server
-  const totalStudents =
-    courses?.reduce(
-      (total, course) => total + (course.totalStudents || 0),
-      0
-    ) || 10000
+  // Calculate total students from course Data or fallback to Enrolled Users data
+  const totalStudents = courses?.reduce(
+    (total, course) => total + (course.totalStudents || 0),
+    0
+  )
 
   return (
     <div className="flex items-center justify-center">
       <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
-        {/* Server-rendered content */}
         <div>
           <Badge className="bg-gradient-to-br via-70% from-primary via-muted/30 to-primary rounded-full py-1 border-none">
             {heroSectionData.shortLabel}
@@ -45,16 +49,8 @@ export function HeroSection({ data: heroSectionData }: HeroSectionProps) {
             {heroSectionData.shortDescription}
           </p>
 
-          {/* Client component for interactive buttons */}
-
-          {/* <HeroCTA
-            primaryBtnLink={'/courses'}
-            videoUrl={heroSectionData.promoVideo}
-          /> */}
-
           <CTAButtons
             handleClick={() => {
-              // Handle primary button click
               router.push('/courses')
             }}
             primaryLabel="Browse Courses"
@@ -66,17 +62,17 @@ export function HeroSection({ data: heroSectionData }: HeroSectionProps) {
             className="mt-8"
           />
 
-          {/* Client component for animated avatars */}
+          {/* Pass enrolled users to AnimatedAvatars */}
           <div className="pt-4">
             <AnimatedAvatars
+              users={enrolledUsers}
               totalUsers={totalStudents}
-              avatarCount={4}
+              maxAvatars={4}
               avatarSize="sm"
             />
           </div>
         </div>
 
-        {/* Client component for marquee */}
         <HeroMarquee data={courses} />
       </div>
     </div>

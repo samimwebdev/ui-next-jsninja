@@ -16,6 +16,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import GitHubAuthButton from '@/components/shared/github-button'
 import { AnimatedAvatars } from '@/components/shared/animated-avatars'
 
+import { getEnrolledUsers } from '@/lib/actions/enrolled-users'
+import { EnrolledUser } from '@/types/enrolled-users'
+
 type FormData = {
   identifier: string
   password: string
@@ -31,6 +34,8 @@ const Login = () => {
     userId: undefined,
     userInfo: undefined,
   } as FormState) // Use FormState instead of ActionState
+
+  const [enrolledUsers, setEnrolledUsers] = React.useState<EnrolledUser[]>([])
 
   const queryClient = useQueryClient()
 
@@ -118,6 +123,16 @@ const Login = () => {
     state.userInfo,
   ])
 
+  //get Enrolled users for animated avatars
+
+  useEffect(() => {
+    const fetchEnrolledUsers = async () => {
+      const enrolledUsers = await getEnrolledUsers()
+      setEnrolledUsers(enrolledUsers.data)
+    }
+
+    fetchEnrolledUsers()
+  }, [])
   return (
     <>
       <div className="relative min-h-screen bg-gradient-to-bl from-slate-50 via-slate-100 to-slate-200 dark:from-background dark:via-muted dark:to-card">
@@ -179,8 +194,9 @@ const Login = () => {
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-2">
                       <AnimatedAvatars
-                        totalUsers={'2000+'}
-                        avatarCount={4}
+                        users={enrolledUsers}
+                        totalUsers={1500}
+                        maxAvatars={4}
                         message="who have successfully advanced their careers"
                       />
                     </div>
