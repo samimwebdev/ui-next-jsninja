@@ -22,6 +22,7 @@ import { notFound } from 'next/navigation'
 import { strapiFetch } from '@/lib/strapi'
 
 import { ComponentType, ComponentDataMap } from '@/types/home-page-types'
+import { getEnrolledUsers } from '@/lib/actions/enrolled-users'
 
 // Server-side data fetching function
 async function getHomeData(): Promise<HomePageData> {
@@ -89,9 +90,17 @@ function getSectionData<T extends ComponentType>(
 // Main Server Component with Suspense boundaries
 export default async function Home() {
   let homeData: HomePageData
+  let enrolledUsersData
 
   try {
-    homeData = await getHomeData()
+    // Fetch home data and enrolled users in parallel
+    const [home, users] = await Promise.all([
+      getHomeData(),
+      getEnrolledUsers(), // Fetch all enrolled users
+    ])
+
+    homeData = home
+    enrolledUsersData = users
   } catch (error) {
     console.error('Failed to fetch home data:', error)
     notFound()
@@ -116,10 +125,13 @@ export default async function Home() {
       <StructuredData seoData={homeData.seo} />
 
       <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Hero Section - Critical above the fold, no suspense needed */}
+        {/* Hero Section - Pass enrolled users */}
         {heroData && (
           <AnimatedSection>
-            <HeroSection data={heroData} />
+            <HeroSection
+              data={heroData}
+              enrolledUsers={enrolledUsersData?.data || []}
+            />
           </AnimatedSection>
         )}
 

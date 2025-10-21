@@ -23,6 +23,8 @@ import { PromoVideosSkeleton } from '@/components/bootcamp/promo-videos/promo-vi
 // import { strapiFetch } from '@/lib/strapi'
 import { CourseTracking } from '@/components/course/course-tracking'
 import CourseNotFound from '@/components/shared/not-found'
+import { getEnrolledUsers } from '@/lib/actions/enrolled-users'
+import { EnrolledUsersResponse } from '@/types/enrolled-users'
 
 interface BootcampPageProps {
   params: Promise<{
@@ -106,6 +108,7 @@ export default async function BootcampPage({
   // Await params before using its properties
   const { slug } = await params
   let bootcampData: BootcampPageData
+  let enrolledUsersData: EnrolledUsersResponse
   try {
     bootcampData = await getBootcampData(slug)
 
@@ -113,6 +116,9 @@ export default async function BootcampPage({
       console.error('❌ No bootcamp data found, rendering 404')
       return <CourseNotFound courseType="bootcamp" />
     }
+    enrolledUsersData = await getEnrolledUsers(
+      bootcampData?.baseContent?.documentId
+    )
   } catch (error) {
     console.error('Error fetching bootcamp data:', error)
     return <CourseNotFound courseType="bootcamp" />
@@ -169,6 +175,8 @@ export default async function BootcampPage({
     (section) => section.__component === 'review-layout.review-layout'
   )
 
+  const totalStudents = bootcampData.baseContent?.totalStudents || 0
+
   const courseInfo = {
     title: bootcampData.baseContent?.title,
     slug: bootcampData.baseContent?.slug,
@@ -192,6 +200,8 @@ export default async function BootcampPage({
           data={heroData}
           assessmentData={assessmentData}
           courseInfo={courseInfo}
+          enrolledUsersData={enrolledUsersData || []}
+          totalStudents={totalStudents}
         />
       )}
 
