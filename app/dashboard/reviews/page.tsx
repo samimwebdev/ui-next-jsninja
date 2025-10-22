@@ -178,6 +178,8 @@ export default function ReviewsPage() {
     retry: 2,
   })
 
+  console.log(reviewsData?.data.enrolledCourses)
+
   // Create review mutation
   const createReviewMutation = useMutation({
     mutationFn: createReview,
@@ -248,6 +250,11 @@ export default function ReviewsPage() {
   const reviews = reviewsData?.data.reviews || []
   const enrolledCourses = reviewsData?.data.enrolledCourses || []
 
+  // ✅ Filter out invalid reviews with missing course data
+  const validReviews = reviews.filter((review) => {
+    return review?.course.title
+  })
+
   const handleEdit = (review: (typeof reviews)[0]) => {
     // Prevent editing if review is approved
     if (review.reviewApproved) {
@@ -257,11 +264,19 @@ export default function ReviewsPage() {
       return
     }
 
+    // ✅ Add safety check
+    if (!review.course.documentId) {
+      toast.error('Error', {
+        description: 'Course data is missing. Please refresh the page.',
+      })
+      return
+    }
+
     setEditingReviewId(review.documentId)
     form.reset({
       course: review.course.documentId,
       rating: review.rating.toString(),
-      designation: review.designation || '', // Handle empty designation
+      designation: review.designation || '',
       comment: stripHtmlTags(review.reviewDetails),
     })
     setIsDialogOpen(true)
@@ -362,25 +377,6 @@ export default function ReviewsPage() {
         </Button>
       </div>
 
-      {/* Stats */}
-      {/* {!isLoading && reviews.length > 0 && (
-        <div className="flex items-center gap-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <span>
-              {reviews.length} Review
-              {reviews.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            <span>
-              {reviews.filter((r) => r.reviewApproved).length} Approved
-            </span>
-          </div>
-        </div>
-      )} */}
-
       {/* Fixed loading condition to prevent flash */}
       {isLoading || !reviewsData ? (
         <div className="grid gap-4 md:grid-cols-2">
@@ -388,134 +384,126 @@ export default function ReviewsPage() {
             <ReviewCardSkeleton key={i} />
           ))}
         </div>
-      ) : reviews.length === 0 ? (
+      ) : validReviews.length === 0 ? (
         <EmptyState />
       ) : (
         <TooltipProvider>
           <div className="grid gap-4 md:grid-cols-2">
-            {reviews.map((review) => (
-              <Card key={review.documentId}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CardTitle className="text-base">
-                          {review.course.title}
-                        </CardTitle>
-                        {/* {review.reviewApproved ? (
-                          <Badge
-                            variant="outline"
-                            className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-                          >
-                            Approved
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant="outline"
-                            className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800"
-                          >
-                            Pending
-                          </Badge>
-                        )} */}
+            {validReviews.map((review) => {
+              // ✅ Add null safety for course data
+              const courseName = review?.course?.title || 'Unknown Course'
+
+              return (
+                <Card key={review.documentId}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <CardTitle className="text-base">
+                            {courseName}
+                          </CardTitle>
+                        </div>
+                        <CardDescription>
+                          {formatReviewDate(review.createdAt)}
+                        </CardDescription>
                       </div>
-                      <CardDescription>
-                        {formatReviewDate(review.createdAt)}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {/* Edit Button with conditional tooltip */}
-                      {review.reviewApproved ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              disabled
-                              className="opacity-50 cursor-not-allowed"
-                            >
-                              <Lock className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Review is approved and cannot be edited</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(review)}
-                          disabled={deleteReviewMutation.isPending}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {/* Edit Button with conditional tooltip */}
+                        {review.reviewApproved ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled
+                                className="opacity-50 cursor-not-allowed"
+                              >
+                                <Lock className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Review is approved and cannot be edited</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(review)}
+                            disabled={deleteReviewMutation.isPending}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
 
-                      {/* Delete Button with conditional tooltip */}
-                      {review.reviewApproved ? (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              disabled
-                              className="opacity-50 cursor-not-allowed"
-                            >
-                              <Lock className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Review is approved and cannot be deleted</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(review.documentId)}
-                          disabled={deleteReviewMutation.isPending}
-                        >
-                          {deleteReviewMutation.isPending &&
-                          deleteReviewId === review.documentId ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash className="h-4 w-4" />
-                          )}
-                        </Button>
-                      )}
+                        {/* Delete Button with conditional tooltip */}
+                        {review.reviewApproved ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled
+                                className="opacity-50 cursor-not-allowed"
+                              >
+                                <Lock className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Review is approved and cannot be deleted</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteClick(review.documentId)}
+                            disabled={deleteReviewMutation.isPending}
+                          >
+                            {deleteReviewMutation.isPending &&
+                            deleteReviewId === review.documentId ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-1 mb-3">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < review.rating
-                            ? 'fill-primary text-primary'
-                            : 'text-muted-foreground'
-                        }`}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-muted-foreground">
-                      {review.rating}/5
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {truncateText(stripHtmlTags(review.reviewDetails), 150)}
-                  </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-1 mb-3">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < review.rating
+                              ? 'fill-primary text-primary'
+                              : 'text-muted-foreground'
+                          }`}
+                        />
+                      ))}
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        {review.rating}/5
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {truncateText(stripHtmlTags(review.reviewDetails), 150)}
+                    </p>
 
-                  {/* Additional info */}
-                  <div className="mt-3 pt-3 border-t border-muted/50">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>By {review.reviewerName}</span>
-                      {review.designation && <span>{review.designation}</span>}
+                    {/* Additional info */}
+                    <div className="mt-3 pt-3 border-t border-muted/50">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>By {review.reviewerName}</span>
+                        {review.designation && (
+                          <span>{review.designation}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </TooltipProvider>
       )}
@@ -542,7 +530,7 @@ export default function ReviewsPage() {
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
-                      disabled={isLoading || !!editingReviewId} // Disable course selection when editing
+                      disabled={isLoading || !!editingReviewId}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -565,7 +553,6 @@ export default function ReviewsPage() {
                 )}
               />
 
-              {/* Show rating field for both create and edit */}
               <FormField
                 control={form.control}
                 name="rating"
@@ -606,7 +593,6 @@ export default function ReviewsPage() {
                 )}
               />
 
-              {/* Added designation field */}
               <FormField
                 control={form.control}
                 name="designation"

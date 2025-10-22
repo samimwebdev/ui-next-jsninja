@@ -41,8 +41,8 @@ function isTokenExpired(token: string): boolean {
   try {
     const decoded = jwtDecode<JWTPayload>(token)
     const currentTime = Math.floor(Date.now() / 1000)
-    // Add 60 second buffer - refresh if less than 1 minute remaining
-    return decoded.exp < currentTime + 60
+    // ✅ Increased buffer to 5 minutes - refresh if less than 5 minutes remaining
+    return decoded.exp < currentTime + 300
   } catch {
     return true
   }
@@ -51,7 +51,7 @@ function isTokenExpired(token: string): boolean {
 /**
  * Refresh the access token using refresh token
  */
-async function refreshAccessToken(
+export async function refreshAccessToken(
   refreshToken: string
 ): Promise<RefreshResponse | null> {
   try {
@@ -68,6 +68,7 @@ async function refreshAccessToken(
     )
 
     if (!response.ok) {
+      console.error('[Middleware] Refresh token failed:', response.status)
       return null
     }
 
@@ -79,145 +80,146 @@ async function refreshAccessToken(
   }
 }
 
+/**
+ * Set authentication cookies on response
+ */
+export function setAuthCookies(
+  response: NextResponse,
+  jwt: string,
+  refreshToken: string
+) {
+  response.cookies.set(COOKIE, jwt, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 15, // 15 minutes
+  })
+
+  response.cookies.set(REFRESH_COOKIE, refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  })
+}
+
+/**
+ * Clear authentication cookies
+ */
+function clearAuthCookies(response: NextResponse) {
+  response.cookies.delete(COOKIE)
+  response.cookies.delete(REFRESH_COOKIE)
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Get cookies
   const tokenCookie = request.cookies.get(COOKIE)
-
   const refreshCookie = request.cookies.get(REFRESH_COOKIE)
 
-  let token = tokenCookie?.value
+  const token = tokenCookie?.value
   const refreshToken = refreshCookie?.value
 
   // Check if route requires authentication
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   )
-
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
 
-  // If access token is missing or expired, try to refresh it
-  if (refreshToken && (!token || isTokenExpired(token))) {
-    // Check if refresh token itself is expired
-    if (!isTokenExpired(refreshToken)) {
-      const refreshResult = await refreshAccessToken(refreshToken)
+  // ✅ CASE 1: No tokens at all
+  if (!token && !refreshToken) {
+    if (isProtectedRoute) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+    // Allow access to public and auth routes
+    return NextResponse.next()
+  }
 
-      if (refreshResult) {
-        // Create response with refreshed tokens
-        const response = NextResponse.next()
+  // ✅ CASE 2: Has refresh token, check if we need to refresh access token
+  if (refreshToken) {
+    const needsRefresh = !token || isTokenExpired(token)
+    const refreshTokenExpired = isTokenExpired(refreshToken)
 
-        // Set new access token
-        response.cookies.set(COOKIE, refreshResult.jwt, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 15, // 15 minutes
-        })
-
-        // Set new refresh token
-        response.cookies.set(REFRESH_COOKIE, refreshResult.refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 60 * 60 * 24 * 30, // 30 days
-        })
-
-        // Update token variable for further checks
-        token = refreshResult.jwt
-
-        // For protected routes, return the response with new cookies
-        if (isProtectedRoute) {
-          return response
-        }
-
-        // For auth routes, redirect to dashboard with new cookies
-        if (isAuthRoute) {
-          const dashboardUrl = new URL('/dashboard/courses', request.url)
-          const redirectResponse = NextResponse.redirect(dashboardUrl)
-
-          // Copy the new cookies to redirect response
-          redirectResponse.cookies.set(COOKIE, refreshResult.jwt, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-            maxAge: 60 * 15,
-          })
-
-          redirectResponse.cookies.set(
-            REFRESH_COOKIE,
-            refreshResult.refreshToken,
-            {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'lax',
-              path: '/',
-              maxAge: 60 * 60 * 24 * 30,
-            }
-          )
-
-          return redirectResponse
-        }
-
-        return response
-      } else {
-        // Refresh failed, clear cookies
-        if (isProtectedRoute) {
-          const loginUrl = new URL('/login', request.url)
-          loginUrl.searchParams.set('redirect', pathname)
-          const response = NextResponse.redirect(loginUrl)
-
-          // Clear invalid cookies
-          response.cookies.delete(COOKIE)
-          response.cookies.delete(REFRESH_COOKIE)
-
-          return response
-        }
-      }
-    } else {
-      // Refresh token expired
+    // ✅ If refresh token itself is expired, logout user
+    if (refreshTokenExpired) {
+      console.log('RefreshToken Expired')
       if (isProtectedRoute) {
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('redirect', pathname)
+        loginUrl.searchParams.set('session_expired', 'true')
         const response = NextResponse.redirect(loginUrl)
+        clearAuthCookies(response)
+        return response
+      }
+      // Clear cookies for non-protected routes too
+      const response = NextResponse.next()
+      clearAuthCookies(response)
+      return response
+    }
 
-        // Clear expired cookies
-        response.cookies.delete(COOKIE)
-        response.cookies.delete(REFRESH_COOKIE)
+    // ✅ Refresh access token if needed
+    if (needsRefresh) {
+      const refreshResult = await refreshAccessToken(refreshToken)
+      console.log('Get Access Token via Refresh Token in Middleware')
 
+      if (refreshResult) {
+        // ✅ Create appropriate response
+        let response: NextResponse
+
+        if (isAuthRoute) {
+          // Redirect authenticated users away from auth routes
+          const dashboardUrl = new URL('/dashboard/courses', request.url)
+          response = NextResponse.redirect(dashboardUrl)
+        } else {
+          // Continue to requested route
+          response = NextResponse.next()
+        }
+
+        // Set new tokens
+        setAuthCookies(response, refreshResult.jwt, refreshResult.refreshToken)
+
+        return response
+      } else {
+        // ✅ Refresh failed - logout user
+        if (isProtectedRoute) {
+          const loginUrl = new URL('/login', request.url)
+          loginUrl.searchParams.set('redirect', pathname)
+          loginUrl.searchParams.set('session_invalid', 'true')
+          const response = NextResponse.redirect(loginUrl)
+          clearAuthCookies(response)
+          return response
+        }
+
+        // Clear cookies for non-protected routes
+        const response = NextResponse.next()
+        clearAuthCookies(response)
         return response
       }
     }
   }
 
-  // Redirect unauthenticated users from protected routes
-  if (isProtectedRoute && !token && !refreshToken) {
+  // ✅ CASE 3: Has valid access token
+  if (token && !isTokenExpired(token)) {
+    // Redirect authenticated users from auth routes
+    if (isAuthRoute) {
+      return NextResponse.redirect(new URL('/dashboard/courses', request.url))
+    }
+
+    // Allow access to all other routes
+    return NextResponse.next()
+  }
+
+  // ✅ CASE 4: Fallback - no valid tokens
+  if (isProtectedRoute) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect authenticated users from auth routes to dashboard
-  if (isAuthRoute && (token || refreshToken)) {
-    return NextResponse.redirect(new URL('/dashboard/courses', request.url))
-  }
-
   return NextResponse.next()
-}
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - api routes
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
-  ],
 }
