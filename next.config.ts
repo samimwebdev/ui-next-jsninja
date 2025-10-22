@@ -24,10 +24,9 @@ const withPWA = withPWAInit({
       },
       {
         urlPattern: /^https:\/\/backend\.javascript-ninja\.com\/.*/i,
-        handler: 'CacheFirst', // Changed from NetworkFirst
+        handler: 'StaleWhileRevalidate', // Changed from NetworkFirst
         options: {
-          cacheName: 'StaleWhileRevalidate',
-          networkTimeoutSeconds: 3, // Reduced from 10
+          cacheName: 'api-cache',
           expiration: {
             maxEntries: 30, // Reduced from 50
             maxAgeSeconds: 2 * 60, // Reduced from 5 minutes
