@@ -152,57 +152,92 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
-    // ✅ Pre-compute CSP string
     const cspHeader = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval'
-    https://js.pusher.com
-    https://www.googletagmanager.com
-    https://browser.sentry-cdn.com;
-
-  style-src 'self' 'unsafe-inline'
-    https://fonts.googleapis.com;
-  
-  img-src 'self' data: blob:
-    https://*.cloudinary.com
-    https://*.gumlet.io
-    https://*.gumlet.com
-    https://*.b-cdn.net
-    https://*.bunny.net
-    https:;
-  
-  font-src 'self' https://fonts.gstatic.com data:;
-  
-  connect-src 'self'
-    ${process.env.NEXT_PUBLIC_STRAPI_URL}
-    https://*.cloudinary.com
-    https://*.gumlet.io
-    https://*.gumlet.com
-    https://*.b-cdn.net
-    https://*.bunny.net
-    https://*.pusher.com
-    https://*.sentry.io
-    wss:;
-  
-  frame-src 'self'
-    https://www.youtube.com
-    https://youtube-nocookie.com
-    https://player.vimeo.com
-    https://*.gumlet.io
-    https://*.bunny.net;
-  
-  media-src 'self' blob: https:
-    https://*.gumlet.io
-    https://*.gumlet.com
-    https://*.b-cdn.net
-    https://*.bunny.net
-    https://*.cloudinary.com;
-  
-  manifest-src 'self';
-  worker-src 'self' blob:;
-  frame-ancestors 'none';
-  upgrade-insecure-requests;
-   `
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval'
+      https://js.pusher.com
+      https://www.googletagmanager.com
+      https://www.google-analytics.com
+      https://ssl.google-analytics.com
+      https://connect.facebook.net
+      https://*.facebook.com
+      https://browser.sentry-cdn.com
+      https://vercel.live
+      https://*.vercel-scripts.com
+      https://va.vercel-scripts.com
+      https://www.youtube.com
+      https://player.vimeo.com
+      https://play.gumlet.io;
+    
+    style-src 'self' 'unsafe-inline'
+      https://fonts.googleapis.com;
+    
+    img-src 'self' data: blob: https:
+      https://*.cloudinary.com
+      https://*.gumlet.io
+      https://*.gumlet.com
+      https://*.b-cdn.net
+      https://*.bunny.net
+      https://www.google-analytics.com
+      https://www.googletagmanager.com
+      https://www.facebook.com
+      https://*.facebook.com
+      https://i.pravatar.cc
+      https://ui-avatars.com
+      https://avatars.githubusercontent.com;
+    
+    font-src 'self' data:
+      https://fonts.gstatic.com;
+    
+    connect-src 'self'
+      http://localhost:1337
+      https://backend.javascript-ninja.com
+      ${process.env.NEXT_PUBLIC_STRAPI_URL || ''}
+      https://*.cloudinary.com
+      https://*.gumlet.io
+      https://*.gumlet.com
+      https://*.b-cdn.net
+      https://*.bunny.net
+      https://ui-avatars.com
+      https://i.pravatar.cc
+      https://sockjs-mt1.pusher.com
+      https://*.pusher.com
+      wss://*.pusher.com
+      https://*.sentry.io
+      https://www.google-analytics.com
+      https://www.googletagmanager.com
+      https://analytics.google.com
+      https://stats.g.doubleclick.net
+      https://www.facebook.com
+      https://*.facebook.com
+      https://*.facebook.net
+      wss:
+      https:;
+    
+    frame-src 'self'
+      https://www.youtube.com
+      https://www.youtube-nocookie.com
+      https://player.vimeo.com
+      https://play.gumlet.io
+      https://*.gumlet.io
+      https://*.bunny.net
+      https://iframe.mediadelivery.net
+      https://video.bunnycdn.com
+      https://www.facebook.com
+      https://*.facebook.com;
+    
+    media-src 'self' blob: https:
+      https://*.gumlet.io
+      https://*.gumlet.com
+      https://*.b-cdn.net
+      https://*.bunny.net
+      https://*.cloudinary.com;
+    
+    manifest-src 'self';
+    worker-src 'self' blob:;
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  `
       .replace(/\s+/g, ' ')
       .trim()
 
@@ -212,17 +247,15 @@ const nextConfig: NextConfig = {
         headers: [
           { key: 'Content-Security-Policy', value: cspHeader },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
-          {
-            key: 'Permissions-Policy',
-            value: 'geolocation=(), microphone=(), camera=(), payment=()',
-          },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'geolocation=(), microphone=(), camera=(), payment=()',
           },
         ],
       },
@@ -236,7 +269,6 @@ const nextConfig: NextConfig = {
         ],
       },
 
-      // 🔹 Add this for image assets
       {
         source: '/(.*)\\.(png|jpg|jpeg|svg|gif|ico|webp)',
         headers: [
