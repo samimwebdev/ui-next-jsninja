@@ -18,6 +18,7 @@ const serwist = new Serwist({
   clientsClaim: true,
   navigationPreload: true,
   runtimeCaching: defaultCache,
+  cleanupOutdatedCaches: true,
 })
 
 // ✅ Push notification handler
