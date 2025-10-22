@@ -18,6 +18,7 @@ import { AnimatedAvatars } from '@/components/shared/animated-avatars'
 
 import { getEnrolledUsers } from '@/lib/actions/enrolled-users'
 import { EnrolledUser } from '@/types/enrolled-users'
+import { toast } from 'sonner'
 
 type FormData = {
   identifier: string
@@ -61,6 +62,20 @@ const Login = () => {
       password: process.env.NODE_ENV === 'development' ? '1234abcdA@' : '',
     },
   })
+
+  useEffect(() => {
+    if (searchParams.get('session_expired') === 'true') {
+      toast.error('Session Expired', {
+        description: 'Your session has expired. Please log in again.',
+      })
+    }
+
+    if (searchParams.get('session_invalid') === 'true') {
+      toast.error('Session Invalid', {
+        description: 'Your session is invalid. Please log in again.',
+      })
+    }
+  }, [searchParams])
 
   const onSubmit = async (data: FormData) => {
     try {

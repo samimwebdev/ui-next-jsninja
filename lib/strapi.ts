@@ -1,3 +1,7 @@
+import { COOKIE, REFRESH_COOKIE } from '@/middleware'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+
 const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL!
 
 // This file is used to interact with the Strapi API.
@@ -38,6 +42,57 @@ export async function strapiFetch<T>(
 
     if (!res.ok) {
       const errorData = await res.json()
+
+      // ✅ Handle 401 Unauthorized
+      if (res.status === 401) {
+        const cookieStore = await cookies()
+        const refreshCookie = cookieStore.get(REFRESH_COOKIE)
+
+        if (!refreshCookie) {
+          // No refresh token, redirect to login
+          redirect('/login?session_expired=true')
+        }
+
+        try {
+          const refreshToken = refreshCookie?.value
+          // Try to refresh token via middleware
+          const refreshResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_STRAPI_URL}/api/auth/refresh`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ refreshToken }),
+              cache: 'no-store',
+            }
+          )
+          if (refreshResponse.ok) {
+            const accessCookie = cookieStore.get(COOKIE)
+            const token = accessCookie?.value
+            console.log('Get AccessToken using refresh Token in strapi fetch')
+            // Token refreshed, retry original request
+            const retryResponse = await fetch(`${STRAPI}${path}`, {
+              headers: {
+                'Content-Type': 'application/json',
+                ...(token && { Authorization: `Bearer ${token}` }),
+              },
+              cache, // 'no-store' | '' | 'default'
+              next, // supports { revalidate, tags } for Next.js 15
+              ...rest,
+            })
+            if (!retryResponse.ok) {
+              throw new Error(`HTTP error! status: ${retryResponse.status}`)
+            }
+            return await retryResponse.json()
+          } else {
+            // Token refresh failed, redirect to login
+            redirect('/login?session_expired=true')
+          }
+        } catch (err) {
+          console.error('Error during token refresh:', err)
+        }
+      }
 
       //  For 404 responses with allowNotFound=true, return the error structure
       if (res.status === 404 && allowNotFound) {
