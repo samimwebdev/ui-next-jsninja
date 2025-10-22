@@ -330,7 +330,6 @@ export async function loginAction(
     })
 
     const cookieStore = await cookies()
-    console.log({ res })
 
     // Store temporary tokens for OTP verification
     cookieStore.set('temp_jwt', res.jwt, {
@@ -409,12 +408,6 @@ export async function verifyOTPAction(
       cookieStore.get('temp_refresh')?.value ||
       cookieStore.get('strapi_up_refresh')?.value
 
-    console.log(
-      { cookies, tempToken, tempRefresh },
-      cookieStore.get('strapi_up_refresh')?.value,
-      'cookies in verifyOTPAction'
-    )
-
     if (!tempToken || !tempRefresh) {
       return {
         message: 'Your verification session has expired. Please log in again.',
@@ -460,8 +453,6 @@ export async function verifyOTPAction(
         type: verificationType,
       }),
     })
-
-    console.log({ res }, 'OTP verification response')
 
     // Delete temporary cookies
     cookieStore.delete('temp_jwt')

@@ -62,7 +62,6 @@ async function refreshAccessToken(
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({ refreshToken }),
         cache: 'no-store',
       }
@@ -86,9 +85,7 @@ export async function middleware(request: NextRequest) {
   // Get cookies
   const tokenCookie = request.cookies.get(COOKIE)
 
-  const refreshCookie =
-    request.cookies.get(REFRESH_COOKIE) ||
-    request.cookies.get('strapi_up_refresh')
+  const refreshCookie = request.cookies.get(REFRESH_COOKIE)
 
   let token = tokenCookie?.value
   const refreshToken = refreshCookie?.value
