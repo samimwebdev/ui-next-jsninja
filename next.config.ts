@@ -10,6 +10,9 @@ const withPWA = withPWAInit({
   sw: 'sw.js',
   reloadOnOnline: true,
   workboxOptions: {
+    clientsClaim: true,
+    skipWaiting: true,
+    cleanupOutdatedCaches: true,
     runtimeCaching: [
       {
         urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
@@ -24,7 +27,7 @@ const withPWA = withPWAInit({
       },
       {
         urlPattern: /^https:\/\/backend\.javascript-ninja\.com\/.*/i,
-        handler: 'StaleWhileRevalidate', // Changed from NetworkFirst
+        handler: 'NetworkFirst', // Changed from NetworkFirst
         options: {
           cacheName: 'api-cache',
           expiration: {
