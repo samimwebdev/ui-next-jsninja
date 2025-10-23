@@ -20,24 +20,6 @@ import { BootcampSectionData, Course } from '@/types/home-page-types'
 import { formatDuration } from '@/lib/utils'
 import { formatBootcampPrice, formatDate } from '@/lib/bootcamp-utils'
 
-// // Helper function to format date
-// const formatDate = (dateString: string | undefined): string => {
-//   if (!dateString) return 'TBA'
-//   const date = new Date(dateString)
-//   return date.toLocaleDateString('en-US', {
-//     month: 'short',
-//     day: 'numeric',
-//     year: 'numeric',
-//   })
-// }
-
-// // Helper function to format price
-// const formatPrice = (price: number): string => {
-//   if (!price || price <= 0) return 'Free'
-//   return `${price.toLocaleString()} BDT`
-// }
-
-// Add this helper function after the other helper functions
 const getDifficultyStyle = (level: string) => {
   const normalizedLevel = level?.toLowerCase()
   switch (normalizedLevel) {
@@ -104,11 +86,11 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
     bootcamp?.baseContent.actualPrice > bootcamp?.baseContent.price
 
   return (
-    <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
+    <div className="w-full max-w-screen-xl py-8 sm:py-12 bg-background text-foreground">
       <div className="container mx-auto px-4">
         <div aria-label="Bootcamp courses" ref={sectionRef}>
           <motion.h2
-            className="text-4xl font-bold text-center mb-4 max-w-3xl mx-auto"
+            className="text-3xl sm:text-4xl font-bold text-center mb-4 max-w-3xl mx-auto px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
@@ -116,7 +98,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
             {bootcampSectionData.title}
           </motion.h2>
           <motion.p
-            className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto"
+            className="text-center text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -141,7 +123,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                 <motion.div
                   layoutId={`card-${bootcamp.baseContent.title}-${id}`}
                   ref={ref}
-                  className="w-full max-w-2xl bg-background rounded-lg shadow-lg overflow-hidden"
+                  className="w-full max-w-2xl bg-background rounded-lg shadow-lg overflow-hidden max-h-[90vh] overflow-y-auto"
                   initial={{ scale: 0.9, opacity: 0.5 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', damping: 20, stiffness: 300 }}
@@ -157,7 +139,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       alt={bootcamp.baseContent.title}
                       width={800}
                       height={400}
-                      className="w-full h-60 object-cover"
+                      className="w-full h-48 sm:h-60 object-cover"
                     />
                     <motion.button
                       onClick={() => setBootcamp(null)}
@@ -169,58 +151,57 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       <CircleX size={20} />
                     </motion.button>
 
-                    {/* Price Badge */}
                     <div className="absolute top-4 left-4">
-                      <Badge className="text-base bg-primary text-primary-foreground px-3 py-1 font-semibold">
-                        {formatBootcampPrice(bootcamp.baseContent.price)}{' '}
-                      </Badge>
-                      {hasDiscount && (
-                        <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full ">
-                          {formatBootcampPrice(
-                            bootcamp.baseContent.actualPrice
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <Badge className="text-sm sm:text-base bg-primary text-primary-foreground px-2 sm:px-3 py-1 font-semibold">
+                            {formatBootcampPrice(bootcamp.baseContent.price)}
+                          </Badge>
+                          {hasDiscount && (
+                            <span className="text-xs sm:text-base font-semibold text-gray-300 bg-ninja-navy line-through px-1 sm:px-2 py-0.5 sm:py-1 rounded-full">
+                              {formatBootcampPrice(
+                                bootcamp.baseContent.actualPrice
+                              )}
+                            </span>
                           )}
-                        </span>
-                      )}
-
-                      {bootcamp.baseContent.actualPrice &&
-                        bootcamp.baseContent.actualPrice >
-                          bootcamp.baseContent.price && (
-                          <span className="inline-block mb-2 px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-semibold border border-red-200">
+                        </div>
+                        {hasDiscount && (
+                          <span className="inline-block px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-xs font-semibold border border-red-200">
                             Save{' '}
                             {Math.round(
-                              ((bootcamp.baseContent.actualPrice -
+                              ((bootcamp.baseContent.actualPrice! -
                                 bootcamp.baseContent.price) /
-                                bootcamp.baseContent.actualPrice) *
+                                bootcamp.baseContent.actualPrice!) *
                                 100
                             )}
                             %
                           </span>
                         )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="p-6">
-                    <h2 className="text-3xl font-bold mb-3 text-foreground">
+                  <div className="p-4 sm:p-6">
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-foreground">
                       {bootcamp.baseContent.title}
                     </h2>
 
-                    {/* Bootcamp Details - Modal - Single Row */}
-                    <div className="flex items-center gap-6 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 mb-4">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                         <Calendar size={16} />
                         <span>
                           Starts:{' '}
                           {formatDate(bootcamp.baseContent.startingFrom || '')}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm">
                         <Clock size={16} className="text-muted-foreground" />
                         <span className="text-muted-foreground">Duration:</span>
-                        <Badge variant="secondary" className="ml-1">
+                        <Badge variant="secondary" className="ml-1 text-xs">
                           {formatDuration(bootcamp.baseContent.duration)}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                         <DollarSign size={16} />
                         <span>
                           {formatBootcampPrice(bootcamp.baseContent.price)}
@@ -228,23 +209,26 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                       </div>
                     </div>
 
-                    {/* Categories */}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {bootcamp.baseContent.categories?.map(
                         (category, indx) => (
-                          <Badge key={indx} variant="secondary">
+                          <Badge
+                            key={indx}
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {category.name}
                           </Badge>
                         )
                       )}
                       {bootcamp.baseContent.level && (
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="text-xs">
                           {bootcamp.baseContent.level}
                         </Badge>
                       )}
                     </div>
 
-                    <p className="text-muted-foreground mb-6 leading-relaxed">
+                    <p className="text-sm sm:text-base text-muted-foreground mb-6 leading-relaxed">
                       {bootcamp.baseContent.shortDescription}
                     </p>
 
@@ -254,7 +238,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                         whileTap={{ scale: 0.95 }}
                         className="flex-1"
                       >
-                        <Button className="w-full">
+                        <Button className="w-full text-sm">
                           <Link
                             href={`/bootcamps/${bootcamp.baseContent.slug}`}
                             className="w-full"
@@ -272,7 +256,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
           </AnimatePresence>
 
           <motion.div
-            className="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="max-w-screen-xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -304,16 +288,15 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                         fill
                         className="object-cover transition-all duration-300 group-hover:scale-110"
                       />
-                      {/* Price and Level Badges */}
                       <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-                        <div className="flex items-baseline gap-2">
-                          <Badge className="text-base bg-primary  text-primary-foreground font-semibold px-3 py-1">
+                        <div className="flex items-baseline gap-1 sm:gap-2">
+                          <Badge className="text-sm sm:text-base bg-primary text-primary-foreground font-semibold px-2 sm:px-3 py-1">
                             {formatBootcampPrice(bootcamp.baseContent.price)}
                           </Badge>
                           {bootcamp.baseContent.actualPrice &&
                             bootcamp.baseContent.actualPrice >
                               bootcamp.baseContent.price && (
-                              <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full">
+                              <span className="text-xs sm:text-base font-semibold text-gray-300 bg-ninja-navy line-through px-1 sm:px-2 py-0.5 sm:py-1 rounded-full">
                                 {formatBootcampPrice(
                                   bootcamp.baseContent.actualPrice
                                 )}
@@ -334,16 +317,15 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
                   </CardHeader>
 
                   <CardContent className="p-4 flex-1 flex flex-col">
-                    <CardTitle className="text-lg font-bold mb-2 line-clamp-2">
+                    <CardTitle className="text-base sm:text-lg font-bold mb-2 line-clamp-2">
                       {bootcamp.baseContent.title}
                     </CardTitle>
 
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
                       {bootcamp.baseContent.shortDescription}
                     </p>
 
-                    {/* Bootcamp Info - Single Row for Cards */}
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground mb-4 gap-2">
                       <div className="flex items-center gap-1">
                         <Calendar size={12} />
                         <span>
@@ -365,7 +347,7 @@ export const BootcampList: React.FC<{ data: BootcampSectionData }> = ({
 
                   <CardFooter className="p-4 pt-0">
                     <Button
-                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm"
                       variant="outline"
                     >
                       {bootcamp?.baseContent.browseCoursesBtn?.btnLabel ||

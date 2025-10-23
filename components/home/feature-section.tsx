@@ -45,17 +45,20 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({ data }) => {
   }, [])
 
   return (
-    <div className="flex items-center justify-center py-12" ref={sectionRef}>
-      <div>
+    <div
+      className="flex items-center justify-center py-8 sm:py-12 w-full"
+      ref={sectionRef}
+    >
+      <div className="w-full">
         <motion.h2
-          className="text-4xl md:text-4xl font-black tracking-tight text-center"
+          className="text-3xl sm:text-4xl font-black tracking-tight text-center px-4"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.5 }}
         >
           {data.title}
         </motion.h2>
-        <div className="mt-16 grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-screen-xl mx-auto px-6">
+        <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-screen-xl mx-auto px-4 sm:px-6">
           {data.feature.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -63,7 +66,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({ data }) => {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={cardVariants}
-              className="flex flex-col border rounded-xl py-6 px-5 transition-all duration-100 hover:scale-105 hover:shadow-lg "
+              className="flex flex-col border rounded-xl py-6 px-5 transition-all duration-100 hover:scale-105 hover:shadow-lg"
               whileHover={{ y: -5 }}
             >
               <motion.div

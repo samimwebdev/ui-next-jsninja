@@ -19,10 +19,9 @@ import { Course, CourseSectionData } from '@/types/home-page-types'
 import { formatDuration } from '@/lib/utils'
 
 const CourseCard = ({ course }: { course: Course }) => {
-  // Handle case when baseContent is null/undefined
   if (!course?.baseContent) {
     return (
-      <div className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4">
+      <div className="w-full flex-shrink-0 px-2 sm:px-4">
         <Card className="overflow-hidden h-full flex flex-col opacity-50">
           <CardHeader className="p-0">
             <div className="relative h-48 w-full overflow-hidden bg-muted">
@@ -57,13 +56,11 @@ const CourseCard = ({ course }: { course: Course }) => {
     browseCoursesBtn = null,
   } = course.baseContent
 
-  // Calculate discount percentage
   const hasDiscount = actualPrice && actualPrice > price
   const discountPercentage = hasDiscount
     ? Math.round(((actualPrice - price) / actualPrice) * 100)
     : null
 
-  // Don't render link if slug is empty
   const cardContent = (
     <Card className="overflow-hidden h-full flex flex-col">
       <CardHeader className="p-0">
@@ -79,12 +76,12 @@ const CourseCard = ({ course }: { course: Course }) => {
             className="object-cover"
           />
           <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
-            <div className="flex items-baseline gap-2">
-              <Badge className="bg-primary text-primary-foreground text-base font-bold px-3 py-1">
+            <div className="flex items-baseline gap-1 sm:gap-2">
+              <Badge className="bg-primary text-primary-foreground text-sm sm:text-base font-bold px-2 sm:px-3 py-1">
                 {price.toLocaleString()} Tk
               </Badge>
               {hasDiscount && (
-                <span className="text-base font-semibold text-gray-300 bg-ninja-navy line-through ml-1 px-2 py-1 rounded-full">
+                <span className="text-xs sm:text-base font-semibold text-gray-300 bg-ninja-navy line-through px-1 sm:px-2 py-0.5 sm:py-1 rounded-full">
                   {actualPrice?.toLocaleString()} Tk
                 </span>
               )}
@@ -98,19 +95,27 @@ const CourseCard = ({ course }: { course: Course }) => {
         </div>
       </CardHeader>
       <CardContent className="p-4 flex-grow">
-        <CardTitle className="text-xl mb-2">{title}</CardTitle>
-        <CardDescription className="mb-4">{shortDescription}</CardDescription>
+        <CardTitle className="text-lg sm:text-xl mb-2 line-clamp-2">
+          {title}
+        </CardTitle>
+        <CardDescription className="mb-4 line-clamp-2 text-sm">
+          {shortDescription}
+        </CardDescription>
         <div className="flex flex-wrap gap-2 mb-4">
           {categories.length > 0 && (
-            <Badge variant="secondary">{categories[0]?.name}</Badge>
+            <Badge variant="secondary" className="text-xs">
+              {categories[0]?.name}
+            </Badge>
           )}
-          <Badge variant="outline">{formatDuration(duration)}</Badge>
-          <Badge>{level}</Badge>
+          <Badge variant="outline" className="text-xs">
+            {formatDuration(duration)}
+          </Badge>
+          <Badge className="text-xs">{level}</Badge>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="p-4 pt-0">
         <Button
-          className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+          className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-sm"
           variant="outline"
           disabled={!slug}
         >
@@ -122,7 +127,8 @@ const CourseCard = ({ course }: { course: Course }) => {
 
   return (
     <motion.div
-      className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-4 group cursor-pointer"
+      // ✅ Fixed: Responsive width classes
+      className="w-full md:w-1/2 xl:w-1/3 flex-shrink-0 px-2 sm:px-4 group cursor-pointer"
       whileHover={{ scale: slug ? 1.03 : 1 }}
       key={course.documentId}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
@@ -145,7 +151,26 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
 }) => {
   const courseList = courseSectionData.courses || []
   const [currentIndex, setCurrentIndex] = useState(0)
-  const coursesPerPage = 3
+
+  // Responsive courses per page
+  const [coursesPerPage, setCoursesPerPage] = useState(3)
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCoursesPerPage(1) // Mobile: 1 course
+      } else if (window.innerWidth < 1280) {
+        setCoursesPerPage(2) // Tablet: 2 courses
+      } else {
+        setCoursesPerPage(3) // Desktop: 3 courses
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const totalPages = Math.ceil(courseList.length / coursesPerPage)
 
   useEffect(() => {
@@ -157,10 +182,10 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
       return () => clearInterval(timer)
     }
   }, [totalPages]) // eslint-disable-line react-hooks/exhaustive-deps
-  // Handle case when courseSectionData is null/undefined
+
   if (!courseSectionData) {
     return (
-      <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
+      <div className="w-full max-w-screen-xl py-8 sm:py-12 bg-background text-foreground">
         <div className="container mx-auto px-4 text-center">
           <p className="text-muted-foreground">
             Course section data unavailable.
@@ -170,15 +195,14 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
     )
   }
 
-  // Handle case when no courses are available
   if (courseList.length === 0) {
     return (
-      <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
+      <div className="w-full max-w-screen-xl py-8 sm:py-12 bg-background text-foreground">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold tracking-tight text-center mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-4">
             {courseSectionData.title || 'Courses'}
           </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto px-4">
             {courseSectionData.description || 'Explore our courses'}
           </p>
           <div className="text-center">
@@ -199,14 +223,12 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
     setCurrentIndex((prevIndex) => (prevIndex - 1 + totalPages) % totalPages)
   }
 
-  // Get current courses to display
   const startIndex = currentIndex * coursesPerPage
   const visibleCourses = courseList.slice(
     startIndex,
     startIndex + coursesPerPage
   )
 
-  // If we don't have enough courses to fill the page, add from the beginning
   if (
     visibleCourses.length < coursesPerPage &&
     courseList.length > coursesPerPage
@@ -216,12 +238,12 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
   }
 
   return (
-    <div className="w-full max-w-screen-xl py-12 bg-background text-foreground">
+    <div className="w-full max-w-screen-xl py-8 sm:py-12 bg-background text-foreground">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold tracking-tight text-center mb-4">
+        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-center mb-4">
           {courseSectionData.title || 'Courses'}
         </h2>
-        <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+        <p className="text-center text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto px-4">
           {courseSectionData.description || 'Explore our courses'}
         </p>
 
@@ -231,28 +253,32 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
               <Button
                 variant="outline"
                 size="icon"
-                className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10"
+                className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 sm:h-10 sm:w-10"
                 onClick={prevSlide}
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="sr-only">Previous slide</span>
               </Button>
 
               <Button
                 variant="outline"
                 size="icon"
-                className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10"
+                className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 h-8 w-8 sm:h-10 sm:w-10"
                 onClick={nextSlide}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="sr-only">Next slide</span>
               </Button>
             </>
           )}
 
-          <div className={`overflow-hidden ${totalPages > 1 ? 'mx-10' : ''}`}>
+          <div
+            className={`overflow-hidden ${
+              totalPages > 1 ? 'mx-8 sm:mx-10' : ''
+            }`}
+          >
             <motion.div
-              className="flex justify-center"
+              className="flex justify-center flex-wrap"
               initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
@@ -268,7 +294,7 @@ export const CourseList: React.FC<{ data: CourseSectionData }> = ({
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-6 sm:mt-8">
             {Array.from({ length: totalPages }).map((_, index) => (
               <Button
                 key={index}

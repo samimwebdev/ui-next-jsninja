@@ -51,7 +51,6 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ data }) => {
     const steps = 60
     const interval = duration / steps
 
-    // Initialize counts
     const initialCounts: { [key: number]: number } = {}
     data.statsCounter.forEach((stat) => {
       initialCounts[stat.id] = 0
@@ -78,32 +77,29 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ data }) => {
     return () => clearInterval(timer)
   }, [isInView, data.statsCounter])
 
-  // const formatCount = (count: number) => {
-  //   if (count >= 1000) {
-  //     return `${(count / 1000).toFixed(1)}K`
-  //   }
-  //   return count.toString()
-  // }
-
   return (
     <div
       ref={sectionRef}
-      className="w-full max-w-screen-xl space-y-8 py-12 px-8 mx-auto"
+      className="w-full max-w-screen-xl space-y-8 py-8 sm:py-12 px-4 sm:px-8 mx-auto"
     >
-      <Card className="mx-auto max-w-screen-xl p-8 rounded-3xl">
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <h2 className="text-4xl font-bold tracking-tight">{data.title}</h2>
-            <p className="text-muted-foreground">{data.description}</p>
+      <Card className="mx-auto max-w-screen-xl p-6 sm:p-8 rounded-3xl">
+        <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
+          <div className="space-y-4 text-center md:text-left">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              {data.title}
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              {data.description}
+            </p>
           </div>
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-4 sm:gap-8">
             {data.statsCounter.map((stat) => (
-              <div key={stat.id} className="space-y-2">
+              <div key={stat.id} className="space-y-2 text-center md:text-left">
                 <div
-                  className="h-5 w-5 text-muted-foreground"
+                  className="h-5 w-5 text-muted-foreground mx-auto md:mx-0"
                   dangerouslySetInnerHTML={{ __html: stat.icon.iconData }}
                 />
-                <div className="text-3xl font-bold">
+                <div className="text-2xl sm:text-3xl font-bold">
                   {counts[stat.id] || 0}
                   {stat.statsLabel.toLowerCase().includes('rate')
                     ? '%'
@@ -111,7 +107,7 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ data }) => {
                     ? '%'
                     : '+'}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   {stat.statsLabel}
                 </p>
               </div>

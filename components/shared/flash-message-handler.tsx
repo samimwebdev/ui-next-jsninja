@@ -56,6 +56,7 @@ export function FlashMessageHandler() {
       })
       cleanUpUrl('info')
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [searchParams, router])
 
   const cleanUpUrl = (param: string) => {
