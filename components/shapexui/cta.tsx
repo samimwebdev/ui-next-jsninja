@@ -16,7 +16,7 @@ const CallToAction: React.FC<{
   courseInfo: CourseInfoType
 }> = ({ data, courseInfo }) => {
   return (
-    <section className="py-20 relative overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <section className="py-12 sm:py-16 lg:py-20 relative overflow-hidden bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Subtle geometric background pattern */}
       <div className="absolute inset-0 opacity-40 dark:opacity-20">
         <div
@@ -32,10 +32,10 @@ const CallToAction: React.FC<{
       <div className="absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-accent/5 dark:from-primary/10 dark:via-transparent dark:to-accent/10"></div>
 
       {/* Optional floating elements */}
-      <div className="absolute top-10 left-10 w-32 h-32 bg-primary/5 dark:bg-primary/10 rounded-full blur-2xl"></div>
-      <div className="absolute bottom-10 right-10 w-40 h-40 bg-accent/5 dark:bg-accent/10 rounded-full blur-2xl"></div>
+      <div className="absolute top-10 left-10 w-24 h-24 sm:w-32 sm:h-32 bg-primary/5 dark:bg-primary/10 rounded-full blur-2xl"></div>
+      <div className="absolute bottom-10 right-10 w-32 h-32 sm:w-40 sm:h-40 bg-accent/5 dark:bg-accent/10 rounded-full blur-2xl"></div>
 
-      <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl relative z-10">
+      <div className="px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl relative z-10">
         {/* Pass all data to client wrapper to maintain exact animations */}
         <CTAClientWrapper
           data={data}

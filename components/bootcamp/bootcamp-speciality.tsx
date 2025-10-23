@@ -45,11 +45,11 @@ export const BootcampSpeciality: React.FC<{
   return (
     <main className="text-foreground bg-background">
       {/* Static header section - SSR */}
-      <section className="w-full py-12 md:py-16 lg:py-20 grid place-content-center text-center">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl px-8 mb-6 font-semibold text-center tracking-tight leading-[120%]">
+      <section className="w-full py-8 sm:py-12 md:py-16 lg:py-20 grid place-content-center text-center px-4">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl mb-4 sm:mb-6 font-semibold text-center tracking-tight leading-[120%] max-w-4xl mx-auto">
           {data.title}
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto px-4">
+        <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-4">
           {data.description}
         </p>
       </section>

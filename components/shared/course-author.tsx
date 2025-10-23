@@ -29,7 +29,7 @@ export const CourseAuthor: React.FC<{ data: AuthorContentSection }> = ({
   }
 
   return (
-    <section id="instructor" className="my-12">
+    <section id="instructor" className="my-12 sm:my-12 px-4 sm:px-0">
       <h2 className="text-3xl font-bold mb-6">{title}</h2>
       <div className="flex items-center space-x-4">
         <Avatar className="h-20 w-20">

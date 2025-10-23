@@ -1,64 +1,66 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { StepSection } from '@/types/bootcamp-page-types'
+import { StrapiIcon } from '@/types/shared-types'
+import dynamic from 'next/dynamic'
 
-// Lazy load the StepsClient component
 const StepsClient = dynamic(
   () => import('./steps-client').then((mod) => ({ default: mod.StepsClient })),
   {
-    ssr: false, // Disable SSR since it has interactive state
+    ssr: false,
     loading: () => <StepsClientSkeleton />,
   }
 )
 
-// Loading skeleton component that matches the StepsClient layout
-const StepsClientSkeleton = () => (
-  <Card className="w-full mx-auto">
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-64" />
-      </div>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      {/* Progress bar skeleton */}
-      <div className="flex items-center gap-2 text-sm mb-4">
-        <Skeleton className="h-4 w-12" />
-        <Skeleton className="h-4 w-4" />
-        <Skeleton className="h-4 w-8" />
-        <div className="flex-1 h-1 bg-muted rounded-full">
-          <Skeleton className="h-full w-1/3 rounded-full" />
-        </div>
-      </div>
+export const StepsClientSkeleton = () => (
+  <div className="w-full max-w-lg lg:max-w-md bg-card rounded-lg shadow-xl p-4 sm:p-6 lg:p-8 border">
+    {/* Header */}
+    <div className="mb-4 sm:mb-6">
+      <Skeleton className="h-6 sm:h-7 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-5/6 mt-1" />
+    </div>
 
-      {/* Steps skeleton */}
-      <div className="space-y-4">
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className="rounded-lg border bg-card p-4">
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-5 flex-1" />
-              <Skeleton className="h-5 w-5" />
+    {/* Progress */}
+    <div className="mb-4 sm:mb-6">
+      <Skeleton className="h-3 sm:h-4 w-24 sm:w-32 mb-2" />
+      <Skeleton className="h-2 w-full rounded-full" />
+    </div>
+
+    {/* Step cards */}
+    <div className="space-y-3 sm:space-y-4">
+      {[1, 2].map((i) => (
+        <div
+          key={i}
+          className="bg-muted/30 rounded-lg p-3 sm:p-4 border border-border/50"
+        >
+          <div className="flex items-start gap-3">
+            <Skeleton className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <Skeleton className="h-4 sm:h-5 w-full mb-2" />
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-4/5 mt-1" />
             </div>
+            <Skeleton className="w-4 h-4 flex-shrink-0" />
           </div>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
+        </div>
+      ))}
+    </div>
+  </div>
 )
 
 interface StepsLazyProps {
   secondaryHeading: string
   secondaryDescription: string
-  steps: StepSection[]
+  steps: Array<{
+    id: number
+    title: string
+    isCompleted: boolean
+    details: string
+    icon: StrapiIcon | null
+  }>
 }
 
 export const StepsLazy: React.FC<StepsLazyProps> = (props) => {
   return <StepsClient {...props} />
 }
-
-// Export the skeleton separately for use in other components
-export { StepsClientSkeleton }

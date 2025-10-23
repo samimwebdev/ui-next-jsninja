@@ -217,35 +217,35 @@ export default async function CoursePage({ params }: CoursePageProps) {
       <CourseTracking {...courseInfo} />
 
       <div className="bg-background text-foreground">
-        <main className="container mx-auto px-4 max-w-screen-xl">
-          {/* Hero Section - Server Component with Animation Wrapper */}
+        <main className="container mx-auto px-4 sm:px-6 max-w-screen-xl">
+          {/* Hero Section */}
           {heroData && (
             <AnimatedSection animation="fadeInUp" delay={0.1} className="mb-8">
               <CourseHero data={heroData} courseInfo={courseInfo} />
             </AnimatedSection>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Main Content */}
             {courseData && (
-              <div className="lg:col-span-2 order-2 md:order-2 lg:order-1">
-                {/* Course Tabs - Server Component with Animation */}
+              <div className="lg:col-span-2 order-2 lg:order-1">
+                {/* Course Tabs */}
                 <AnimatedSection
                   animation="fadeInUp"
                   delay={0.2}
-                  className="mb-8"
+                  className="mb-6 sm:mb-8"
                 >
                   <CourseTabs data={courseData} />
                 </AnimatedSection>
 
-                {/* Overview Section */}
+                {/* Overview */}
                 {courseData.overviewFeatures && (
                   <AnimatedSection animation="fadeInUp" delay={0.3}>
                     <Overview data={courseData.overviewFeatures} />
                   </AnimatedSection>
                 )}
 
-                {/* Curriculum Section - Using sanitized data */}
+                {/* Curriculum */}
                 {sanitizedCurriculum && (
                   <AnimatedSection animation="fadeInUp" delay={0.4}>
                     <CourseCurriculum
@@ -255,35 +255,35 @@ export default async function CoursePage({ params }: CoursePageProps) {
                   </AnimatedSection>
                 )}
 
-                {/* Author Section */}
+                {/* Author */}
                 {authorData && (
                   <AnimatedSection animation="fadeInUp" delay={0.5}>
                     <CourseAuthor data={authorData} />
                   </AnimatedSection>
                 )}
 
-                {/* Review Section */}
+                {/* Reviews */}
                 {reviewData && (
                   <AnimatedSection animation="revealSection" delay={0.6}>
                     <ReviewSlider data={reviewData} />
                   </AnimatedSection>
                 )}
 
-                {/* FAQ Section */}
+                {/* FAQ */}
                 {faqData && (
                   <AnimatedSection animation="fadeInUp" delay={0.7}>
                     <CourseFAQ data={faqData} />
                   </AnimatedSection>
                 )}
 
-                {/* Project Section */}
+                {/* Projects */}
                 {projectData && (
                   <AnimatedSection animation="scrollFadeIn" delay={0.8}>
                     <ProjectShowcase data={projectData} />
                   </AnimatedSection>
                 )}
 
-                {/* Course Bundle Section */}
+                {/* Bundle */}
                 {courseBundleData && (
                   <AnimatedSection animation="fadeInUp" delay={0.9}>
                     <CourseBundle
@@ -295,8 +295,8 @@ export default async function CoursePage({ params }: CoursePageProps) {
               </div>
             )}
 
-            {/* Sidebar - Client Component for Interactivity */}
-            <div className="lg:col-span-1 space-y-6 order-1 md:order-1 lg:order-2">
+            {/* Sidebar */}
+            <div className="lg:col-span-1 order-1 lg:order-2">
               <AnimatedSection
                 animation="fadeInUp"
                 delay={0.3}

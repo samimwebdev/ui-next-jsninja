@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useEnrollmentCheck } from '@/hooks/use-enrollment-check'
 import { useEffect } from 'react'
 import { trackEnrollmentStart } from '../analytics/vercel-analytics'
-import { CountdownTimer } from '@/components/shared/countdown-timer' // Import the countdown timer
+import { CountdownTimer } from '@/components/shared/countdown-timer'
 import { formatPrice } from '@/lib/course-utils'
 
 interface PricingPackageData {
@@ -34,7 +34,7 @@ interface PricingClientWrapperProps {
     isLiveRegistrationAvailable: boolean
     liveBootcampPrice?: number
     isRecordedRegistrationAvailable: boolean
-    endDate: string | null // Add endDate field
+    endDate: string | null
     actualPrice?: number | null
   }
 }
@@ -55,7 +55,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   }, [slug, checkEnrollment, checkAuthOnly])
 
   const handleClick = async () => {
-    // Check enrollment status first
     const enrollLink = `/checkout?courseSlug=${courseInfo.slug}&courseType=${courseInfo.courseType}&packageType=${packageData.packageType}`
     const enrolled = await checkEnrollment(courseInfo.slug)
     const auth = await checkAuthOnly()
@@ -66,24 +65,20 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
     }
 
     if (enrolled) {
-      // User is enrolled, go to course
       router.push(`/course-view/${courseInfo.slug}`)
     } else {
-      // Use the discounted price for tracking
       trackEnrollmentStart({
         slug: courseInfo.slug,
         title: courseInfo.title,
-        price: courseInfo.price, // This is now the discounted price
+        price: courseInfo.price,
         courseType: courseInfo.courseType,
         packageType: packageData.packageType,
       })
 
-      // User not enrolled, go to checkout
       router.push(enrollLink)
     }
   }
 
-  // Create fallback icons with proper iconData
   const createFallbackIcon = (iconName: string) => ({
     iconName,
     width: 24,
@@ -99,7 +94,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
   })
 
   const getButtonContent = () => {
-    // If user is already enrolled, show access button
     if (isEnrolled) {
       return {
         label: 'Access Course',
@@ -108,7 +102,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // If general registration is closed, disable all packages
     if (!isRegistrationOpen) {
       return {
         label: 'Registration Closed',
@@ -117,7 +110,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // Handle Live Package
     if (packageData.packageType === 'live') {
       if (!courseInfo.isLiveRegistrationAvailable) {
         return {
@@ -134,7 +126,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // Handle Recorded Package
     if (packageData.packageType === 'record') {
       if (!courseInfo.isRecordedRegistrationAvailable) {
         return {
@@ -151,7 +142,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       }
     }
 
-    // Fallback for any other package types
     return {
       label: packageData.btn?.btnLabel || 'Enroll Now',
       icon: packageData.btn?.btnIcon || createFallbackIcon('mdi:wallet'),
@@ -161,7 +151,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
 
   const buttonContent = getButtonContent()
 
-  // Check if countdown should be shown (only for active registrations)
   const shouldShowCountdown =
     !isEnrolled && isRegistrationOpen && !buttonContent.disabled && endDate
 
@@ -170,7 +159,6 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
       ? courseInfo?.liveBootcampPrice ?? courseInfo?.price
       : courseInfo?.price
 
-  // Calculate discount percentage if actualPrice exists
   const discountPercentage =
     actualPrice && actualPrice > packagePrice
       ? Math.round(((actualPrice - packagePrice) / actualPrice) * 100)
@@ -180,51 +168,50 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
     <>
       {/* Countdown Timer */}
       {shouldShowCountdown && (
-        <CountdownTimer
-          endDate={endDate}
-          title={
-            packageType === 'live'
-              ? 'Live Session Starts Soon!'
-              : 'Limited Time Offer!'
-          }
-          subtitle={
-            packageType === 'live'
-              ? 'Registration closes in:'
-              : 'Enrollment ends in:'
-          }
-        />
+        <div className="mb-4">
+          <CountdownTimer
+            endDate={endDate}
+            title={
+              packageType === 'live'
+                ? 'Live Session Starts Soon!'
+                : 'Limited Time Offer!'
+            }
+            subtitle={
+              packageType === 'live'
+                ? 'Registration closes in:'
+                : 'Enrollment ends in:'
+            }
+          />
+        </div>
       )}
 
-      {/* Price Display - IMPROVED CONSISTENCY */}
-      <div className="mb-6 text-center">
-        <div className="flex items-baseline justify-center gap-3 mb-2">
-          {/* Discounted Price (Current Price) */}
-          <span className="text-4xl font-bold text-ninja-gold">
+      {/* Price Display - Responsive */}
+      <div className="mb-4 sm:mb-6 text-center">
+        <div className="flex items-baseline justify-center gap-2 sm:gap-3 mb-2">
+          <span className="text-3xl sm:text-4xl font-bold text-ninja-gold">
             {formatPrice(packagePrice)}
           </span>
 
-          {/* Original Price (Crossed Out) - ALIGNED TO BASELINE */}
           {actualPrice && actualPrice > price && (
-            <span className="text-xl text-gray-500 dark:text-gray-400 line-through">
+            <span className="text-lg sm:text-xl text-gray-500 dark:text-gray-400 line-through">
               {formatPrice(actualPrice)}
             </span>
           )}
         </div>
 
-        {/* Discount Badge - IMPROVED SPACING */}
         {discountPercentage && (
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
+          <div className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
             <span>Save {discountPercentage}%</span>
           </div>
         )}
       </div>
 
-      {/* Enroll Button - IMPROVED ALIGNMENT */}
+      {/* Enroll Button - Responsive */}
       <Button
         size="lg"
         className={`${
           packageType === 'live' && 'btn-ninja-primary'
-        } w-full py-3 px-6 transition-all duration-300 disabled:cursor-not-allowed mt-auto flex items-center justify-center gap-2 ${
+        } w-full py-2.5 sm:py-3 px-4 sm:px-6 text-sm sm:text-base transition-all duration-300 disabled:cursor-not-allowed mt-auto flex items-center justify-center gap-2 ${
           buttonContent.disabled
             ? 'opacity-60 cursor-not-allowed'
             : 'hover:scale-[1.02] hover:shadow-lg'
@@ -236,7 +223,7 @@ export const PricingClientWrapper: React.FC<PricingClientWrapperProps> = ({
         {buttonContent.icon && (
           <DynamicIcon
             icon={buttonContent.icon}
-            className="h-5 w-5" // Slightly larger icon
+            className="h-4 w-4 sm:h-5 sm:w-5"
             width={20}
             height={20}
           />

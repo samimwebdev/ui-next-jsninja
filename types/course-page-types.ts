@@ -131,6 +131,7 @@ export type CourseComponentDataMap = {
 // Re-export shared types for convenience
 export type {
   StrapiImage,
+  OverviewFeature,
   StrapiIcon,
   Category,
   Project,

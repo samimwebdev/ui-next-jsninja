@@ -40,11 +40,11 @@ export function HeroSection({
             {heroSectionData.shortLabel}
           </Badge>
 
-          <h1 className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[20ch] md:max-w-[15ch] text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight text-gradient-ninja">
+          <h1 className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[20ch] text-4xl md:text-5xl font-black leading-[1.1] tracking-tight text-gradient-ninja">
             {heroSectionData.title}
           </h1>
 
-          <p className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[60ch] text-base sm:text-lg">
+          <p className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[60ch] text-sm sm:text-lg">
             {heroSectionData.shortDescription}
           </p>
 

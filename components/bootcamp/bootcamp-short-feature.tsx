@@ -16,7 +16,7 @@ const BootcampShortFeature = ({
       {features.map((eachFeature, index) => (
         <div
           key={eachFeature.id || index}
-          className="flex flex-col min-h-[250px] border rounded-xl py-6 px-5 w-full md:w-auto flex-1 hover:shadow-lg transition-all duration-300 hover:border-primary/20 hover:-translate-y-1 bg-card/50 "
+          className="flex flex-col items-center md:items-start text-center md:text-left min-h-[250px] border rounded-xl py-6 px-5 w-full md:w-auto flex-1 hover:shadow-lg transition-all duration-300 hover:border-primary/20 hover:-translate-y-1 bg-card/50"
         >
           <div className="mb-4 h-12 w-12 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/30 rounded-full shadow-sm">
             {eachFeature.icon ? (

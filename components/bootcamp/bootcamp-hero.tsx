@@ -50,9 +50,10 @@ export const BootcampHero = ({
   const assessmentButton = buttons[1]
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
-        <div>
+    <div className="flex items-center justify-center w-full">
+      <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 px-4 sm:px-6 py-8 sm:py-12">
+        {/* Text Content - Centered on mobile */}
+        <div className="text-center lg:text-left">
           <AnimatedSection animation="fadeInUp">
             <Badge className="bg-gradient-ninja-primary rounded-full py-1 border-none">
               {shortLabel}
@@ -60,17 +61,20 @@ export const BootcampHero = ({
           </AnimatedSection>
 
           <AnimatedSection animation="fadeInUp">
-            <h1 className="mt-6 max-w-[500px] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
+            <h1 className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[20ch] md:max-w-[30ch] lg:max-w-[40ch] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight">
               {title}
             </h1>
           </AnimatedSection>
+
           <AnimatedSection animation="fadeInUp">
-            <p className="mt-6 max-w-[60ch] text-lg">{description}</p>
+            <p className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[60ch] text-base sm:text-lg">
+              {description}
+            </p>
           </AnimatedSection>
 
           <AnimatedSection
             animation="fadeInUp"
-            className="mt-12 flex items-center gap-4"
+            className="mt-6 sm:mt-12 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4"
           >
             <HeroButtonClient
               enrollButton={enrollButton}
@@ -84,21 +88,17 @@ export const BootcampHero = ({
             />
           </AnimatedSection>
 
-          <AnimatedSection className="pt-8 border-white/10">
-            <div className="flex items-center gap-4">
-              <AnimatedAvatars
-                users={enrolledUsersData?.data || []}
-                totalUsers={
-                  totalStudents || enrolledUsersData?.data.length || 0
-                }
-                avatarSize="sm"
-                message="who enrolled in this bootcamp"
-              />
-            </div>
+          <AnimatedSection className="pt-6 sm:pt-8 flex justify-center lg:justify-start">
+            <AnimatedAvatars
+              users={enrolledUsersData?.data || []}
+              totalUsers={totalStudents || enrolledUsersData?.data.length || 0}
+              avatarSize="sm"
+              message="who enrolled in this bootcamp"
+            />
           </AnimatedSection>
         </div>
 
-        {/* Video - Lazy loaded */}
+        {/* Video */}
         <div>
           <AnimatedSection animation="fadeInUp">
             <Suspense fallback={<VideoPlayerSkeleton aspectRatio="video" />}>

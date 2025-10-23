@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic'
 import { Skeleton } from '@/components/ui/skeleton'
-// import { Module } from '@/types/shared-types'
 import { Lesson } from '@/types/course-page-types'
 
 // Lazy load the CurriculumClient component
@@ -21,8 +20,8 @@ const CurriculumClient = dynamic(
 const CurriculumSkeleton = () => (
   <div className="mt-3 space-y-4">
     {/* Header stats skeleton */}
-    <div className="mb-6">
-      <Skeleton className="h-4 w-48" />
+    <div className="mb-4 sm:mb-6">
+      <Skeleton className="h-4 w-32 sm:w-48" />
     </div>
 
     <div className="space-y-3">
@@ -32,59 +31,59 @@ const CurriculumSkeleton = () => (
           className="border border-border rounded-lg overflow-hidden bg-card shadow-sm"
         >
           {/* Module header skeleton */}
-          <div className="flex items-center justify-between px-6 py-4">
-            <div className="flex items-center gap-4 text-left flex-1">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center gap-3 sm:gap-4 text-left flex-1 min-w-0">
               {/* Module number */}
-              <Skeleton className="w-8 h-8 rounded-full" />
+              <Skeleton className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex-shrink-0" />
 
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 {/* Module title */}
-                <Skeleton className="h-5 w-4/5 mb-2" />
+                <Skeleton className="h-4 sm:h-5 w-4/5 mb-2" />
 
                 {/* Module stats */}
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-3 w-16" />
-                  <Skeleton className="h-3 w-12" />
-                  <Skeleton className="h-3 w-12" />
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <Skeleton className="h-3 w-12 sm:w-16" />
+                  <Skeleton className="h-3 w-10 sm:w-12" />
+                  <Skeleton className="h-3 w-10 sm:w-12" />
                 </div>
               </div>
             </div>
 
             {/* Chevron icon */}
-            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-4 flex-shrink-0" />
           </div>
 
-          {/* Lessons skeleton (show for first module to simulate expanded state) */}
+          {/* Lessons skeleton (show for first module) */}
           {moduleIndex === 0 && (
             <div className="bg-muted/20 border-t">
               {Array.from({ length: 4 }).map((_, lessonIndex) => (
                 <div
                   key={lessonIndex}
-                  className="flex items-center justify-between px-6 py-4 border-b border-border/50 last:border-b-0"
+                  className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-border/50 last:border-b-0"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     {/* Lesson number */}
-                    <Skeleton className="w-6 h-6 rounded-full" />
+                    <Skeleton className="w-5 h-5 sm:w-6 sm:h-6 rounded-full flex-shrink-0" />
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                       {/* Video icon */}
-                      <Skeleton className="h-5 w-5 rounded" />
+                      <Skeleton className="h-4 w-4 sm:h-5 sm:w-5 rounded flex-shrink-0" />
 
-                      <div>
+                      <div className="min-w-0 flex-1">
                         {/* Lesson title */}
-                        <Skeleton className="h-4 w-56 mb-1" />
+                        <Skeleton className="h-3 sm:h-4 w-full max-w-[200px] sm:max-w-[300px] mb-1" />
                         {/* Lesson type */}
-                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-2 sm:h-3 w-16 sm:w-20" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     {/* Duration */}
-                    <Skeleton className="h-3 w-8" />
+                    <Skeleton className="h-3 w-6 sm:w-8" />
 
                     {/* Badge */}
-                    <Skeleton className="h-6 w-20 rounded-full" />
+                    <Skeleton className="h-5 w-16 sm:h-6 sm:w-20 rounded-full hidden sm:block" />
                   </div>
                 </div>
               ))}
@@ -93,8 +92,8 @@ const CurriculumSkeleton = () => (
 
           {/* Show partial content for other modules */}
           {moduleIndex > 0 && moduleIndex < 3 && (
-            <div className="bg-muted/10 border-t px-6 py-3">
-              <Skeleton className="h-3 w-32" />
+            <div className="bg-muted/10 border-t px-4 sm:px-6 py-2 sm:py-3">
+              <Skeleton className="h-3 w-24 sm:w-32" />
             </div>
           )}
         </div>
@@ -103,7 +102,7 @@ const CurriculumSkeleton = () => (
 
     {/* Loading indicator */}
     <div className="text-center py-4">
-      <Skeleton className="h-4 w-40 mx-auto" />
+      <Skeleton className="h-4 w-32 sm:w-40 mx-auto" />
     </div>
   </div>
 )
@@ -116,6 +115,7 @@ interface CurriculumLazyProps {
     duration: number
     title: string
     lessons: Lesson[]
+    releaseDate: Date | null
   }>
 }
 

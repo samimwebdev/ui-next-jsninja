@@ -164,17 +164,17 @@ export const Navigation = ({
                 {/* ✅ Enhanced Sign Up Button with active state */}
                 <Button
                   variant={isRegisterPage ? 'default' : 'outline'}
-                  className={`h-10 transition-colors ${
+                  className={`hidden sm:inline-flex h-10 transition-colors ${
                     isRegisterPage
-                      ? 'bg-primary/90 text-primary-foreground shadow-lg ring-2 ring-primary/20'
+                      ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/20'
                       : 'hover:bg-accent hover:text-accent-foreground'
                   }`}
                   asChild
                 >
                   <Link href="/register">Register</Link>
                 </Button>
-
                 <ThemeSwitcher />
+                {/* ✅ Mobile Navigation */}
                 <div className="md:hidden">
                   <NavigationSheet
                     isLoggedIn={false}
