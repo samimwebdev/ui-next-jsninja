@@ -1,9 +1,9 @@
-import { COOKIE, REFRESH_COOKIE } from '@/middleware'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL!
-
+const ACCESS_COOKIE = process.env.ACCESS_COOKIE || 'jsn_jwt'
+const REFRESH_COOKIE = process.env.REFRESH_COOKIE || 'jsn_refresh'
 // This file is used to interact with the Strapi API.
 // It provides a function to fetch data from the Strapi backend.
 // The function supports custom headers, caching, and Next.js revalidation.
@@ -49,6 +49,7 @@ export async function strapiFetch<T>(
         const refreshCookie = cookieStore.get(REFRESH_COOKIE)
 
         if (!refreshCookie) {
+          console.log('No RefreshToken  in strapi fetch')
           // No refresh token, redirect to login
           redirect('/login?session_expired=true')
         }
@@ -67,8 +68,13 @@ export async function strapiFetch<T>(
               cache: 'no-store',
             }
           )
+
+          console.log(
+            { refreshResponse },
+            'new Access Token using refreshToken in strapi fetch'
+          )
           if (refreshResponse.ok) {
-            const accessCookie = cookieStore.get(COOKIE)
+            const accessCookie = cookieStore.get(ACCESS_COOKIE)
             const token = accessCookie?.value
             console.log('Get AccessToken using refresh Token in strapi fetch')
             // Token refreshed, retry original request

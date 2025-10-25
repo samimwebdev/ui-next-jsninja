@@ -97,7 +97,7 @@ export async function getUser(): Promise<User | null> {
   }
 
   try {
-    return await strapiFetch(`/api/users/me`, {
+    return await strapiFetch(`/api/users/me?populate=role`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
     })
@@ -158,6 +158,6 @@ export async function clearInvalidAuthCookie() {
 export async function isAuthenticated(): Promise<boolean> {
   'use server'
   const token = await getAuthToken()
-  console.log('Auth token presence:', token) // Debug log
+
   return !!token
 }

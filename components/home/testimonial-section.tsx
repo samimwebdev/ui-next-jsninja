@@ -38,22 +38,23 @@ const ReviewCard = ({
 }) => (
   <Card
     className={cn(
+      // Set fixed height and ensure all cards have same baseline height
       'transition-transform duration-300 flex flex-col',
       isMobile
-        ? 'scale-100 max-h-auto min-h-[280px]' // Auto height on mobile with minimum
+        ? 'scale-100 h-72'
         : isCurrent
         ? 'bg-muted/50 scale-110 shadow-lg border-primary/20 h-72'
         : 'scale-90 h-72'
     )}
   >
-    <CardContent className="p-4 sm:p-6 flex flex-col h-auto">
-      <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 flex-shrink-0">
-        <Avatar className="size-12 sm:size-14 flex-shrink-0">
+    <CardContent className="p-6 flex flex-col h-full">
+      <div className="flex items-center gap-4 mb-4 flex-shrink-0">
+        <Avatar className="size-14">
           <AvatarImage
             src={review?.profile?.image?.formats?.thumbnail?.url}
             alt={review.reviewerName}
           />
-          <AvatarFallback className="text-sm">
+          <AvatarFallback>
             {review.reviewerName
               .split(' ')
               .map((n) => n[0])
@@ -61,22 +62,19 @@ const ReviewCard = ({
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
+          <h3 className="font-semibold text-foreground truncate">
             {review.reviewerName}
           </h3>
-          <p className="text-muted-foreground text-xs sm:text-sm truncate">
+          <p className="text-muted-foreground text-sm truncate">
             {review?.courses?.[0]?.title}
           </p>
         </div>
       </div>
 
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Use flex-1 to fill remaining space and add scrolling for long content */}
+      <div className="flex-1 overflow-hidden">
         <p
-          className={cn(
-            'text-muted-foreground text-xs sm:text-sm leading-relaxed',
-            isMobile ? 'line-clamp-none' : 'line-clamp-6'
-          )}
+          className="text-muted-foreground text-sm leading-relaxed line-clamp-6"
           dangerouslySetInnerHTML={{ __html: review.reviewDetails }}
         />
       </div>
@@ -95,27 +93,27 @@ const NavigationControls = ({
   onPrevious: () => void
   onNext: () => void
 }) => (
-  <div className="flex items-center justify-center gap-3 sm:gap-4 mt-4 sm:mt-6">
+  <div className="flex items-center justify-center gap-4 mt-2">
     <Button
       variant="outline"
       size="icon"
       onClick={onPrevious}
-      className="rounded-full h-8 w-8 sm:h-10 sm:w-10"
+      className="rounded-full"
       aria-label="Previous review"
     >
-      <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+      <ChevronLeft className="h-4 w-4" />
     </Button>
-    <span className="text-xs sm:text-sm text-muted-foreground min-w-[60px] text-center">
+    <span className="text-sm text-muted-foreground">
       {currentIndex + 1} / {totalItems}
     </span>
     <Button
       variant="outline"
       size="icon"
       onClick={onNext}
-      className="rounded-full h-8 w-8 sm:h-10 sm:w-10"
+      className="rounded-full"
       aria-label="Next review"
     >
-      <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+      <ChevronRight className="h-4 w-4" />
     </Button>
   </div>
 )
@@ -169,14 +167,11 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
 
   if (reviews.length === 0) {
     return (
-      <section
-        className="w-full max-w-screen-xl px-4 sm:px-6 py-8 sm:py-12"
-        aria-label="Customer reviews"
-      >
-        <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 max-w-3xl mx-auto text-foreground">
+      <section className="px-4 py-6" aria-label="Customer reviews">
+        <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto text-foreground">
           {reviewSectionData.title || 'Customer Reviews'}
         </h1>
-        <p className="text-center text-sm sm:text-base text-muted-foreground">
+        <p className="text-center text-muted-foreground">
           No reviews available at the moment.
         </p>
       </section>
@@ -184,22 +179,14 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
   }
 
   return (
-    <section
-      className="w-full max-w-screen-xl px-4 sm:px-6 py-8 sm:py-12"
-      aria-label="Customer reviews"
-    >
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 max-w-3xl mx-auto text-foreground">
+    <section className="px-4 py-6" aria-label="Customer reviews">
+      <h1 className="text-4xl font-bold text-center mb-12 max-w-3xl mx-auto text-foreground">
         {reviewSectionData.title || 'Customer Reviews'}
       </h1>
 
       <div className="relative max-w-6xl mx-auto">
-        {/* Responsive height container */}
-        <div
-          className={cn(
-            'flex items-center justify-center overflow-hidden',
-            isMobile ? 'min-h-[320px]' : 'h-80'
-          )}
-        >
+        {/* Fixed height container to ensure consistent alignment */}
+        <div className="flex items-center justify-center h-80 overflow-hidden">
           <div
             className={cn(
               'flex items-center w-full',
@@ -210,16 +197,12 @@ export const TestimonialSection: React.FC<{ data: ReviewSectionData }> = ({
               {visibleReviews.map((review, idx) => (
                 <motion.div
                   key={review.id}
-                  className={cn(
-                    'flex justify-center',
-                    isMobile ? 'w-full max-w-md' : 'flex-1'
-                  )}
+                  className="flex-1 flex justify-center"
                   initial={{ opacity: 0, x: direction > 0 ? 200 : -200 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: direction > 0 ? -200 : 200 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className={cn('w-full', !isMobile && 'max-w-sm')}>
+                  <div className="w-full max-w-sm">
                     <ReviewCard
                       review={review}
                       isCurrent={!isMobile && idx === 1}

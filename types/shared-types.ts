@@ -300,6 +300,12 @@ export type User = {
   blocked?: boolean
   profile?: Profile
   enableTotp?: boolean
+  role: {
+    id: number
+    name: string
+    description: string
+    type: string
+  }
 } | null
 
 export interface UserWithProfile {
