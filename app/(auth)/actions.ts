@@ -404,9 +404,9 @@ export async function verifyOTPAction(
     const cookieStore = await cookies()
     const tempToken = cookieStore.get('temp_jwt')?.value
 
-    const tempRefresh =
-      cookieStore.get('temp_refresh')?.value ||
-      cookieStore.get('strapi_up_refresh')?.value
+    const tempRefresh = cookieStore.get('temp_refresh')?.value
+
+    console.log({ tempToken, tempRefresh }, 'Token in login Action')
 
     if (!tempToken || !tempRefresh) {
       return {

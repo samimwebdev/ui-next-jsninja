@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtDecode } from 'jwt-decode'
 
-export const COOKIE = 'jsn_jwt'
-export const REFRESH_COOKIE = 'jsn_refresh'
+const ACCESS_COOKIE = process.env.ACCESS_COOKIE || 'jsn_jwt'
+const REFRESH_COOKIE = process.env.REFRESH_COOKIE || 'jsn_refresh'
 
 interface JWTPayload {
   userId: string
@@ -51,7 +51,7 @@ function isTokenExpired(token: string): boolean {
 /**
  * Refresh the access token using refresh token
  */
-export async function refreshAccessToken(
+async function refreshAccessToken(
   refreshToken: string
 ): Promise<RefreshResponse | null> {
   try {
@@ -88,7 +88,7 @@ export function setAuthCookies(
   jwt: string,
   refreshToken: string
 ) {
-  response.cookies.set(COOKIE, jwt, {
+  response.cookies.set(ACCESS_COOKIE, jwt, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -109,15 +109,15 @@ export function setAuthCookies(
  * Clear authentication cookies
  */
 function clearAuthCookies(response: NextResponse) {
-  response.cookies.delete(COOKIE)
+  response.cookies.delete(ACCESS_COOKIE)
   response.cookies.delete(REFRESH_COOKIE)
 }
 
-export async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Get cookies
-  const tokenCookie = request.cookies.get(COOKIE)
+  const tokenCookie = request.cookies.get(ACCESS_COOKIE)
   const refreshCookie = request.cookies.get(REFRESH_COOKIE)
 
   const token = tokenCookie?.value
@@ -131,12 +131,14 @@ export async function middleware(request: NextRequest) {
 
   // ✅ CASE 1: No tokens at all
   if (!token && !refreshToken) {
+    // ✅ Only log if trying to access protected route
     if (isProtectedRoute) {
+      console.log('[Auth] No tokens found, redirecting to login:', pathname)
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
-    // Allow access to public and auth routes
+    // ✅ Silent pass for public routes and auth routes
     return NextResponse.next()
   }
 
@@ -147,7 +149,7 @@ export async function middleware(request: NextRequest) {
 
     // ✅ If refresh token itself is expired, logout user
     if (refreshTokenExpired) {
-      console.log('RefreshToken Expired')
+      console.log('[Auth] Refresh token expired')
       if (isProtectedRoute) {
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('redirect', pathname)
@@ -164,10 +166,12 @@ export async function middleware(request: NextRequest) {
 
     // ✅ Refresh access token if needed
     if (needsRefresh) {
+      console.log('Need Refresh [auth]')
       const refreshResult = await refreshAccessToken(refreshToken)
-      console.log('Get Access Token via Refresh Token in Middleware')
 
       if (refreshResult) {
+        console.log('[Auth] Access token refreshed successfully')
+
         // ✅ Create appropriate response
         let response: NextResponse
 
@@ -185,6 +189,7 @@ export async function middleware(request: NextRequest) {
 
         return response
       } else {
+        console.log('[Auth] Refresh failed, clearing session')
         // ✅ Refresh failed - logout user
         if (isProtectedRoute) {
           const loginUrl = new URL('/login', request.url)
@@ -216,10 +221,29 @@ export async function middleware(request: NextRequest) {
 
   // ✅ CASE 4: Fallback - no valid tokens
   if (isProtectedRoute) {
+    console.log('[Auth] Invalid tokens, redirecting to login:', pathname)
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
   return NextResponse.next()
+}
+
+// ✅ Configure which paths the middleware should run on
+// Configure which paths the middleware should run on
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - _next/webpack-hmr (hot module replacement)
+     * - api routes that handle their own auth
+     * - static files (images, fonts, etc.)
+     * - metadata files (favicon, sitemap, robots, manifest)
+     * - service worker files
+     */
+    '/((?!_next/static|_next/image|_next/webpack-hmr|favicon.ico|sitemap.xml|robots.txt|manifest.json|sw.js|workbox-.*\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|eot|otf|css|js|map)$).*)',
+  ],
 }

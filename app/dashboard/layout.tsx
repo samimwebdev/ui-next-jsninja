@@ -3,6 +3,7 @@ import { SidebarNav } from '@/components/dashboard/sidebar-nav'
 import { UserProfile } from '@/components/dashboard/user-profile'
 import { FlashMessageHandler } from '@/components/shared/flash-message-handler'
 import { getUser } from '@/lib/auth'
+import { canReviewTasks } from '@/lib/actions/task-review-actions'
 
 import { EmailVerificationBanner } from '@/components/auth/email-verification-banner'
 import { TwoFactorPromptBanner } from '@/components/auth/two-factor-verification-banner'
@@ -10,7 +11,8 @@ import { TwoFactorPromptBanner } from '@/components/auth/two-factor-verification
 // Force dynamic rendering for all dashboard routes
 export const dynamic = 'force-dynamic'
 
-const sidebarNavItems = [
+// Base sidebar items
+const baseSidebarItems = [
   {
     title: 'Profile',
     href: '/dashboard/profile',
@@ -61,6 +63,20 @@ export default async function DashboardLayout({
   // Check authentication
   const user = await getUser()
 
+  // Check if user can review tasks
+  const hasReviewPermission = await canReviewTasks()
+
+  // Add Review Tasks menu item for Admins and Moderators
+  const sidebarNavItems = hasReviewPermission
+    ? [
+        ...baseSidebarItems,
+        {
+          title: 'Review Tasks',
+          href: '/dashboard/review-tasks',
+        },
+      ]
+    : baseSidebarItems
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <FlashMessageHandler />
@@ -70,6 +86,7 @@ export default async function DashboardLayout({
         <EmailVerificationBanner userEmail={user.email} />
       )}
 
+      {/* ✅ Two-Factor Authentication Banner */}
       {user && user.confirmed && !user.enableTotp && <TwoFactorPromptBanner />}
 
       {/* User Profile Header */}
