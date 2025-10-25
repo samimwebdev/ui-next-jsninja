@@ -20,13 +20,7 @@ export const BootcampPricing: React.FC<{
     actualPrice?: number | null
   }
 }> = ({ data, courseInfo }) => {
-  // Server-side HTML parsing using cheerio-like approach or regex
-
-  // const liveBootcampPrice = courseInfo.liveBootcampPrice
-  // const recordedBootcampPrice = courseInfo.price
-
   const parseChecklist = (htmlString: string) => {
-    // Simple regex approach for server-side parsing
     const matches = htmlString.match(
       /class="todo-list__label__description"[^>]*>([^<]*)</g
     )
@@ -41,70 +35,68 @@ export const BootcampPricing: React.FC<{
   }
 
   return (
-    <section id="bootcamp-pricing" className="w-full py-16 bg-background">
-      <div className="container max-w-7xl mx-auto px-4 md:px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+    <section
+      id="bootcamp-pricing"
+      className="w-full py-8 sm:py-12 lg:py-16 bg-background px-4 sm:px-6"
+    >
+      <div className="container max-w-7xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4">
             {data.title}
           </h2>
-          <p className="text-muted-foreground text-lg">{data.description}</p>
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto px-4">
+            {data.description}
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
           {data.package.map((pkg) => {
             const features = parseChecklist(pkg.details)
 
             return (
               <Card
                 key={pkg.id}
-                className="relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 p-8"
+                className="relative overflow-hidden border-2 hover:border-primary/50 transition-all duration-300 p-6 sm:p-8 flex flex-col"
               >
                 {pkg.isPreferred && (
-                  <Badge className="absolute top-6 right-6 bg-primary/10 hover:bg-primary/10 text-foreground">
+                  <Badge className="absolute top-4 sm:top-6 right-4 sm:right-6 bg-primary/10 hover:bg-primary/10 text-foreground text-xs sm:text-sm px-2 sm:px-3 py-1">
                     Most Popular
                   </Badge>
                 )}
 
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="p-3 rounded-lg bg-primary/10">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="p-2 sm:p-3 rounded-lg bg-primary/10 flex-shrink-0">
                     {pkg.packageIcon ? (
                       <DynamicIcon
                         icon={pkg.packageIcon}
-                        className="h-6 w-6 text-primary"
+                        className="h-5 w-5 sm:h-6 sm:w-6 text-primary"
                         width={24}
                         height={24}
                       />
                     ) : (
-                      <Check className="h-6 w-6 text-primary" />
+                      <Check className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     )}
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold">{pkg.name}</h3>
-                    <p className="text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xl sm:text-2xl font-bold mb-1">
+                      {pkg.name}
+                    </h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">
                       {pkg.shortDescription}
                     </p>
                   </div>
                 </div>
 
-                {/* <div className="mb-6">
-                  <p className="text-3xl font-bold">
-                    {pkg.packageType === 'live'
-                      ? formatPrice(liveBootcampPrice)
-                      : formatPrice(recordedBootcampPrice)}
-                  </p>
-                </div> */}
-
-                <div className="space-y-4 mb-8">
+                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
                   {features.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary mt-0.5" />
-                      <span>{feature}</span>
+                      <Check className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <span className="text-sm sm:text-base">{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className=" flex flex-col">
-                  {/* Client component for button interactions */}
+                <div className="flex flex-col mt-auto">
                   <PricingClientWrapper
                     packageData={{
                       id: pkg.id,

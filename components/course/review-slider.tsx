@@ -9,8 +9,6 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
   data,
 }) => {
   const [currentReview, setCurrentReview] = useState(0)
-
-  // Use data from API or fallback to empty array
   const reviews = data?.reviews || []
 
   useEffect(() => {
@@ -24,11 +22,11 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
 
   if (!reviews.length) {
     return (
-      <section className="my-12">
-        <h2 className="text-3xl font-bold mb-6">
+      <section className="my-8 sm:my-12 px-4 sm:px-0" id="reviews">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center lg:text-left">
           {data?.title || 'What Our Students Say'}
         </h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-center lg:text-left">
           No reviews available at the moment.
         </p>
       </section>
@@ -36,57 +34,57 @@ export const ReviewSlider: React.FC<{ data: ReviewContentSection }> = ({
   }
 
   return (
-    <section className="my-12" id="reviews">
-      <h2 className="text-3xl font-bold mb-6">
+    <section className="my-8 sm:my-12 px-4 sm:px-0" id="reviews">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center lg:text-left">
         {data?.title || 'What Our Students Say'}
       </h2>
-      <div className="relative h-48">
+      <div className="relative min-h-[200px] sm:min-h-[220px]">
         <AnimatePresence>
           <motion.div
             key={currentReview}
-            className="absolute inset-0 bg-card text-card-foreground rounded-lg p-6"
+            className="absolute inset-0 bg-card text-card-foreground rounded-lg p-4 sm:p-6"
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.25 }}
           >
-            <p className="text-lg mb-4">
+            <p className="text-base sm:text-lg mb-4 leading-relaxed">
               {getCleanText(reviews[currentReview].reviewDetails)}
             </p>
-            <div className="flex items-center">
-              <div className="flex-shrink-0 mr-3">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
                 {reviews[currentReview].profile?.image?.formats?.thumbnail
                   ?.url ? (
                   <Image
-                    className="h-10 w-10 rounded-full object-cover"
+                    className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover"
                     src={
                       reviews[currentReview].profile.image.formats.thumbnail.url
                     }
                     alt={reviews[currentReview].reviewerName}
-                    width={40}
-                    height={40}
+                    width={48}
+                    height={48}
                   />
                 ) : (
                   <Image
-                    className="h-10 w-10 rounded-full"
+                    className="h-10 w-10 sm:h-12 sm:w-12 rounded-full"
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
                       reviews[currentReview].reviewerName
                     )}`}
-                    width={40}
-                    height={40}
+                    width={48}
+                    height={48}
                     alt={reviews[currentReview].reviewerName}
                   />
                 )}
               </div>
               <div>
-                <p className="font-semibold">
+                <p className="font-semibold text-sm sm:text-base">
                   {reviews[currentReview].reviewerName}
                 </p>
-                <div className="flex items-center">
+                <div className="flex items-center gap-0.5">
                   {[...Array(reviews[currentReview].rating)].map((_, i) => (
                     <svg
                       key={i}
-                      className="h-5 w-5 text-yellow-400"
+                      className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >

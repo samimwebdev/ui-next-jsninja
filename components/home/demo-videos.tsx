@@ -1,5 +1,5 @@
 'use client'
-import Image from 'next/image' // Added missing import
+import Image from 'next/image'
 import {
   Carousel,
   CarouselContent,
@@ -24,32 +24,31 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
     thumbnail: getYouTubeThumbnail(extractYouTubeId(video.videoURL)),
   }))
 
-  // Set first video as active initially
   const [activeVideo, setActiveVideo] = useState(
     videosWithData.length > 0 ? videosWithData[0].embedId : ''
   )
 
   return (
-    <div className="max-w-screen-xl bg-background text-foreground">
-      <div className="container mx-auto px-4 py-12">
-        <div className="space-y-4 text-center mb-12">
+    <div className="max-w-screen-xl bg-background text-foreground w-full">
+      <div className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="space-y-4 text-center mb-8 sm:mb-12">
           <Badge variant="secondary" className="px-4 py-1">
             Demo Videos
           </Badge>
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight px-4">
             {videoSectionData.title}
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
             {videoSectionData.description}
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 items-start">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-10 items-start">
           {/* Main Video Player */}
-          <div className="relative aspect-video bg-muted rounded-xl overflow-hidden shadow-xl mt-4">
+          <div className="relative aspect-video bg-muted rounded-xl overflow-hidden shadow-xl">
             {activeVideo ? (
               <iframe
-                key={activeVideo} // Add key prop to force re-render when video changes
+                key={activeVideo}
                 width="100%"
                 height="100%"
                 src={`https://www.youtube.com/embed/${activeVideo}?autoplay=0`}
@@ -67,7 +66,6 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
 
           {/* Video Carousel */}
           <div className="relative">
-            {/* First Carousel */}
             <Carousel
               opts={{
                 align: 'start',
@@ -79,7 +77,7 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
                 {videosWithData.map((video) => (
                   <CarouselItem
                     key={video.id}
-                    className="md:basis-1/2 lg:basis-1/2"
+                    className="basis-full sm:basis-1/2"
                   >
                     <div
                       className={`relative aspect-video rounded-lg overflow-hidden group cursor-pointer transition-all duration-300 ${
@@ -96,18 +94,17 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
                         height={360}
                         className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
-                          // Fallback to different thumbnail quality
                           e.currentTarget.src = `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <PlayCircle className="w-12 h-12 text-white" />
+                        <PlayCircle className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                       </div>
 
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <h3 className="text-sm font-medium text-white line-clamp-2">
+                      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                        <h3 className="text-xs sm:text-sm font-medium text-white line-clamp-2">
                           {video.title}
                         </h3>
                         <p className="text-xs text-white/80 mt-1 line-clamp-1">
@@ -122,20 +119,19 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
               <CarouselNext className="hidden md:flex" />
             </Carousel>
 
-            {/* Second Carousel - Only show if more than 2 videos */}
             {videosWithData.length > 2 && (
               <Carousel
                 opts={{
                   align: 'start',
                   loop: true,
                 }}
-                className="w-full"
+                className="w-full mt-4 sm:mt-6"
               >
-                <CarouselContent className="mt-6">
+                <CarouselContent>
                   {videosWithData.map((video) => (
                     <CarouselItem
                       key={`second-${video.id}`}
-                      className="md:basis-1/2 lg:basis-1/2"
+                      className="basis-full sm:basis-1/2"
                     >
                       <div
                         className={`relative aspect-video rounded-lg overflow-hidden group cursor-pointer transition-all duration-300 ${
@@ -152,18 +148,17 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
                           height={360}
                           className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            // Fallback to different thumbnail quality
                             e.currentTarget.src = `https://img.youtube.com/vi/${video.embedId}/hqdefault.jpg`
                           }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
 
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <PlayCircle className="w-12 h-12 text-white" />
+                          <PlayCircle className="w-10 h-10 sm:w-12 sm:h-12 text-white" />
                         </div>
 
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <h3 className="text-sm font-medium text-white line-clamp-2">
+                        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
+                          <h3 className="text-xs sm:text-sm font-medium text-white line-clamp-2">
                             {video.title}
                           </h3>
                           <p className="text-xs text-white/80 mt-1 line-clamp-1">
@@ -178,17 +173,6 @@ export const DemoVideos: React.FC<{ data: VideoSectionData }> = ({
                 <CarouselNext className="hidden md:flex" />
               </Carousel>
             )}
-
-            {/* Browse Videos Button */}
-            {/* {videoSectionData.browseVideosBtn && (
-              <div className="flex justify-center mt-8">
-                <Button asChild className="group">
-                  <Link href={videoSectionData.browseVideosBtn?.btnLink || '#'}>
-                    {videoSectionData.browseVideosBtn?.btnLabel}
-                  </Link>
-                </Button>
-              </div>
-            )} */}
           </div>
         </div>
       </div>

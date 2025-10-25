@@ -28,26 +28,30 @@ export function CourseHero({ data, courseInfo }: CourseHeroProps) {
   const posterImage = data?.promoImage?.url
 
   return (
-    <div className="flex items-center justify-center">
-      <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-12 px-6 py-12">
-        {/* Server-rendered content */}
-        <div>
+    <div className="flex items-center justify-center w-full">
+      <div className="max-w-screen-xl w-full mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 px-4 sm:px-6 py-8 sm:py-12">
+        {/* Text Content - Centered on mobile */}
+        <div className="text-center lg:text-left">
           <Badge className="bg-gradient-ninja-primary rounded-full py-1 border-none">
             {shortLabel}
           </Badge>
 
-          <h1 className="mt-6 max-w-[500px] text-5xl lg:text-[2.75rem] xl:text-5xl font-black leading-[1.1] tracking-tight bg-">
+          <h1 className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[20ch] md:max-w-[30ch] text-5xl xl:text-5xl font-black leading-[1.1] tracking-tight">
             {title}
           </h1>
 
-          <p className="mt-6 max-w-[60ch] text-lg">{description}</p>
+          <p className="mt-4 sm:mt-6 mx-auto lg:mx-0 max-w-[60ch] text-base sm:text-lg">
+            {description}
+          </p>
 
           {/* Client component for interactive buttons only */}
-          <HeroCTA
-            courseInfo={courseInfo}
-            videoUrl={videoUrl}
-            checkOnMount={true}
-          />
+          <div className="mt-6 sm:mt-8 flex justify-center lg:justify-start">
+            <HeroCTA
+              courseInfo={courseInfo}
+              videoUrl={videoUrl}
+              checkOnMount={true}
+            />
+          </div>
         </div>
 
         {/* Client component for video player */}

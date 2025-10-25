@@ -21,17 +21,19 @@ export const BootcampProjectShowcase: React.FC<{
   }))
 
   return (
-    <section className="container mx-auto max-w-screen-xl px-4 py-12">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl md:text-4xl font-black tracking-tight text-center mb-6">
+    <section className="container mx-auto max-w-screen-xl px-4 sm:px-6 py-8 sm:py-12">
+      <div className="text-center mb-8 sm:mb-12">
+        <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-center mb-4 sm:mb-6">
           {data.title}
         </h2>
-        <p className="text-muted-foreground text-lg">{data.description}</p>
+        <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto px-4">
+          {data.description}
+        </p>
       </div>
 
       {/* SSR fallback grid for no-JS users */}
       <noscript>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {projectsData.slice(0, 6).map((project) => (
             <div
               key={project.id}
