@@ -20,7 +20,7 @@ export function getCourseContentSection<T extends CourseComponentType>(
 export function formatPrice(price: number | undefined): string {
   if (price === undefined) return '৳0.00'
 
-  return new Intl.NumberFormat('BDT', {
+  return new Intl.NumberFormat('en-BD', {
     style: 'currency',
     currency: 'BDT',
   }).format(price) // Assuming price is in cents
@@ -83,7 +83,7 @@ export function getNextLessonTitle(
 
 // lib/date-utils.ts
 export const isModuleReleased = (releaseDate: string | null): boolean => {
-  if (!releaseDate) return false
+  if (releaseDate === null) return true
 
   try {
     const release = new Date(releaseDate)

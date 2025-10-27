@@ -61,9 +61,12 @@ async function refreshAccessToken(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json',
+          origin: process.env.NEXT_PUBLIC_CLIENT_URL || 'http://localhost:3000',
         },
         body: JSON.stringify({ refreshToken }),
         cache: 'no-store',
+        credentials: 'include',
       }
     )
 
@@ -88,12 +91,15 @@ export function setAuthCookies(
   jwt: string,
   refreshToken: string
 ) {
+  const domain = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined
+
   response.cookies.set(ACCESS_COOKIE, jwt, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 15, // 15 minutes
+    domain,
   })
 
   response.cookies.set(REFRESH_COOKIE, refreshToken, {
@@ -102,6 +108,7 @@ export function setAuthCookies(
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 60 * 24 * 30, // 30 days
+    domain,
   })
 }
 
@@ -166,7 +173,7 @@ export default async function middleware(request: NextRequest) {
 
     // ✅ Refresh access token if needed
     if (needsRefresh) {
-      console.log('Need Refresh [auth]')
+      console.log('Need Refresh [auth]', { refreshToken })
       const refreshResult = await refreshAccessToken(refreshToken)
 
       if (refreshResult) {

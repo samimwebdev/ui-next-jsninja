@@ -28,26 +28,49 @@ export function LessonContent({
   return (
     <>
       {currentContent.type === 'video' ? (
-        <div className="p-8">
-          <h1 className="text-2xl font-bold mb-3">{currentContent.title}</h1>
+        <div className="p-4 sm:p-6 md:p-8">
+          <h1 className="text-xl sm:text-2xl font-bold mb-3">
+            {currentContent.title}
+          </h1>
 
-          <Tabs defaultValue="description" className="mt-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="description">Video Description</TabsTrigger>
-              <TabsTrigger value="resources">Resources</TabsTrigger>
-              <TabsTrigger value="quiz">Quiz</TabsTrigger>
-              <TabsTrigger value="assignment">Assignment</TabsTrigger>
+          <Tabs defaultValue="description" className="mt-4 sm:mt-6">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+              <TabsTrigger
+                value="description"
+                className="text-xs sm:text-sm py-2.5 sm:py-2"
+              >
+                <span className="hidden sm:inline">Video Description</span>
+                <span className="sm:hidden">Description</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="resources"
+                className="text-xs sm:text-sm py-2.5 sm:py-2"
+              >
+                Resources
+              </TabsTrigger>
+              <TabsTrigger
+                value="quiz"
+                className="text-xs sm:text-sm py-2.5 sm:py-2"
+              >
+                Quiz
+              </TabsTrigger>
+              <TabsTrigger
+                value="assignment"
+                className="text-xs sm:text-sm py-2.5 sm:py-2"
+              >
+                Assignment
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="description" className="mt-4 space-y-4">
-              <div className="prose dark:prose-invert max-w-none">
+              <div className="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
                 {currentContent.content?.length < 1 ? (
-                  <p className="whitespace-pre-line text-muted-foreground">
+                  <p className="whitespace-pre-line text-sm sm:text-base text-muted-foreground">
                     No description available for this video.
                   </p>
                 ) : (
-                  <p
-                    className="text-muted-foreground leading-relaxed"
+                  <div
+                    className="text-sm sm:text-base text-muted-foreground leading-relaxed"
                     dangerouslySetInnerHTML={{ __html: currentContent.content }}
                   />
                 )}
@@ -56,7 +79,7 @@ export function LessonContent({
 
             <TabsContent value="resources" className="mt-4 space-y-4">
               {resources.length === 0 ? (
-                <div className="text-muted-foreground">
+                <div className="text-sm sm:text-base text-muted-foreground">
                   No resources available for this lesson.
                 </div>
               ) : (
@@ -81,7 +104,7 @@ export function LessonContent({
                   assignmentId={assignment.documentId}
                 />
               ) : (
-                <div className="text-muted-foreground">
+                <div className="text-sm sm:text-base text-muted-foreground">
                   No assignment available for this lesson.
                 </div>
               )}

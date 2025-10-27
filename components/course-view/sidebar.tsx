@@ -32,6 +32,24 @@ interface SidebarProps {
   courseType?: string
 }
 
+// Helper to format duration
+const formatDuration = (duration: number | string): string => {
+  const seconds =
+    typeof duration === 'string'
+      ? parseInt(duration.replace(/\D/g, '')) || 0
+      : duration
+
+  if (seconds >= 3600) {
+    const hours = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+  } else if (seconds >= 60) {
+    const mins = Math.floor(seconds / 60)
+    return `${mins}m`
+  }
+  return '< 1m'
+}
+
 export function Sidebar({
   modules,
   currentLessonId,
@@ -230,8 +248,7 @@ export function Sidebar({
                         </div>
                       )}
                       <p className="text-muted-foreground">
-                        {Math.floor(module.duration / 60)}:
-                        {(module.duration % 60).toString().padStart(2, '0')}
+                        {formatDuration(module.duration)}
                       </p>
                     </div>
                   </div>
@@ -270,7 +287,7 @@ export function Sidebar({
                           {lesson.title}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {lesson.duration}
+                          {formatDuration(lesson.duration)}
                         </p>
                       </div>
                     </Button>

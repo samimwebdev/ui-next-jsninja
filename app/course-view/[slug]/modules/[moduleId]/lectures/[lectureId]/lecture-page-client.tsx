@@ -50,7 +50,6 @@ export default function LecturePage({
       resolvedParams?.moduleId &&
       resolvedParams?.lectureId
     ) {
-      // Find the specific module first
       const targetModule = modules.find(
         (module) => module.id.toString() === resolvedParams.moduleId
       )
@@ -66,13 +65,11 @@ export default function LecturePage({
         return
       }
 
-      // Find the lesson within the specific module
       const targetLesson = targetModule.lessons.find(
         (lesson) => lesson.documentId === resolvedParams.lectureId
       )
 
       if (targetLesson) {
-        // Only update if it's different from current content
         if (
           currentContent?.lessonId !== targetLesson.documentId ||
           currentContent?.moduleId !== targetModule.id
@@ -80,7 +77,6 @@ export default function LecturePage({
           handleContentSelect(targetModule.id, targetLesson)
         }
       } else {
-        // If lesson not found in the specific module, redirect to first lesson of that module
         const firstLesson = targetModule.lessons[0]
         if (firstLesson) {
           router.replace(
@@ -102,38 +98,32 @@ export default function LecturePage({
     currentContent?.moduleId,
   ])
 
-  // Get current module for document ID
   const currentModule = modules.find(
     (module) => module.id === currentContent?.moduleId
   )
 
-  // Loading state - Show skeleton while params are resolving OR course is loading OR content is not yet available
+  // Loading state
   if (!resolvedParams || isLoading || !currentContent) {
     return (
-      <div className="relative flex flex-col space-y-4">
+      <div className="relative flex flex-col space-y-4 sm:space-y-6">
         {/* Video/Content Skeleton */}
         <div className="w-full aspect-video bg-gradient-to-r from-muted via-muted/50 to-muted animate-pulse rounded-lg"></div>
 
         {/* Action Buttons Skeleton */}
-        <div className="flex gap-2">
-          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
-          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
-          <div className="h-10 w-40 bg-muted animate-pulse rounded-md"></div>
+        <div className="flex flex-wrap gap-2 px-4 sm:px-0">
+          <div className="h-10 w-full sm:w-32 bg-muted animate-pulse rounded-md"></div>
+          <div className="h-10 w-full sm:w-32 bg-muted animate-pulse rounded-md"></div>
+          <div className="h-10 w-full sm:w-40 bg-muted animate-pulse rounded-md"></div>
         </div>
 
         {/* Content Area Skeleton */}
-        <div className="space-y-4 p-6 bg-card rounded-lg border">
-          {/* Title skeleton */}
+        <div className="space-y-4 p-4 sm:p-6 bg-card rounded-lg border mx-4 sm:mx-0">
           <div className="h-8 w-3/4 bg-muted animate-pulse rounded"></div>
-
-          {/* Description lines skeleton */}
           <div className="space-y-3">
             <div className="h-4 w-full bg-muted animate-pulse rounded"></div>
             <div className="h-4 w-full bg-muted animate-pulse rounded"></div>
             <div className="h-4 w-2/3 bg-muted animate-pulse rounded"></div>
           </div>
-
-          {/* Resources skeleton */}
           <div className="space-y-2 pt-4">
             <div className="h-6 w-32 bg-muted animate-pulse rounded"></div>
             <div className="h-12 bg-muted animate-pulse rounded-md"></div>
@@ -142,9 +132,9 @@ export default function LecturePage({
         </div>
 
         {/* Navigation Skeleton */}
-        <div className="flex justify-between pt-6">
-          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
-          <div className="h-10 w-32 bg-muted animate-pulse rounded-md"></div>
+        <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 px-4 sm:px-0">
+          <div className="h-10 w-full sm:w-32 bg-muted animate-pulse rounded-md"></div>
+          <div className="h-10 w-full sm:w-32 bg-muted animate-pulse rounded-md"></div>
         </div>
       </div>
     )
@@ -153,28 +143,32 @@ export default function LecturePage({
   // Error state
   if (error) {
     return (
-      <div className="relative flex flex-col">
-        <div className="text-center text-red-500 p-8 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
-          <p className="font-semibold mb-2">Error Loading Course Content</p>
-          <p className="text-sm">{error}</p>
+      <div className="relative flex flex-col p-4 sm:p-6">
+        <div className="text-center text-red-500 p-6 sm:p-8 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+          <p className="font-semibold mb-2 text-sm sm:text-base">
+            Error Loading Course Content
+          </p>
+          <p className="text-xs sm:text-sm">{error}</p>
         </div>
       </div>
     )
   }
 
-  // No data state (after loading is complete)
+  // No data state
   if (!courseData) {
     return (
-      <div className="relative flex flex-col">
-        <div className="text-center p-8 bg-muted/50 rounded-lg border">
-          <p className="text-muted-foreground">No course content available.</p>
+      <div className="relative flex flex-col p-4 sm:p-6">
+        <div className="text-center p-6 sm:p-8 bg-muted/50 rounded-lg border">
+          <p className="text-sm sm:text-base text-muted-foreground">
+            No course content available.
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="relative flex flex-col">
+    <div className="relative flex flex-col space-y-4 sm:space-y-6">
       {/* Render appropriate content based on type */}
       {currentContent.type === 'video' ? (
         <VideoPlayer currentContent={currentContent} />
@@ -184,31 +178,33 @@ export default function LecturePage({
 
       {/* Action buttons for video lessons only */}
       {currentContent.type === 'video' && currentContent?.videoLink && (
-        <ActionButtons
-          actionButtons={[
-            {
-              label: 'VideoPlay Issue',
-              active: !!currentContent.videoLink.videoNotPlayed,
-              content: currentContent.videoLink.videoNotPlayed,
-              icon: Video,
-            },
-            {
-              label: 'Piracy Notice',
-              active: !!currentContent.videoLink?.piracyNotice,
-              content: currentContent.videoLink?.piracyNotice || '',
-              icon: CopyrightIcon,
-            },
-            {
-              label: 'Community Support',
-              active: !!currentContent.videoLink?.community,
-              content: currentContent.videoLink?.community,
-              icon: PersonStanding,
-            },
-          ]}
-        />
+        <div className="px-4 sm:px-0">
+          <ActionButtons
+            actionButtons={[
+              {
+                label: 'VideoPlay Issue',
+                active: !!currentContent.videoLink.videoNotPlayed,
+                content: currentContent.videoLink.videoNotPlayed,
+                icon: Video,
+              },
+              {
+                label: 'Piracy Notice',
+                active: !!currentContent.videoLink?.piracyNotice,
+                content: currentContent.videoLink?.piracyNotice || '',
+                icon: CopyrightIcon,
+              },
+              {
+                label: 'Community Support',
+                active: !!currentContent.videoLink?.community,
+                content: currentContent.videoLink?.community,
+                icon: PersonStanding,
+              },
+            ]}
+          />
+        </div>
       )}
 
-      {/* Lesson Content - No token prop needed */}
+      {/* Lesson Content */}
       <LessonContent
         currentContent={currentContent}
         resources={currentContent?.resources || []}
@@ -219,13 +215,15 @@ export default function LecturePage({
       />
 
       {/* Navigation Buttons */}
-      <LessonNavigation
-        modules={modules}
-        currentModuleId={currentContent.moduleId}
-        currentLessonId={currentContent.lessonId}
-        onLessonSelect={handleContentSelect}
-        slug={resolvedParams.slug}
-      />
+      <div className="px-4 sm:px-0">
+        <LessonNavigation
+          modules={modules}
+          currentModuleId={currentContent.moduleId}
+          currentLessonId={currentContent.lessonId}
+          onLessonSelect={handleContentSelect}
+          slug={resolvedParams.slug}
+        />
+      </div>
     </div>
   )
 }

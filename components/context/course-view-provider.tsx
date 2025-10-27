@@ -161,11 +161,7 @@ export default function CourseViewLayoutWrapper({
           videoUrl: lesson.videoUrl || '',
           title: lesson.title,
           content: lesson.content || '',
-          duration: `${Math.floor(+lesson.duration / 60)}:${(
-            +lesson.duration % 60
-          )
-            .toString()
-            .padStart(2, '0')}`,
+          duration: lesson.duration,
           type: lesson.type.toLowerCase(),
           completed: isCompleted,
           isFree: lesson.isFree,
