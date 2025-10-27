@@ -5,14 +5,14 @@ export interface CreatePaymentRequest {
 
 export interface CreatePaymentResponse {
   data: {
-    status: number
-    message: string
-    payment_url: string
+    status: boolean
+    pp_id: number
+    pp_url: string
   }
 }
 
 export interface VerifyPaymentRequest {
-  transactionId: string
+  transactionId: string | number | null
 }
 
 export interface PaymentMetadata {
@@ -27,14 +27,16 @@ export interface PaymentMetadata {
 // Raw API response (before processing)
 export interface VerifyPaymentRawSuccessResponse {
   data: {
-    cus_name: string
-    cus_email: string
-    amount: string
+    customer_name: string
+    customer_email_mobile: string
     transaction_id: string
-    trx_id: string
+    sender_name: string
+    pp_id: string
+    currency: string
+    amount: string
     metadata: string // JSON string that needs to be parsed
     payment_method: string
-    status: 'COMPLETED' | 'FAILED' | 'PENDING'
+    status: 'completed' | 'failed' | 'pending'
   }
   error?: never
 }
@@ -58,14 +60,16 @@ export type VerifyPaymentRawResponse =
 // Processed success response (after parsing metadata)
 export interface VerifyPaymentSuccessResponse {
   data: {
-    cus_name: string
-    cus_email: string
+    customer_name: string
+    customer_email_mobile: string
     amount: string
     transaction_id: string
-    trx_id: string
+    sender_name: string
+    pp_id: string
+    currency: string
     metadata: PaymentMetadata // Parsed object
     payment_method: string
-    status: 'COMPLETED' | 'FAILED' | 'PENDING'
+    status: 'completed' | 'failed' | 'pending'
   }
   error?: never
 }

@@ -12,6 +12,12 @@ interface CurrentUserResponse {
   enableTotp?: boolean
   confirmed?: boolean
   blocked?: boolean
+  role: {
+    id: number
+    name: string
+    type: string
+    description: string
+  }
 }
 
 export const fetchCurrentUser = cache(

@@ -131,10 +131,10 @@ export function CheckoutSummary({
         courseBaseId,
       })
 
-      if (response.data.status === 1 && response.data.payment_url) {
-        window.location.href = response.data.payment_url
+      if (response.data.status && response.data.pp_url) {
+        window.location.href = `${response.data.pp_url}`
       } else {
-        toast.error(response.data.message || 'Failed to create payment')
+        toast.error(response.data.status || 'Failed to create payment')
       }
     } catch (error) {
       console.error('Payment initiation failed:', error)
@@ -505,12 +505,24 @@ function OrderSummaryCard({
   isRegistrationOpen: boolean
   onPaymentClick: () => void
 }) {
+  const [agreed, setAgreed] = useState(false)
+
+  const handleClick = () => {
+    if (!agreed) {
+      toast.error(
+        'Please acknowledge the Terms & Conditions before proceeding.'
+      )
+      return
+    }
+    onPaymentClick()
+  }
+
   return (
     <Card className="sticky top-4 border border-border">
       <CardHeader className="bg-card">
         <CardTitle>Order Summary</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pb-4">
         <div className="space-y-4">
           <div className="flex justify-between">
             <span className="font-medium">{mainTitle}</span>
@@ -552,12 +564,47 @@ function OrderSummaryCard({
             <span>{formatPrice(totalPrice)}</span>
           </div>
         </div>
+
+        {/* Terms acknowledgement - moved inside CardContent */}
+        <div className="mt-6 pt-4 border-t border-border">
+          <label className="flex items-start gap-3 text-sm cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(e) => setAgreed(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+              aria-label="Agree to terms and conditions"
+            />
+            <span className="text-muted-foreground leading-tight">
+              I agree to the{' '}
+              <a
+                href="/pages/terms-and-conditions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                Terms & Conditions
+              </a>{' '}
+              and{'  '}
+              <a
+                href="/pages/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                Privacy Policy
+              </a>
+              .
+            </span>
+          </label>
+        </div>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-4">
+
+      <CardFooter className="flex flex-col space-y-3 pt-4">
         <Button
-          onClick={onPaymentClick}
-          disabled={isProcessing || !isRegistrationOpen}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 transition-all duration-200"
+          onClick={handleClick}
+          disabled={isProcessing || !isRegistrationOpen || !agreed}
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           size="lg"
         >
           {isProcessing ? (
@@ -574,7 +621,7 @@ function OrderSummaryCard({
             </>
           )}
         </Button>
-        <p className="text-xs text-center text-muted-foreground">
+        <p className="text-xs text-center text-muted-foreground leading-relaxed">
           By completing your purchase, you agree to our Terms of Service and
           Privacy Policy
         </p>

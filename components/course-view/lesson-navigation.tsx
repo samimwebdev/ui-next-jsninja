@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Lesson, Module } from '@/types/course-view-types'
 import { useRouter, useParams } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
 interface LessonNavigationProps {
   modules: Module[]
@@ -61,7 +62,8 @@ export function LessonNavigation({
   }
 
   return (
-    <div className="flex justify-between items-center px-8 py-6 border-t bg-card">
+    <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-6 px-4 sm:px-6 md:px-8 py-6 sm:py-8 border-t bg-card">
+      {/* Previous Button */}
       <div className="flex-1 flex justify-start">
         {previousLesson && (
           <Button
@@ -69,14 +71,18 @@ export function LessonNavigation({
             onClick={() =>
               handleNavigation(previousLesson.lesson, previousLesson.moduleId)
             }
-            className="flex items-center gap-3 px-4 py-6 group hover:bg-primary hover:text-primary-foreground transition-colors"
+            className={cn(
+              'flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-5 sm:py-6',
+              'group hover:bg-primary hover:text-primary-foreground transition-colors',
+              'w-full sm:w-auto justify-start min-h-[72px]'
+            )}
           >
-            <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            <div className="text-left">
-              <div className="text-xs text-muted-foreground group-hover:text-primary-foreground/80 mb-1">
+            <ChevronLeft className="h-5 w-5 flex-shrink-0 group-hover:-translate-x-1 transition-transform" />
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs text-muted-foreground group-hover:text-primary-foreground/80 mb-0.5">
                 Previous
               </div>
-              <div className="font-medium text-sm truncate max-w-[200px]">
+              <div className="font-medium text-sm truncate max-w-[250px] sm:max-w-[200px]">
                 {previousLesson.lesson.title}
               </div>
             </div>
@@ -84,6 +90,7 @@ export function LessonNavigation({
         )}
       </div>
 
+      {/* Next Button */}
       <div className="flex-1 flex justify-end">
         {nextLesson && (
           <Button
@@ -91,17 +98,21 @@ export function LessonNavigation({
             onClick={() =>
               handleNavigation(nextLesson.lesson, nextLesson.moduleId)
             }
-            className="flex items-center gap-3 px-4 py-6 group hover:bg-primary hover:text-primary-foreground transition-colors"
+            className={cn(
+              'flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-5 sm:py-6',
+              'group hover:bg-primary hover:text-primary-foreground transition-colors',
+              'w-full sm:w-auto justify-end min-h-[72px]'
+            )}
           >
-            <div className="text-right">
-              <div className="text-xs text-muted-foreground group-hover:text-primary-foreground/80 mb-1">
+            <div className="text-right min-w-0 flex-1">
+              <div className="text-xs text-muted-foreground group-hover:text-primary-foreground/80 mb-0.5">
                 Next
               </div>
-              <div className="font-medium text-sm truncate max-w-[200px]">
+              <div className="font-medium text-sm truncate sm:max-w-[200px]">
                 {nextLesson.lesson.title}
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="h-5 w-5 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
           </Button>
         )}
       </div>

@@ -68,25 +68,25 @@ export const CurriculumClient: React.FC<{
     return module.lessons?.length || 0
   }
 
-  const getTotalDuration = (module: Module) => {
-    if (!module.lessons) return '0 min'
-    const totalSeconds = module.lessons.reduce(
-      (total: number, lesson: Lesson) => {
-        const duration = lesson.duration || '0'
-        const seconds = parseInt(String(duration).replace(/\D/g, '')) || 0
-        return total + seconds
-      },
-      0
-    )
+  // const getTotalDuration = (module: Module) => {
+  //   if (!module.lessons) return '0 min'
+  //   const totalSeconds = module.lessons.reduce(
+  //     (total: number, lesson: Lesson) => {
+  //       const duration = lesson.duration || '0'
+  //       const seconds = parseInt(String(duration).replace(/\D/g, '')) || 0
+  //       return total + seconds
+  //     },
+  //     0
+  //   )
 
-    if (totalSeconds >= 3600) {
-      const hours = Math.floor(totalSeconds / 3600)
-      const mins = Math.floor((totalSeconds % 3600) / 60)
-      const secs = totalSeconds % 60
-      return `${hours}h ${mins}m ${secs}s`
-    }
-    return `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`
-  }
+  //   if (totalSeconds >= 3600) {
+  //     const hours = Math.floor(totalSeconds / 3600)
+  //     const mins = Math.floor((totalSeconds % 3600) / 60)
+  //     const secs = totalSeconds % 60
+  //     return `${hours}h ${mins}m ${secs}s`
+  //   }
+  //   return `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`
+  // }
 
   const getFreeLessonsCount = (module: Module) => {
     return module.lessons?.filter((lesson: Lesson) => lesson.isFree).length || 0
@@ -153,7 +153,7 @@ export const CurriculumClient: React.FC<{
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         <span className="whitespace-nowrap">
-                          {getTotalDuration(module)}
+                          {formatDuration(module.duration)}
                         </span>
                       </span>
                       {freeLessons > 0 && (

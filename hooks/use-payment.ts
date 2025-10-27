@@ -21,13 +21,13 @@ export function useVerifyPayment() {
   return useMutation<VerifyPaymentResponse, Error, VerifyPaymentRequest>({
     mutationFn: verifyPayment,
     onError: (error) => {
-      console.error('Payment verification failed:', error)
+      console.error(':', error)
     },
   })
 }
 
 // For auto-verification on success page
-export function useAutoVerifyPayment(transactionId: string | null) {
+export function useAutoVerifyPayment(transactionId: string | number | null) {
   return useQuery<VerifyPaymentResponse, Error>({
     queryKey: ['verify-payment', transactionId],
     queryFn: () => {

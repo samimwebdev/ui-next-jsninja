@@ -34,8 +34,10 @@ export async function createPayment(
       }
     )
 
-    if (!response?.data || response.data.status !== 1) {
-      throw new Error(response?.data?.message || 'Failed to create payment')
+    console.log(response.data)
+
+    if (!response?.data || !response.data.status) {
+      throw new Error('Failed to create payment')
     }
 
     return response
@@ -73,6 +75,8 @@ export async function verifyPayment(
     if (!rawResponse) {
       throw new Error('Invalid payment verification response')
     }
+
+    console.log({ rawResponse })
 
     // Check if response contains an error
     if (isRawPaymentVerificationError(rawResponse)) {

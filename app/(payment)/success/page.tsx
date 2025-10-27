@@ -17,7 +17,6 @@ import {
 import { useAutoVerifyPayment } from '@/hooks/use-payment'
 import { toast } from 'sonner'
 import { isPaymentVerificationError } from '@/types/payment-types'
-// ✅ Import simplified tracking component
 import { PaymentVerificationTracking } from '@/components/payment/payment-verification-tracking'
 
 export default function PaymentSuccessPage() {
@@ -27,7 +26,7 @@ export default function PaymentSuccessPage() {
   const [showButtons, setShowButtons] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
 
-  const transactionId = searchParams.get('transactionId')
+  const transactionId = searchParams.get('pp_id')
 
   const {
     data: verificationResponse,
@@ -36,6 +35,8 @@ export default function PaymentSuccessPage() {
     error,
     refetch,
   } = useAutoVerifyPayment(transactionId)
+
+  console.log({ verificationResponse })
 
   // ✅ Simple tracking state
   const [trackingStatus, setTrackingStatus] = useState<{
@@ -90,7 +91,7 @@ export default function PaymentSuccessPage() {
           toast.error(errorMessage)
           setShowButtons(true)
         }
-      } else if (verificationResponse.data.status === 'COMPLETED') {
+      } else if (verificationResponse.data.status === 'completed') {
         // ✅ Track as success
         setTrackingStatus({
           status: 'success',
@@ -239,7 +240,7 @@ Thank you!`
   const isSuccessfulPayment =
     verificationResponse &&
     !isPaymentVerificationError(verificationResponse) &&
-    verificationResponse.data.status === 'COMPLETED'
+    verificationResponse.data.status === 'completed'
 
   const isSuccess = isSuccessfulPayment || isAlreadyCreatedError
   const isError = trackingStatus.status === 'error'
@@ -293,7 +294,7 @@ Thank you!`
             <>
               <div className="space-y-4">
                 <p className="text-destructive">
-                  {trackingStatus.errorMessage || 'Payment verification failed'}
+                  {trackingStatus.errorMessage || ''}
                 </p>
                 <p className="text-muted-foreground text-sm">
                   Your payment was likely successful, but we could not verify it
