@@ -76,6 +76,7 @@ async function refreshAccessToken(
     }
 
     const data: RefreshResponse = await response.json()
+    console.log({ data })
     return data
   } catch (error) {
     console.error('[Middleware] Token refresh error:', error)

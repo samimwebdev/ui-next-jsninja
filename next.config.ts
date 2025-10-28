@@ -153,6 +153,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  allowedDevOrigins: ['*.loca.lt'],
 
   async headers() {
     const cspHeader = `

@@ -101,6 +101,8 @@ function EmptyState({ type }: { type: 'all' | 'unread' }) {
 
 export function NotificationPanel() {
   const [activeTab, setActiveTab] = React.useState<NotificationType>('all')
+  // const auth = isAuthenticated()
+  // console.log({ auth })
   const [isOpen, setIsOpen] = React.useState(false)
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -124,6 +126,7 @@ export function NotificationPanel() {
   } = useQuery({
     queryKey: ['notifications'],
     queryFn: fetchNotifications,
+    enabled: isOpen, // Only fetch when panel is open
     staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 0,
