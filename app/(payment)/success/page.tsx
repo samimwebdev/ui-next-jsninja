@@ -13,6 +13,7 @@ import {
   Info,
   MessageCircle,
   RefreshCw,
+  Home,
 } from 'lucide-react'
 import { useAutoVerifyPayment } from '@/hooks/use-payment'
 import { toast } from 'sonner'
@@ -155,18 +156,29 @@ export default function PaymentSuccessPage() {
     }
   }
 
-  // ✅ Handle contact support
+  // ✅ Handle contact support (works with or without transaction ID)
   const handleContactSupport = async () => {
     try {
-      const supportMessage = `Payment Verification Issue - Transaction ${transactionId}
+      const supportMessage = `Payment Issue - ${
+        transactionId
+          ? `Transaction ${transactionId}`
+          : 'Missing Transaction ID'
+      }
 
-Hello, I need help with payment verification:
+Hello, I need help with a payment issue:
 
-Transaction ID: ${transactionId}
-Issue: ${trackingStatus.errorMessage || 'Payment verification failed'}
-Retry Attempts: ${retryCount}
+${
+  transactionId
+    ? `Transaction ID: ${transactionId}`
+    : 'Transaction ID: Not found in URL'
+}
+Issue: ${
+        trackingStatus.errorMessage ||
+        'Payment verification failed or transaction ID missing'
+      }
+${retryCount > 0 ? `Retry Attempts: ${retryCount}` : ''}
 
-Please help me get access to my purchased course.
+Please help me get access to my purchased course or verify my payment.
 
 Thank you!`
 
@@ -178,7 +190,9 @@ Thank you!`
       )}`
 
       // Prepare email
-      const emailSubject = `Payment Verification Issue - Transaction ${transactionId}`
+      const emailSubject = transactionId
+        ? `Payment Verification Issue - Transaction ${transactionId}`
+        : 'Payment Issue - Missing Transaction ID'
       const emailUrl = `mailto:${
         process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@javascriptninja.com'
       }?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(
@@ -214,18 +228,91 @@ Thank you!`
     router.push('/dashboard')
   }
 
+  // ✅ Show error state with support option if no transaction ID
   if (!transactionId) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <Card className="text-center">
-          <CardContent className="pt-6">
-            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Invalid Payment</h2>
-            <p className="text-muted-foreground mb-4">
-              No transaction ID found. Please contact support if you completed a
-              payment.
+          <CardHeader>
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <CardTitle className="text-2xl font-bold text-destructive">
+              Payment Issue
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <p className="text-lg font-medium text-destructive">
+                Transaction ID Not Found
+              </p>
+              <p className="text-muted-foreground">
+                We couldn’t find a transaction ID in the URL. This might happen
+                if:
+              </p>
+              <ul className="text-sm text-muted-foreground text-left space-y-2 max-w-md mx-auto">
+                <li className="flex items-start gap-2">
+                  <span className="text-destructive mt-1">•</span>
+                  <span>The payment was cancelled or failed</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-destructive mt-1">•</span>
+                  <span>You were redirected incorrectly</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-destructive mt-1">•</span>
+                  <span>There was a technical issue during payment</span>
+                </li>
+              </ul>
+              <p className="text-sm text-muted-foreground mt-4">
+                If you completed a payment, please contact our support team
+                immediately. We ll help verify your payment and grant course
+                access.
+              </p>
+            </div>
+
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                💡 Have Payment Confirmation?
+              </p>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                If you received a payment confirmation email or SMS from your
+                payment provider, please keep it handy when contacting support.
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-4">
+              <Button
+                onClick={handleContactSupport}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                size="lg"
+              >
+                <MessageCircle className="mr-2 h-4 w-4" />
+                Contact Support (Messenger + Email)
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => router.push('/courses')}
+                className="w-full"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Browse Courses
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleDashboardRedirect}
+                className="w-full"
+              >
+                Go to Dashboard
+              </Button>
+            </div>
+
+            <p className="text-xs text-muted-foreground pt-4">
+              Our support team is available to help you resolve this issue
+              quickly.
             </p>
-            <Button onClick={() => router.push('/')}>Go to Home</Button>
           </CardContent>
         </Card>
       </div>
@@ -294,7 +381,7 @@ Thank you!`
             <>
               <div className="space-y-4">
                 <p className="text-destructive">
-                  {trackingStatus.errorMessage || ''}
+                  {trackingStatus.errorMessage || 'Payment verification failed'}
                 </p>
                 <p className="text-muted-foreground text-sm">
                   Your payment was likely successful, but we could not verify it
@@ -305,7 +392,9 @@ Thank you!`
 
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">Transaction ID</p>
-                <p className="font-mono font-medium">{transactionId}</p>
+                <p className="font-mono font-medium break-all">
+                  {transactionId}
+                </p>
                 {retryCount > 0 && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Retry attempts: {retryCount}
@@ -386,7 +475,9 @@ Thank you!`
                       <p className="text-sm text-muted-foreground">
                         Transaction ID
                       </p>
-                      <p className="font-mono font-medium">{transactionId}</p>
+                      <p className="font-mono font-medium break-all">
+                        {transactionId}
+                      </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">

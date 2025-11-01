@@ -25,6 +25,8 @@ const protectedRoutes = [
   '/course-view',
   '/app-setup',
   '/app-setup-success',
+  '/success',
+  '/cancel',
 ]
 const authRoutes = [
   '/login',

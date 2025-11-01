@@ -16,9 +16,20 @@ export async function fetchLoginHistory(): Promise<LoginHistoryResponse> {
       {
         method: 'GET',
         token,
+        returnErrorResponse: true,
       }
     )
 
+    if (response.data === null && response.error?.status == 403) {
+      return {
+        data: {
+          publishedAt: new Date().toISOString(),
+          locale: null,
+          isBlocked: true,
+          loginHistory: [],
+        },
+      }
+    }
     return response
   } catch (error) {
     console.error('Error fetching login history:', error)

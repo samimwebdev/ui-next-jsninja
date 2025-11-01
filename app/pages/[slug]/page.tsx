@@ -109,7 +109,7 @@ export default async function GenericPage({ params }: PageProps) {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: pageData.title,
-    url: `https://www.javascriptninja.com/pages/${pageData.slug}`,
+    url: `https://www.javascript-ninja.com/pages/${pageData.slug}`,
     description: cleanHtmlForSeo(pageData.description),
     datePublished: pageData.publishedAt,
     dateModified: pageData.updatedAt,
@@ -122,7 +122,7 @@ export default async function GenericPage({ params }: PageProps) {
       name: 'Javascript Ninja',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://www.javascriptninja.com/logo.png',
+        url: 'https://www.javascript-ninja.com/logo.png',
       },
     },
     ...(pageData.seo?.metaImage && {
