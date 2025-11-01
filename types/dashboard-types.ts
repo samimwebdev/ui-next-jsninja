@@ -152,7 +152,12 @@ export interface LoginHistoryData {
 }
 
 export interface LoginHistoryResponse {
-  data: LoginHistoryData
+  data: LoginHistoryData | null
+  error?: {
+    status: number
+    name: string
+    message: string
+  }
 }
 
 export interface StatsModule {

@@ -138,9 +138,7 @@ export function CheckoutSummary({
       }
     } catch (error) {
       console.error('Payment initiation failed:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to initiate payment'
-      )
+      toast.error('Failed to initiate payment, Try later')
     } finally {
       setIsProcessing(false)
     }
